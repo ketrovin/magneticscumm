@@ -1,0 +1,97 @@
+/* ============================================================
+   ZAK-STYLE ADVENTURE — global styles
+   960×600 canvas rendered pixel-perfect inside a responsive wrapper
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-page:    #0a0a12;
+  --bg-chrome:  #13131f;
+  --title-gold: #c8a84b;
+  --border-dim: #2a2a44;
+  --font-game:  'Share Tech Mono', 'Courier New', monospace;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: var(--bg-page);
+  color: #ccc;
+  font-family: var(--font-game);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ── Wrapper ──────────────────────────────────────── */
+#game-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  /* Constrain so the canvas never exceeds the viewport */
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+/* ── Title chrome bar ─────────────────────────────── */
+#title-bar {
+  width: 100%;
+  max-width: 960px;
+  background: var(--bg-chrome);
+  border: 1px solid var(--border-dim);
+  border-bottom: none;
+  padding: 5px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--title-gold);
+}
+
+#game-title {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* ── The canvas — fills its container, pixels stay sharp ── */
+#game {
+  display: block;
+  /* Scale canvas to fit viewport while preserving 960:600 ratio */
+  width:  min(960px, 100vw);
+  height: min(600px, calc(100vw * 600 / 960));
+  border: 1px solid var(--border-dim);
+  border-top: none;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+  outline: none;
+}
+
+/* ── Loading overlay ─────────────────────────────── */
+#loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#loading-text {
+  font-family: var(--font-game);
+  font-size: 22px;
+  color: var(--title-gold);
+  letter-spacing: 0.2em;
+  animation: blink 0.8s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}

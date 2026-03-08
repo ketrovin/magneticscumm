@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zak McKraken Style Adventure</title>
+  <meta name="description" content="A SCUMM-style point-and-click adventure game in the spirit of Zak McKraken and the Alien Mindbenders." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="game-wrapper">
+    <div id="title-bar">
+      <span id="game-title">⊕ ZAK-STYLE ADVENTURE</span>
+      <span id="score-display">Score: <strong id="score">0</strong></span>
+    </div>
+
+    <!-- The canvas fills the panel area. 960×600 internal resolution. -->
+    <canvas id="game" width="960" height="600" tabindex="0"></canvas>
+
+    <div id="loading-overlay">
+      <div id="loading-text">LOADING…</div>
+    </div>
+  </div>
+
+  <script type="module" src="game/main.js"></script>
+  <script>
+    // Hide loading overlay once modules are ready
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+      }, 800);
+    });
+  </script>
+</body>
+</html>
