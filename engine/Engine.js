@@ -51,6 +51,10 @@ export class Engine {
             this.player.stopWalking();
             this.actors.push(this.player);
         }
+        // Re-add static NPC actors stored on the room
+        if (this.room.npcs && this.room.npcs.length) {
+            this.actors.push(...this.room.npcs);
+        }
         console.log(`[Engine] → ${roomId}`);
     }
 

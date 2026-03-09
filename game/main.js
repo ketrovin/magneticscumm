@@ -42,24 +42,63 @@ const DAVE_ANIMS = {
     walkL: { row: 0, count: 4, fps: 8, flipH: true },
 };
 
-// NPC spritesheet format (matches dave2 proportions for consistency)
-// Row 0: walkR  (4 frames @ fps 8)
-// Row 1: idle   (2 frames @ fps 3)  — frames 2-3 are spare/repeated
-// Row 2: talk   (4 frames @ fps 6)  — mouth open/closed cycle
-const NPC_FRAME_W = 256, NPC_FRAME_H = 200;
-const NPC_ANIMS = {
-    idle: { row: 1, count: 2, fps: 3 },
-    talk: { row: 2, count: 4, fps: 6 },
-    walkR: { row: 0, count: 4, fps: 8 },
-    walkL: { row: 0, count: 4, fps: 8, flipH: true },
+// ── NPC spritesheet config (matches user-supplied chargen sheet format) ─────
+// Sheet layout (approx 1024 × 660 px):
+//   Top row (y≈0):   9 frames total — left 4 = walkR, lamp post gap, right 4 = walkL
+//   Mid sections:    push/use/action poses (not used in gameplay)
+//   Bottom mini-row (y≈555): 6 small talk/idle frames
+//
+// All coords are ESTIMATES — tweak if sprites appear offset.
+const CHARGEN_ANIMS = {
+    walkR: {
+        fps: 8,
+        frames: [
+            { x: 0, y: 0, w: 113, h: 210 },
+            { x: 113, y: 0, w: 113, h: 210 },
+            { x: 226, y: 0, w: 113, h: 210 },
+            { x: 339, y: 0, w: 113, h: 210 },
+        ],
+    },
+    walkL: {  // right half of top row (already facing left in sheet)
+        fps: 8,
+        frames: [
+            { x: 576, y: 0, w: 113, h: 210 },
+            { x: 689, y: 0, w: 113, h: 210 },
+            { x: 802, y: 0, w: 113, h: 210 },
+            { x: 915, y: 0, w: 113, h: 210 },
+        ],
+    },
+    idle: {
+        fps: 2,
+        frames: [
+            { x: 0, y: 555, w: 80, h: 110 },
+            { x: 80, y: 555, w: 80, h: 110 },
+        ],
+    },
+    talk: {
+        fps: 6,
+        frames: [
+            { x: 160, y: 555, w: 80, h: 110 },
+            { x: 240, y: 555, w: 80, h: 110 },
+            { x: 320, y: 555, w: 80, h: 110 },
+            { x: 400, y: 555, w: 80, h: 110 },
+        ],
+    },
 };
 
-// Build a static NPC Actor from a loaded spritesheet image (or null for placeholder)
-function buildNPC({ id, name, x, y, sheet }) {
-    if (!sheet) return null; // sprite not yet generated — NPC exists as hotspot only
-    const anim = new SpriteAnimator(sheet, NPC_FRAME_W, NPC_FRAME_H, NPC_ANIMS, 'auto');
+/**
+ * Create a static NPC Actor and attach it to room.npcs.
+ * Engine.changeRoom re-adds room.npcs on every room entry automatically.
+ * If sheet is null the NPC remains dialogue-only (hotspot still works).
+ */
+function buildNPCActor({ room, id, name, x, y, sheet }) {
+    if (!sheet) return;
+    const anim = new SpriteAnimator(sheet, 113, 210, CHARGEN_ANIMS, 'auto');
     anim.play('idle');
-    return new Actor({ id, name, x, y, animator: anim });
+    const actor = new Actor({ id, name, x, y, animator: anim });
+    actor.speed = 0; // static NPC — never walks
+    room.npcs = room.npcs ?? [];
+    room.npcs.push(actor);
 }
 
 
@@ -1794,8 +1833,9 @@ async function main() {
     // Load all backgrounds (null-safe — gradient fallback used if file missing)
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg,
-        daveSheet] = await Promise.all([
+        magEntranceBg, geoStrataBg, magHillBg, daveSheet,
+        npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
+        npcCat, npcPellerin, npcRaccoon] = await Promise.all([
             loadImage('assets/bedroom_bg.png'),
             loadImage('assets/kitchen_bg.jpg'),
             loadImage('assets/street_bg.jpg'),
@@ -1813,26 +1853,73 @@ async function main() {
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('assets/dave_spritesheet.png'),
+            // NPC sprite sheets — null-safe, dialogue hotspots still work without them
+            loadImage('assets/npc_baker.png'),
+            loadImage('assets/npc_poutine.png'),
+            loadImage('assets/npc_doorman.png'),
+            loadImage('assets/npc_pawnbroker.png'),
+            loadImage('assets/npc_savoie.png'),
+            loadImage('assets/npc_cat.png'),
+            loadImage('assets/npc_pellerin.png'),
+            loadImage('assets/npc_raccoon.png'),
         ]);
 
-    // Register all 16 rooms
+    // ── Register all 16 rooms + attach NPC actors ────────────────────────────
     engine.registerRoom(buildBedroom(bedroomBg));
     engine.registerRoom(buildKitchen(kitchenBg));
-    engine.registerRoom(buildStreet(streetBg));
-    engine.registerRoom(buildAlley(alleyBg));
+
+    { // Street — baker + poutine guy
+        const r = buildStreet(streetBg);
+        buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker });
+        buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine });
+        engine.registerRoom(r);
+    }
+    { // Alley — club doorman
+        const r = buildAlley(alleyBg);
+        buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman });
+        engine.registerRoom(r);
+    }
     engine.registerRoom(buildSecretRoom(secretBg));
     engine.registerRoom(buildGateArea(gateBg));
-    engine.registerRoom(buildPawnShop(pawnBg));
-    engine.registerRoom(buildMansionCourtyard(courtyardBg));
-    engine.registerRoom(buildMansionFoyer(foyerBg));
-    engine.registerRoom(buildMansionLibrary(libraryBg));
+
+    { // Pawn shop — pawnbroker
+        const r = buildPawnShop(pawnBg);
+        buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker });
+        engine.registerRoom(r);
+    }
+    { // Mansion courtyard — raccoon family in garden
+        const r = buildMansionCourtyard(courtyardBg);
+        buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon });
+        engine.registerRoom(r);
+    }
+    { // Mansion foyer — cat on a pedestal
+        const r = buildMansionFoyer(foyerBg);
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat });
+        engine.registerRoom(r);
+    }
+    { // Mansion library — cat reappears upstairs (same sheet)
+        const r = buildMansionLibrary(libraryBg);
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat });
+        engine.registerRoom(r);
+    }
     engine.registerRoom(buildMansionBackyard(backyardBg));
     engine.registerRoom(buildPoliceExt(policeExtBg));
-    engine.registerRoom(buildPoliceInt(policeIntBg));
+
+    { // Police station interior — Officer Savoie at desk
+        const r = buildPoliceInt(policeIntBg);
+        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Officer Savoie', x: 545, y: 420, sheet: npcSavoie });
+        engine.registerRoom(r);
+    }
     engine.registerRoom(buildMagEntrance(magEntranceBg));
-    engine.registerRoom(buildGeoStrata(geoStrataBg));
+
+    { // Geo strata — Dr. Pellerin (been here since 1987)
+        const r = buildGeoStrata(geoStrataBg);
+        buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin });
+        engine.registerRoom(r);
+    }
     engine.registerRoom(buildMagneticHill(magHillBg));
-    console.log('[Rooms] 16 rooms registered.');
+    console.log('[Rooms] 16 rooms registered, NPCs attached.');
+
 
     // Dave
     const sheetImg = daveSheet ?? buildProceduralDave();
