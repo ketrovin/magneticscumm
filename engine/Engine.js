@@ -1,8 +1,6 @@
 /**
  * Engine — main game loop, canvas, room/actor management, room transitions.
  */
-import { InputManager } from './InputManager.js';
-import { ScummUI } from './ScummUI.js';
 
 class Engine {
     constructor(canvasId) {

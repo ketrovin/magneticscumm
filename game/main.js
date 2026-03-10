@@ -10,10 +10,6 @@
  *   pawn_shop → gate
  *   secret    → bedroom (ladder up)
  */
-import { Engine } from '../engine/Engine.js';
-import { Room } from '../engine/Room.js';
-import { Actor } from '../engine/Actor.js';
-import { SpriteAnimator } from '../engine/SpriteAnimator.js';
 
 // ── Canvas / scene dims ────────────────────────────────────────────────────────
 const CW = 960, CH = 600, PANEL_H = 80, SCENE_H = CH - PANEL_H; // 520
