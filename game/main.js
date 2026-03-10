@@ -89,7 +89,15 @@ const CHARGEN_ANIMS = {
  */
 function buildNPCActor({ room, id, name, x, y, sheet }) {
     if (!sheet) return;
-    const anim = new SpriteAnimator(sheet, 113, 210, CHARGEN_ANIMS, 'auto');
+
+    // Each generated NPC is a single static graphic for now, not a grid sheet.
+    // Set frameW/frameH to exactly the image size, and use a 1-frame 'idle' animation.
+    const customAnims = {
+        idle: { row: 0, count: 1, fps: 1 }
+    };
+
+    // The 'auto' parameter invokes removeBackground to strip the image background
+    const anim = new SpriteAnimator(sheet, sheet.width, sheet.height, customAnims, 'auto');
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
     actor.speed = 0; // static NPC — never walks
