@@ -8,7 +8,7 @@
  * Background color removal: pass bgColor (e.g. '#e8d7b0') to make
  * that color transparent on load (color-keying).
  */
-export class SpriteAnimator {
+class SpriteAnimator {
   /**
    * @param {HTMLImageElement|HTMLCanvasElement} image
    * @param {number} defaultFrameW  – used for uniform-grid animations
@@ -101,7 +101,7 @@ export class SpriteAnimator {
  * transparent. Samples the top-left corner if bgColor is 'auto'.
  * Returns an HTMLCanvasElement usable as an image source.
  */
-export function removeBackground(img, bgColor = 'auto', tolerance = 40) {
+function removeBackground(img, bgColor = 'auto', tolerance = 40) {
   const oc = document.createElement('canvas');
   oc.width = img.width || img.naturalWidth || 512;
   oc.height = img.height || img.naturalHeight || 512;

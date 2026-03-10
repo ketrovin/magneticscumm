@@ -4,7 +4,7 @@
  * Walkbox is an array of {x,y} points defining the walkable floor area.
  * Hotspots: [{ id, name, x, y, w, h, verb, action }]
  */
-export class Room {
+class Room {
     constructor({ id, name, background, walkbox, hotspots = [] }) {
         this.id = id;
         this.name = name;

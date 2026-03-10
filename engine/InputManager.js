@@ -1,7 +1,7 @@
 /**
  * InputManager — captures mouse events and dispatches to Engine.
  */
-export class InputManager {
+class InputManager {
     constructor(canvas) {
         this.canvas = canvas;
         this._listeners = [];

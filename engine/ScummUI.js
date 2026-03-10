@@ -8,7 +8,7 @@
  *  │  Push     Pull     Give Talk to Close│               │
  *  └──────────────────────────────────────┴───────────────┘
  */
-export class ScummUI {
+class ScummUI {
     constructor(canvasWidth, canvasHeight) {
         this.cw = canvasWidth;
         this.ch = canvasHeight;

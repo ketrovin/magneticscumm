@@ -2,7 +2,7 @@
  * Actor — a character in the game world.
  * Supports walking to a target and playing idle/walk animations.
  */
-export class Actor {
+class Actor {
     constructor({ id, name, x, y, animator }) {
         this.id = id;
         this.name = name;

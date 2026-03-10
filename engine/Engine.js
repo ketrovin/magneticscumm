@@ -4,7 +4,7 @@
 import { InputManager } from './InputManager.js';
 import { ScummUI } from './ScummUI.js';
 
-export class Engine {
+class Engine {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
