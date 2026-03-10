@@ -90,17 +90,36 @@ const CHARGEN_ANIMS = {
 function buildNPCActor({ room, id, name, x, y, sheet }) {
     if (!sheet) return;
 
-    // Each generated NPC is a single static graphic for now, not a grid sheet.
-    // Set frameW/frameH to exactly the image size, and use a 1-frame 'idle' animation.
+    // AI generated sprite sheets are massive (e.g., 2754x1536).
+    // They generally contain 8-10 character poses across the top row.
+    // We slice the sheet into a rough grid so we can animate the frames.
+    const cols = 8;
+    const rows = 3;
+    const frameW = sheet.width / cols;
+    const frameH = sheet.height / rows;
+
+    // Define an idle (first frame) and a walk cycle (frames 1 to 4)
     const customAnims = {
-        idle: { row: 0, count: 1, fps: 1 }
+        idle: { row: 0, count: 1, fps: 1 },
+        walkR: { row: 0, count: 4, fps: 6 },
+        walkL: { row: 0, count: 4, fps: 6, flipH: true }
     };
 
-    // The 'auto' parameter invokes removeBackground to strip the image background
-    const anim = new SpriteAnimator(sheet, sheet.width, sheet.height, customAnims, 'auto');
+    const anim = new SpriteAnimator(sheet, frameW, frameH, customAnims, 'auto');
+
+    // Scale the massive 300px+ tall sliced frames down to match Dave (~64px tall)
+    anim.scale = 75 / frameH;
+
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
-    actor.speed = 0; // static NPC — never walks
+    actor.speed = 0; // they stay in place for now
+
+    // If you talk to them, pretend they are walking right/left to animate
+    actor.talkAnim = () => {
+        anim.play('walkR');
+        setTimeout(() => anim.play('idle'), 1500);
+    };
+
     room.npcs = room.npcs ?? [];
     room.npcs.push(actor);
 }
