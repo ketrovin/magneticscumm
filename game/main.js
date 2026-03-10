@@ -1854,14 +1854,14 @@ async function main() {
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('assets/dave_spritesheet.png'),
             // NPC sprite sheets — null-safe, dialogue hotspots still work without them
-            loadImage('assets/npc_baker.png'),
-            loadImage('assets/npc_poutine.png'),
-            loadImage('assets/npc_doorman.png'),
-            loadImage('assets/npc_pawnbroker.png'),
-            loadImage('assets/npc_savoie.png'),
-            loadImage('assets/npc_cat.png'),
-            loadImage('assets/npc_pellerin.png'),
-            loadImage('assets/npc_raccoon.png'),
+            loadImage('assets/baker.png'),
+            loadImage('assets/poutineGuy.png'),
+            loadImage('assets/ClubDoorman.png'),
+            loadImage('assets/pawnbroker.png'),
+            loadImage('assets/OfficerSavoie.png'),
+            loadImage('assets/cat.png'),
+            loadImage('assets/drPellarin.png'),
+            loadImage('assets/racoon.png'),
         ]);
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
