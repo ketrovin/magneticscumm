@@ -108,28 +108,32 @@ function removeBackground(img, bgColor = 'auto', tolerance = 40) {
   const ctx = oc.getContext('2d');
   ctx.drawImage(img, 0, 0);
 
-  const imageData = ctx.getImageData(0, 0, oc.width, oc.height);
-  const data = imageData.data;
+  try {
+    const imageData = ctx.getImageData(0, 0, oc.width, oc.height);
+    const data = imageData.data;
 
-  let tr, tg, tb;
-  if (bgColor === 'auto') {
-    // Sample top-left pixel
-    tr = data[0]; tg = data[1]; tb = data[2];
-  } else {
-    const c = hexToRgb(bgColor);
-    tr = c.r; tg = c.g; tb = c.b;
-  }
-
-  for (let i = 0; i < data.length; i += 4) {
-    const dr = Math.abs(data[i] - tr);
-    const dg = Math.abs(data[i + 1] - tg);
-    const db = Math.abs(data[i + 2] - tb);
-    if (dr + dg + db < tolerance * 3) {
-      data[i + 3] = 0; // transparent
+    let tr, tg, tb;
+    if (bgColor === 'auto') {
+      // Sample top-left pixel
+      tr = data[0]; tg = data[1]; tb = data[2];
+    } else {
+      const c = hexToRgb(bgColor);
+      tr = c.r; tg = c.g; tb = c.b;
     }
-  }
 
-  ctx.putImageData(imageData, 0, 0);
+    for (let i = 0; i < data.length; i += 4) {
+      const dr = Math.abs(data[i] - tr);
+      const dg = Math.abs(data[i + 1] - tg);
+      const db = Math.abs(data[i + 2] - tb);
+      if (dr + dg + db < tolerance * 3) {
+        data[i + 3] = 0; // transparent
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  } catch (e) {
+    console.warn("removeBackground failed (CORS error?), continuing without background removal:", e);
+  }
   return oc;
 }
 

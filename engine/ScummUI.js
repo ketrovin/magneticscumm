@@ -75,20 +75,21 @@ class ScummUI {
     }
 
     draw(ctx) {
-        // Panel background
-        ctx.fillStyle = '#000000';
+        // Panel background - FM Towns Era / VGA style metallic dark gradient
+        const bgGrad = ctx.createLinearGradient(0, this.panelY, 0, this.panelY + this.panelH);
+        bgGrad.addColorStop(0, '#2b2b40');
+        bgGrad.addColorStop(1, '#0e0e1a');
+        ctx.fillStyle = bgGrad;
         ctx.fillRect(0, this.panelY, this.cw, this.panelH);
 
-        // Divider line
-        ctx.strokeStyle = '#555566';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, this.panelY);
-        ctx.lineTo(this.cw, this.panelY);
-        ctx.stroke();
+        // Ridge divider line
+        ctx.fillStyle = '#5a5a75';
+        ctx.fillRect(0, this.panelY, this.cw, 2);
+        ctx.fillStyle = '#0a0a10';
+        ctx.fillRect(0, this.panelY + 2, this.cw, 2);
 
         // Verb cells
-        ctx.font = 'bold 11px "Courier New", monospace';
+        ctx.font = 'normal 16px "Share Tech Mono", monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -99,39 +100,57 @@ class ScummUI {
             const isHovered = v === this.hoveredVerb;
 
             if (isSelected) {
-                ctx.fillStyle = '#334455';
-                ctx.fillRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                ctx.fillRect(r.x + 3, r.y + 3, r.w - 6, r.h - 6);
+                ctx.strokeStyle = '#6c8fb5';
+                ctx.strokeRect(r.x + 3, r.y + 3, r.w - 6, r.h - 6);
+            } else if (isHovered) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+                ctx.fillRect(r.x + 3, r.y + 3, r.w - 6, r.h - 6);
             }
 
             ctx.fillStyle = isSelected
-                ? '#ffff88'
+                ? '#ffe14d'
                 : isHovered
-                    ? '#aaddff'
-                    : '#88aacc';
+                    ? '#ffffff'
+                    : '#78a2d4';
 
+            // Text shadow for classic depth
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
             ctx.fillText(v, r.x + r.w / 2, r.y + r.h / 2);
+            ctx.shadowColor = 'transparent';
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
         }
 
-        // Inventory area background
-        ctx.fillStyle = '#0a0a1a';
-        ctx.fillRect(this.invX, this.panelY, this.invW, this.panelH);
-        ctx.strokeStyle = '#333355';
-        ctx.strokeRect(this.invX, this.panelY, this.invW, this.panelH);
+        // Inventory area background - inset look
+        ctx.fillStyle = '#10101d';
+        ctx.fillRect(this.invX, this.panelY + 4, this.invW - 4, this.panelH - 8);
+        
+        ctx.strokeStyle = '#2d2d42';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(this.invX, this.panelY + 4, this.invW - 4, this.panelH - 8);
+        ctx.strokeStyle = '#4e4e68';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(this.invX - 1, this.panelY + 3, this.invW - 2, this.panelH - 6);
 
         // Inventory label
-        ctx.fillStyle = '#556677';
-        ctx.font = '9px monospace';
+        ctx.fillStyle = '#6a7e93';
+        ctx.font = '11px "Share Tech Mono", monospace';
         ctx.textAlign = 'left';
-        ctx.fillText('INVENTORY', this.invX + 4, this.panelY + 8);
+        ctx.fillText('INVENTORY', this.invX + 8, this.panelY + 16);
 
         // Inventory items
-        ctx.fillStyle = '#aabbcc';
-        ctx.font = '10px monospace';
+        ctx.fillStyle = '#d5e2f0';
+        ctx.font = '13px "Share Tech Mono", monospace';
         for (let i = 0; i < Math.min(this.inventory.length, 6); i++) {
-            const col = i % 3;
-            const row = Math.floor(i / 3);
-            const ix = this.invX + col * this.invSlotW + 4;
-            const iy = this.panelY + 16 + row * 24;
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const ix = this.invX + col * (this.invSlotW * 1.5) + 8;
+            const iy = this.panelY + 34 + row * 20;
             ctx.fillText(this.inventory[i], ix, iy);
         }
 
@@ -140,8 +159,8 @@ class ScummUI {
     }
 
     _drawStatusLine(ctx) {
-        const lineH = 16;
-        ctx.fillStyle = '#000000';
+        const lineH = 22;
+        ctx.fillStyle = '#0a0a0f';
         ctx.fillRect(0, this.panelY - lineH, this.cw, lineH);
 
         let text = this.selectedVerb;
@@ -149,10 +168,10 @@ class ScummUI {
             text += ' ' + this.hoveredHotspot.name;
         }
 
-        ctx.fillStyle = '#ffff88';
-        ctx.font = 'bold 11px "Courier New", monospace';
-        ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffe14d';
+        ctx.font = 'normal 15px "Share Tech Mono", monospace';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, 8, this.panelY - lineH / 2);
+        ctx.fillText(text, this.cw / 2, this.panelY - lineH / 2);
     }
 }
