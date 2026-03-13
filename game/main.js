@@ -25,18 +25,19 @@ function loadImage(src) {
 }
 
 // ── Dave animations ────────────────────────────────────────────────────────────
-// dave2 spritesheet observed layout (save as assets/dave_spritesheet.png):
-//   Row 0 top  : side walk cycle 4 frames (facing right)
-//   Row 1 mid  : front idle 2 frames
-//   Row 2 bot  : impatient idle 8 frames
-// Each frame ~256×200 in a 1024×600+ sheet; scale factor applied via animator.
-const FRAME_W = 256, FRAME_H = 200;
+// Dave3.png is 1024x559. 12 columns, 3 rows.
+// We use fractional steps for perfect grid alignment, but smaller frameW/H to "crop" 
+// out potential bleeding from neighboring characters.
+const DAVE_STEP_W = 1024 / 12;
+const DAVE_STEP_H = 559 / 3;
 const DAVE_ANIMS = {
-    idle: { row: 1, count: 2, fps: 3 },
-    impatient: { row: 2, count: 8, fps: 10 },
-    walkR: { row: 0, count: 4, fps: 8 },
-    walkL: { row: 0, count: 4, fps: 8, flipH: true },
+    idle: { row: 2, count: 1, fps: 1, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
+    impatient: { row: 2, count: 8, fps: 3, startFrame: 4.08, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H }, 
+    walkR: { row: 0, count: 8, fps: 8, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
+    walkL: { row: 1, count: 8, fps: 8, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
+    walkBack: { row: 1, count: 4, fps: 6, startFrame: 8.08, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H },
 };
+const FRAME_W = 75, FRAME_H = 170; // Default fallback for procedural Dave
 
 // ── NPC spritesheet config (matches user-supplied chargen sheet format) ─────
 // Sheet layout (approx 1024 × 660 px):
@@ -87,41 +88,40 @@ const CHARGEN_ANIMS = {
  * Engine.changeRoom re-adds room.npcs on every room entry automatically.
  * If sheet is null the NPC remains dialogue-only (hotspot still works).
  */
-function buildNPCActor({ room, id, name, x, y, sheet }) {
+function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00' }) {
     if (!sheet) return;
 
-    // AI generated sprite sheets are massive (e.g., 2754x1536).
-    // They generally contain 8-10 character poses across the top row.
-    // We slice the sheet into a rough grid so we can animate the frames.
-    const cols = 8;
-    const rows = 3;
+    // AI generated NPC sheets are 9 columns x 4 rows
+    const cols = 9;
+    const rows = 4;
     const frameW = sheet.width / cols;
     const frameH = sheet.height / rows;
 
-    // Define an idle (first frame) and a walk cycle (frames 1 to 4)
     const customAnims = {
         idle: { row: 0, count: 1, fps: 1 },
-        walkR: { row: 0, count: 4, fps: 6 },
-        walkL: { row: 0, count: 4, fps: 6, flipH: true }
+        walkR: { row: 1, count: 8, fps: 8 },
+        walkL: { row: 2, count: 8, fps: 8 },
+        walkFront: { row: 0, count: 8, fps: 8 },
+        walkBack: { row: 3, count: 8, fps: 8 }
     };
 
     const anim = new SpriteAnimator(sheet, frameW, frameH, customAnims, 'auto');
-
-    // Scale the massive 300px+ tall sliced frames down to match Dave (~64px tall)
-    anim.scale = 75 / frameH;
+    anim.scale = 0.55; // Matches Dave's typical scale
 
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
-    actor.speed = 0; // they stay in place for now
+    actor.speed = 0; 
+    actor.color = color;
 
-    // If you talk to them, pretend they are walking right/left to animate
+    // Talking animation: Cycle front-walk or just play
     actor.talkAnim = () => {
-        anim.play('walkR');
+        anim.play('walkFront');
         setTimeout(() => anim.play('idle'), 1500);
     };
 
     room.npcs = room.npcs ?? [];
     room.npcs.push(actor);
+    return actor;
 }
 
 
@@ -1877,14 +1877,14 @@ async function main() {
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('Dave3.png'),
             // NPC sprite sheets — null-safe, dialogue hotspots still work without them
-            loadImage('npc_baker_new_1773192965658.png'),
-            loadImage('npc_poutine_guy_1773192979582.png'),
-            loadImage('npc_bouncer_1773193090860.png'),
-            loadImage('npc_pawnbroker_new_1773193165779.png'),
-            loadImage('npc_officer_1773192953303.png'),
+            loadImage('npc_baker_.png'),
+            loadImage('npc_poutine_guy.png'),
+            loadImage('npc_bouncer.png'),
+            loadImage('npc_pawnbroker.png'),
+            loadImage('npc_officer.png'),
             loadImage('assets/cat.png'),
-            loadImage('npc_woman_scientist_1773193058759.png'),
-            loadImage('npc_raccoon_1773193133179.png'),
+            loadImage('npc_woman_scientist .png'),
+            loadImage('npc_raccoon.png'),
         ]);
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
@@ -1893,13 +1893,13 @@ async function main() {
 
     { // Street — baker + poutine guy
         const r = buildStreet(streetBg);
-        buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker });
-        buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine });
+        buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555' });
+        buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55' });
         engine.registerRoom(r);
     }
     { // Alley — club doorman
         const r = buildAlley(alleyBg);
-        buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman });
+        buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildSecretRoom(secretBg));
@@ -1907,22 +1907,22 @@ async function main() {
 
     { // Pawn shop — pawnbroker
         const r = buildPawnShop(pawnBg);
-        buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker });
+        buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff' });
         engine.registerRoom(r);
     }
     { // Mansion courtyard — raccoon family in garden
         const r = buildMansionCourtyard(courtyardBg);
-        buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon });
+        buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon, color: '#aaaaaa' });
         engine.registerRoom(r);
     }
     { // Mansion foyer — cat on a pedestal
         const r = buildMansionFoyer(foyerBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff' });
         engine.registerRoom(r);
     }
     { // Mansion library — cat reappears upstairs (same sheet)
         const r = buildMansionLibrary(libraryBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff' });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMansionBackyard(backyardBg));
@@ -1930,14 +1930,14 @@ async function main() {
 
     { // Police station interior — Officer Savoie at desk
         const r = buildPoliceInt(policeIntBg);
-        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Officer Savoie', x: 545, y: 420, sheet: npcSavoie });
+        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Officer Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff' });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMagEntrance(magEntranceBg));
 
     { // Geo strata — Dr. Pellerin (been here since 1987)
         const r = buildGeoStrata(geoStrataBg);
-        buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin });
+        buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin, color: '#ffcc00' });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMagneticHill(magHillBg));
@@ -1952,12 +1952,13 @@ async function main() {
         useRealSheet ? FRAME_W : 48,
         useRealSheet ? FRAME_H : 64,
         useRealSheet ? DAVE_ANIMS : {
-            idle: { row: 1, count: 2, fps: 3 },
-            walkR: { row: 0, count: 4, fps: 8 },
-            walkL: { row: 0, count: 4, fps: 8, flipH: true },
+            idle: { row: 3, count: 1, fps: 3 },
+            walkR: { row: 0, count: 6, fps: 8 },
+            walkL: { row: 0, count: 6, fps: 8, flipH: true },
         },
-        useRealSheet ? 'auto' : null  // auto-key background colour from corn. pixel
+        'auto' // Enable auto-transparency for Dave3.png
     );
+    animator.scale = 0.55; // Scale Dave down to fit room
     animator.play('idle');
 
     const dave = new Actor({ id: 'dave', name: 'Dave', x: 480, y: 450, animator });

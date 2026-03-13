@@ -60,12 +60,17 @@ html, body {
 /* ── The canvas — fills its container, pixels stay sharp ── */
 #game {
   display: block;
-  /* Scale canvas to fit viewport while preserving 960:600 ratio */
-  width:  min(960px, 100vw);
-  height: min(600px, calc(100vw * 600 / 960));
+  /* Responsive scaling that maintains 1.6 aspect ratio (960x600) */
+  width: 100%;
+  height: auto;
+  max-width: 960px;
+  max-height: calc(100vh - 60px); /* Leave space for title bar and margins */
+  aspect-ratio: 960 / 600;
+  
   border: 1px solid var(--border-dim);
   border-top: none;
   cursor: crosshair;
+  image-rendering: -moz-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   background: #000;

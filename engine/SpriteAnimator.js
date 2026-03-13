@@ -64,15 +64,19 @@ class SpriteAnimator {
       // Per-frame coordinate mode
       const f = anim.frames[this.frame];
       if (!f) return;
-      sx = f.x; sy = f.y; sw = f.w; sh = f.h;
+      sx = Math.floor(f.x); sy = Math.floor(f.y); sw = Math.floor(f.w); sh = Math.floor(f.h);
     } else {
       // Uniform grid mode
       const fw = anim.frameW ?? this.defaultFrameW;
       const fh = anim.frameH ?? this.defaultFrameH;
-      sx = this.frame * fw;
-      sy = anim.row * fh;
-      sw = fw;
-      sh = fh;
+      const stepW = anim.stepW ?? this.defaultFrameW;
+      const stepH = anim.stepH ?? this.defaultFrameH;
+      
+      const startX = (anim.startFrame || 0) * stepW;
+      sx = Math.floor(startX + (this.frame * stepW));
+      sy = Math.floor(anim.row * stepH);
+      sw = Math.floor(fw);
+      sh = Math.floor(fh);
     }
 
     const dw = sw * this.scale;

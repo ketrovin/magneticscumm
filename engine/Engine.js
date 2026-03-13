@@ -73,7 +73,15 @@ class Engine {
     addItem(id, displayName) {
         if (!this.hasItem(id)) {
             this.gameState.inventory.push(id);
-            this.ui.inventory.push(displayName ?? id);
+            this.ui.inventory.push({ id, name: displayName ?? id });
+            
+            // Preload the item image if not already loaded
+            if (!this.ui.loadedItemImages) this.ui.loadedItemImages = {};
+            if (!this.ui.loadedItemImages[id]) {
+                const img = new Image();
+                img.src = `assets/item_${id}.png`;
+                this.ui.loadedItemImages[id] = img;
+            }
         }
     }
     removeItem(id) {
@@ -118,7 +126,7 @@ class Engine {
                 // Walk Dave toward hotspot centre first, then interact
                 if (this.player) {
                     const tx = hotspot.walkToX ?? (hotspot.x + hotspot.w / 2);
-                    const ty = hotspot.walkToY ?? Math.min(hotspot.y + hotspot.h, 480);
+                    const ty = hotspot.walkToY ?? Math.min(hotspot.y + hotspot.h, 450);
                     const clamped = this.room.clampToWalkbox(tx, ty);
                     this.player.walkTo(clamped.x, clamped.y);
                     // Queue interaction after walk (simple: slight delay)
@@ -135,8 +143,9 @@ class Engine {
 
     _onHotspotInteract(hotspot) {
         const verb = this.ui.selectedVerb;
+        const item = this.ui.selectedInventoryItem;
         if (typeof hotspot.onInteract === 'function') {
-            hotspot.onInteract(verb, this);
+            hotspot.onInteract(verb, this, item);
         }
     }
 
@@ -197,43 +206,45 @@ class Engine {
     }
 
     _drawDialog(ctx, text) {
-        const panelY = this.canvas.height - 80;
         const x = this.player ? this.player.x : this.canvas.width / 2;
-        const y = this.player ? (this.player.y - 90) : 80;
+        const y = this.player ? (this.player.y - (this.player.animator.frameH * this.player.animator.scale) - 10) : 80;
 
         ctx.save();
-        ctx.font = 'bold 12px "Courier New", monospace';
-        const maxW = 280;
-
-        // Word-wrap
+        // Use a bold, blocky font similar to Zak EGA
+        ctx.font = 'bold 18px "Share Tech Mono", monospace';
+        ctx.textAlign = 'center';
+        
         const words = text.split(' ');
         const lines = [];
         let line = '';
+        const maxW = 350;
+
         for (const word of words) {
             const test = line ? `${line} ${word}` : word;
             if (ctx.measureText(test).width > maxW && line) {
-                lines.push(line); line = word;
-            } else { line = test; }
+                lines.push(line);
+                line = word;
+            } else {
+                line = test;
+            }
         }
         if (line) lines.push(line);
 
-        const lh = 16, pad = 8;
-        const bw = maxW + pad * 2;
-        const bh = lines.length * lh + pad * 2;
-        const bx = Math.max(4, Math.min(x - bw / 2, this.canvas.width - bw - 4));
-        const by = Math.max(4, Math.min(y - bh, panelY - bh - 4));
+        const lh = 22;
+        const startY = y - (lines.length * lh);
 
-        // Bubble
-        ctx.fillStyle = 'rgba(0,0,0,0.75)';
-        ctx.strokeStyle = '#ffff88';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.roundRect(bx, by, bw, bh, 4);
-        ctx.fill(); ctx.stroke();
+        lines.forEach((l, i) => {
+            const ly = startY + i * lh;
+            
+            // Text Shadow for contrast (essential since we removed the bubble)
+            ctx.fillStyle = '#000000';
+            ctx.fillText(l, x + 2, ly + 2);
+            
+            // Main Text Color (Zak is white, NPCs can vary)
+            ctx.fillStyle = this.player ? (this.player.color || '#ffffff') : '#ffffff';
+            ctx.fillText(l, x, ly);
+        });
 
-        ctx.fillStyle = '#ffff88';
-        ctx.textBaseline = 'top';
-        lines.forEach((l, i) => ctx.fillText(l, bx + pad, by + pad + i * lh));
         ctx.restore();
     }
 }

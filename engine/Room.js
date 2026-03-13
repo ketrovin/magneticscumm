@@ -54,14 +54,14 @@ class Room {
 
     draw(ctx) {
         if (this.background && this.background.complete) {
-            ctx.drawImage(this.background, 0, 0, ctx.canvas.width, ctx.canvas.height - 80);
+            ctx.drawImage(this.background, 0, 0, ctx.canvas.width, ctx.canvas.height - 140);
         } else {
             // Fallback gradient while image loads
-            const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height - 80);
+            const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height - 140);
             grad.addColorStop(0, '#1a0a3a');
             grad.addColorStop(1, '#4a2060');
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height - 80);
+            ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height - 140);
 
             // Draw floor
             ctx.fillStyle = '#2a1540';
