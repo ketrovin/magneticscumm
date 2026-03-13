@@ -202,32 +202,32 @@ function buildBedroom(bg) {
             // Lamp / nightstand
             {
                 id: 'lamp', name: 'Lamp', x: 60, y: 200, w: 120, h: 170, walkToX: 155, walkToY: 460,
-                onInteract(v, e) { e.say("A trusty desk lamp. Very illuminating — literally."); }
+                onInteract(v, e) { e.say("A trusty desk lamp. It's the only bright spot in my life right now. Literally."); }
             },
             // Bed
             {
                 id: 'bed', name: 'Bed', x: 130, y: 190, w: 240, h: 160, walkToX: 260, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Sleep on' || v === 'Use') e.say("No time for sleeping! I have... something to do. Probably.");
-                    else e.say("My glorious bed. I could use the sleep.");
+                    if (v === 'Sleep on' || v === 'Use') e.say("I'd love to, but I have a feeling the game won't let me advance the plot while unconscious.");
+                    else e.say("My bed. It's where I dream of being an accountant. Accountants don't find batteries in their fridges.");
                 }
             },
             // Nightstand drawer — has cash card inside
             {
                 id: 'drawer', name: 'Nightstand Drawer', x: 20, y: 310, w: 130, h: 90, walkToX: 120, walkToY: 450,
                 onInteract(v, e) {
-                    if (v === 'Open' || v === 'Look at' || v === 'Pick up') {
-                        if (e.hasItem('cash_card')) { e.say("The drawer is empty now. I already took the cash card."); }
-                        else { e.addItem('cash_card', 'Cash Card'); e.say("My CASH CARD! I thought I lost this. It was in the drawer the whole time."); }
-                    } else { e.say("It's a nightstand drawer. Drawers contain things."); }
+                    if (v === 'Open' || v === 'Look at' || v === 'Pick up' || v === 'Use') {
+                        if (e.hasItem('cash_card')) { e.say("The drawer is empty. Just like my social calendar."); }
+                        else { e.addItem('cash_card', 'Cash Card'); e.say("My cash card! This plastic rectangle is the only thing keeping me from a career in urban scavenging."); }
+                    } else { e.say("It's a nightstand drawer. It's currently participating in a silent protest against being organized."); }
                 }
             },
             // Computer on desk
             {
                 id: 'computer', name: 'Computer', x: 455, y: 200, w: 170, h: 155, walkToX: 540, walkToY: 450,
                 onInteract(v, e) {
-                    if (v === 'Use') e.say("I try to use the computer but the screensaver has locked it. The screensaver is a fish.");
-                    else e.say("My trusty computer. The fish screensaver has been running since 1987.");
+                    if (v === 'Use') e.say("I try to use it, but the fish screensaver has achieved sentience and refuses to yield. It's a very assertive fish.");
+                    else e.say("My trusty computer. It's so old, it actually has 'adventure' listed as a hardware requirement.");
                 }
             },
             // Cell phone — sitting on desk next to computer
@@ -235,9 +235,9 @@ function buildBedroom(bg) {
                 id: 'phone', name: 'Cell Phone', x: 615, y: 305, w: 50, h: 50, walkToX: 620, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
-                        if (e.hasItem('cell_phone')) { e.say("I already have my phone."); }
-                        else { e.addItem('cell_phone', 'Cell Phone'); e.say("My CELL PHONE! Now I can call... someone. If I knew anyone."); }
-                    } else { e.say("A cell phone, sitting suspiciously on the desk by the fish screensaver."); }
+                        if (e.hasItem('cell_phone')) { e.say("I already have my phone. Zero bars, zero friends, 100% fish screensaver."); }
+                        else { e.addItem('cell_phone', 'Cell Phone'); e.say("My cell phone! It's low on battery and even lower on purpose, but at least I can look busy while I'm being ignored."); }
+                    } else { e.say("My phone is sitting next to the computer. It hasn't buzzed since 2004. I'm sure it's just a network issue."); }
                 }
             },
             // Green carpet — Push/Pull to reveal trapdoor
@@ -247,8 +247,8 @@ function buildBedroom(bg) {
                 onInteract(v, e) {
                     if (v === 'Push' || v === 'Pull') {
                         e.getRoomState('bedroom').carpetMoved = true;
-                        e.say("I heave the carpet aside. There's a trapdoor under here. Since WHEN?!");
-                    } else { e.say("A perfectly normal green rug. Nothing to see here. Definitely no trapdoors."); }
+                        e.say("I heave the carpet aside. A trapdoor! Just like the realtor promised: 'hidden underground infrastructure included'.");
+                    } else { e.say("A green rug. It really ties the room together. Or hides the fact that I'm living on top of a conspiracy."); }
                 }
             },
             // Rolled rug hotspot
@@ -263,9 +263,9 @@ function buildBedroom(bg) {
                 isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; },
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Use' || v === 'Walk to') {
-                        e.say("Down I go...");
-                        setTimeout(() => e.changeRoom('secret', 480, 460), 1500);
-                    } else { e.say("A trapdoor. In MY bedroom. I've lived here for 3 years."); }
+                        e.say("Down into the darkness. If I'm not back in ten minutes, call the poutine guy.");
+                        setTimeout(() => e.changeRoom('secret', 480, 460), 1000);
+                    } else { e.say("A trapdoor. In my room. I'm starting to think my landlord isn't telling me everything."); }
                 }
             },
             // Living Room door → Kitchen
@@ -338,9 +338,9 @@ function buildKitchen(bg) {
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
-                        if (e.hasItem('battery')) e.say("I already have this extremely large battery.");
-                        else { e.addItem('battery', 'Enormous Battery'); e.say("A D-cell battery the size of a fire hydrant. D for Dave? D for Danger? D for... definitely weird."); }
-                    } else e.say("An enormous battery chilling in my fridge. Completely normal.");
+                        if (e.hasItem('battery')) e.say("I already have the battery. My pocket is now 50% battery by volume.");
+                        else { e.addItem('battery', 'Enormous Battery'); e.say("A D-cell battery the size of a fire hydrant. I suppose if I ever need to jump-start a submarine, I'm prepared. Or just power a very, very large remote control."); }
+                    } else e.say("An enormous battery chilling in my fridge. Completely normal. I like my power supply served cold.");
                 }
             },
             {
@@ -348,9 +348,9 @@ function buildKitchen(bg) {
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
-                        if (e.hasItem('cheese')) e.say("I have enough cheese, thank you.");
-                        else { e.addItem('cheese', 'Old Cheese'); e.say("It has the smell of a decision I'm already regretting."); }
-                    } else e.say("Well-aged. Very well-aged. Possibly pre-aged at the factory.");
+                        if (e.hasItem('cheese')) e.say("I have enough cheese. My inventory is starting to smell like a specialized Deli.");
+                        else { e.addItem('cheese', 'Old Cheese'); e.say("It smells like a sweaty gym sock that's been used to wrap a dead fish. I'll take it, because that's apparently the kind of day I'm having. And it might be useful for... something. Probably not eating."); }
+                    } else e.say("Well-aged. Very well-aged. Possibly pre-aged at the factory... or in the basement of a condemned building.");
                 }
             },
             {
@@ -358,9 +358,9 @@ function buildKitchen(bg) {
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
-                        if (e.hasItem('rotten_egg')) e.say("One rotten egg is already one too many.");
-                        else { e.addItem('rotten_egg', 'Rotten Egg'); e.say("I pick it up and instantly regret everything. The smell is visible."); }
-                    } else e.say("It is... not a good egg.");
+                        if (e.hasItem('rotten_egg')) e.say("One rotten egg is already a lifestyle choice I'm not ready for.");
+                        else { e.addItem('rotten_egg', 'Rotten Egg'); e.say("A rotten egg. Why am I touching this? Why am I putting it in my pocket? I'm questioning my life choices as we speak. This better be important later."); }
+                    } else e.say("It is... not a good egg. It has developed its own political opinions.");
                 }
             },
             {
@@ -368,8 +368,8 @@ function buildKitchen(bg) {
                 isVisible(e) { return e.getRoomState('kitchen').fridgeOpen && !e.hasItem('house_key'); },
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
-                        e.addItem('house_key', 'House Key'); e.say("My HOUSE KEY! Why was it in the fridge?! Cold storage for important things, I guess.");
-                    } else e.say("My house key. In the fridge. Fine.");
+                        e.addItem('house_key', 'House Key'); e.say("My house key. Chilling in the fridge next to the sentient mold. Because security is best served cold, I guess. And I definitely didn't check the fridge first.");
+                    } else e.say("My house key. In the fridge. It's the only thing in my life that's 'cool' right now.");
                 }
             },
             {
@@ -377,17 +377,17 @@ function buildKitchen(bg) {
                 isVisible(e) { return !e.hasItem('pizza'); },
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
-                        if (e.hasItem('pizza')) e.say("I already have the remaining slice. It's cold anyway.");
-                        else { e.addItem('pizza', 'Cold Pizza'); e.say("Cold pizza. I'll eat it later. ...much later."); }
-                    } else e.say("A slice of cold pizza sitting on the box. It defies the laws of room-sharing.");
+                        if (e.hasItem('pizza')) e.say("I already have a slice. I'm not running a buffet.");
+                        else { e.addItem('pizza', 'Cold Pizza'); e.say("A slice of cold pizza. It's been sitting here since the Reagan administration. It's probably a biohazard, but in an adventure game, that's called 'useful'. And delicious. Probably."); }
+                    } else e.say("A slice of cold pizza sitting on the box. It defies the laws of room-sharing and basic hygiene.");
                 }
             },
             // Boombox / stereo
             {
                 id: 'boombox', name: 'Boombox', x: 480, y: 240, w: 80, h: 60, walkToX: 520, walkToY: 400,
                 onInteract(v, e) {
-                    if (v === 'Use') e.say("♪ ...Danger Zone plays forever ♪");
-                    else e.say("A vintage boombox. It has excellent taste in music.");
+                    if (v === 'Use') e.say("I press play. ♪ ...Danger Zone plays forever ♪. It's the soundtrack to my life. Unfortunately.");
+                    else e.say("A vintage boombox. It has excellent taste in music, mainly because it's stuck on one tape.");
                 }
             },
             // Coffee table with pizza
@@ -449,7 +449,7 @@ function buildStreet(bg) {
             {
                 id: 'apt_window', name: 'Apartment Window', x: 110, y: 230, w: 145, h: 180, walkToX: 180, walkToY: 440,
                 onInteract(v, e) {
-                    e.say("That's my room. But I'M out here. Who is sleeping in my bed?! And why is the furniture different?!");
+                    e.say("That's my room. But I'M out here. I hope whoever's in there is at least charging their phone correctly.");
                 }
             },
             // Moncton Bakery — Baker NPC (prime suspect)
@@ -469,11 +469,11 @@ function buildStreet(bg) {
                         e.say(lines[(s.bakerTalks - 1) % lines.length]);
                     } else if (v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Open') {
                         if (e.hasItem('battle_bread')) {
-                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back.");
+                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back. It's mine now.");
                         } else {
                             s.breadGiven = true;
                             e.addItem('battle_bread', 'Battle Bread');
-                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. It's solid as iron.");
+                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. It's solid as iron. And surprisingly aerodynamic. This could be useful.");
                         }
                     } else {
                         e.say('Moncton Bakery. Incredible bread. Baker looks absolutely furious. Standard.');
@@ -488,11 +488,11 @@ function buildStreet(bg) {
                     const s = e.getRoomState('street');
                     if (v === 'Talk to' || v === 'Use' || v === 'Walk to') {
                         if (s.poutineGiven) {
-                            e.say("The poutine stand owner gives me a sympathetic look. 'No more rapée, friend. You finish it?'");
+                            e.say("The poutine stand owner gives me a sympathetic look. 'No more rapée, friend. You finish it?' I nod. I finished it. I regret nothing. Mostly.");
                         } else {
                             s.poutineGiven = true;
                             e.addItem('poutine', 'Poutine Rapée');
-                            e.say("Owner: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway.");
+                            e.say("Owner: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway. And now I own it. Literally.");
                         }
                     } else e.say("A poutine stand. The sign says 'BEST POUTINE'. It is specifically poutine rapée. The distinction matters.");
                 }
@@ -516,7 +516,7 @@ function buildStreet(bg) {
             {
                 id: 'world_end_left', name: '...', x: 0, y: 350, w: 30, h: 180,
                 onInteract(v, e) {
-                    e.say("The world just... ends over there. Someone forgot to make this part. I can't go. It's not a wall, it's just... nothing. Existentially uncomfortable.");
+                    e.say("The world ends over there. Someone forgot to program the next screen. I respect the developer's right to take a nap, but it's physically uncomfortable to look at.");
                 }
             },
         ]
@@ -563,7 +563,7 @@ function buildAlley(bg) {
             // Trash cans
             {
                 id: 'trash', name: 'Trash Cans', x: 100, y: 380, w: 155, h: 150, walkToX: 175, walkToY: 470,
-                onInteract(v, e) { e.say("Trash cans. The economy of the alley."); }
+                onInteract(v, e) { e.say("Trash cans. I'm not looking in there. I have some standards left. About three percent of my standards, but they're firmly in place."); }
             },
             // The Herring Club door + doorman
             {
@@ -715,13 +715,16 @@ function buildGateArea(bg) {
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Use' || v === 'Walk to') {
                         if (e.hasItem('mansion_key')) {
-                            e.say('I fit the raccoon-bow skeleton key into the lock. It turns with a deeply satisfying CLUNK. The Van Horne gate swings open.');
+                            e.say('I fit the raccoon-bow skeleton key into the lock. It turns with a deeply satisfying CLUNK. The Van Horne gate swings open, yielding to the power of high-end pawn shop shopping.');
                             setTimeout(() => e.changeRoom('mansion_courtyard', 480, 460), 1800);
+                        } else if (e.hasItem('house_key')) {
+                            e.say("For no reason at all, I try my house key. The one I found in the fridge. It fits perfectly. It turns. The gate opens. I'm not going to think about the security implications or why my fridge key can unlock a millionaire's mansion. I'm just going in.");
+                            setTimeout(() => e.changeRoom('mansion_courtyard', 480, 460), 2000);
                         } else {
-                            e.say('The gate is locked with a heavy padlock. The lock has a raccoon-shaped keyhole. Specific. I need the right key. I wonder where one would find a key for a raccoon-shaped lock in Moncton.');
+                            e.say("The gate is locked with a heavy padlock. It has a raccoon-shaped keyhole, because of course it does. I need a key that matches this level of commitment to woodland-themed security.");
                         }
                     } else {
-                        e.say('VAN HORNE MANSION. Iron gates. Lit windows. Eyes in the garden. The gate has a raccoon-shaped keyhole, which raises a number of questions.');
+                        e.say("VAN HORNE MANSION. Iron gates. Lit windows. Eyes in the garden. The gate has a raccoon-shaped keyhole, which raises a number of questions about Van Horne's interior decorator.");
                     }
                 }
             },
@@ -737,14 +740,14 @@ function buildGateArea(bg) {
 // ── PAWN SHOP INTERIOR ────────────────────────────────────────────────────────
 // Items have prices; Dave needs his cash card to buy.
 const PAWN_ITEMS = [
-    { id: 'spoon', name: 'Spoon', price: 5, desc: 'A regular spoon. In a display case. At a pawn shop. The price is $5. I wonder what it does. (It is a spoon.)' },
-    { id: 'bent_knife', name: 'Bent Butter Knife', price: 15, desc: "A butter knife bent at a dramatic angle, mounted on a velvet plaque labelled 'NOT A SPOON'. I need this." },
-    { id: 'camera', name: 'Camera', price: 50, desc: 'A 35mm film camera. The film inside is from 1991. It has been... waiting.' },
-    { id: 'radio', name: 'Vintage Radio', price: 25, desc: 'A vintage tube radio. It picks up stations from 1987. Specifically one station. Always the same station.' },
-    { id: 'binoculars', name: 'Binoculars', price: 30, desc: 'Binoculars. For seeing things far away. Useful if you believe someone watched this mansion from a distance. Which you now do.' },
-    { id: 'battle_bread', name: 'Baguette Fragment', price: 8, desc: "A chunk of yesterday's Moncton bakery baguette. Dense enough to drive nails. Still warm, somehow." },
-    { id: 'remote_control', name: 'Remote Control', price: 12, desc: 'A remote control. TV? Stereo? It has one extra button labelled MAGNET in red electrical tape. Weird.' },
-    { id: 'mansion_key', name: 'Van Horne Mansion Key', price: 75, desc: "An ornate Victorian skeleton key. The bow is shaped like a raccoon. Tagged 'V.H. MAIN GATE'. $75 is a bargain for access to a crime scene." },
+    { id: 'spoon', name: 'Spoon', price: 5, desc: "A spoon. Five dollars. For a spoon. I could probably find a better one in my own kitchen drawer, if I ever cleaned it. This is peak consumerism." },
+    { id: 'bent_knife', name: 'Bent Butter Knife', price: 15, desc: "A butter knife, bent into a shape that suggests it's seen things. Fifteen dollars for a bent butter knife. The pawnbroker must be a connoisseur of cutlery-based trauma." },
+    { id: 'camera', name: 'Camera', price: 50, desc: "A 35mm camera from 1991. It probably contains 24 exposures of someone's thumb, but it's 'vintage.' And potentially evidence. Fifty dollars for a camera that might incriminate me." },
+    { id: 'radio', name: 'Vintage Radio', price: 25, desc: "A vintage tube radio. It only plays one station from 1987. Perfect for when I want to live in a perpetual state of 80s synth-pop dread. Or solve a murder. Probably both." },
+    { id: 'binoculars', name: 'Binoculars', price: 30, desc: "Binoculars. For when you want to look at things far away, like the sanity I left behind when I started this quest. Or the killer. One of those." },
+    { id: 'battle_bread', name: 'Baguette Fragment', price: 8, desc: "Moncton Bakery Baguette. It's so hard it has its own zip code. I could use this to fight off a dragon or build a small bridge. Or just eat it, if I'm desperate. I'm not desperate. Yet." },
+    { id: 'remote_control', name: 'Remote Control', price: 12, desc: "A remote control. TV? Stereo? It has one extra button labelled MAGNET in red electrical tape. Because who doesn't need to control local physics from their couch? Or turn off a tourist attraction." },
+    { id: 'mansion_key', name: 'Van Horne Mansion Key', price: 75, desc: "A skeleton key with a raccoon bowtie. Seventy-five dollars to potentially get arrested for trespassing? Bargain. A very specific, raccoon-themed bargain." },
 ];
 
 // Pawnbroker NPC multi-line dialogue
@@ -1066,7 +1069,7 @@ function buildMansionFoyer(bg) {
             // Chandelier
             {
                 id: 'chandelier', name: 'Chandelier', x: 340, y: 0, w: 300, h: 130,
-                onInteract(v, e) { e.say('A chandelier with actual candles. Still lit. Either someone lit them tonight or chandeliers in mansions just burn forever. Both are plausible.'); }
+                onInteract(v, e) { e.say('A chandelier with actual candles. Still lit. Either someone lit it recently or chandeliers in mansions just burn forever. Both are plausible.'); }
             },
             // Cat on the balcony
             {
@@ -1215,7 +1218,7 @@ function buildMansionLibrary(bg) {
                 id: 'library_exit', name: 'Library Door', x: 820, y: 175, w: 145, h: 350, walkToX: 860, walkToY: 470,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('mansion_foyer', 520, 460);
-                    else e.say('The door back to the foyer. And the chalk outline. I am almost nostalgic for it.');
+                    else e.say('The door back to the foyer. Back to the chalk outline and the crushing weight of unsolved mystery. I am really missing my fridge battery right now.');
                 }
             },
             // Spiral staircase with OUT OF ORDER sign
@@ -1226,8 +1229,8 @@ function buildMansionLibrary(bg) {
                     if (v === 'Pick up') {
                         e.getRoomState('mansion_library').signRemoved = true;
                         e.addItem('oos_sign', 'OUT OF ORDER Sign');
-                        e.say('I pick up the OUT OF ORDER sign. The spiral staircase is immediately, visibly, fully operational. The sign WAS the problem. It always is.');
-                    } else e.say('A sign on the spiral staircase that says OUT OF ORDER. While the sign is here, the staircase is, technically, out of order.');
+                        e.say("I pick up the sign. Suddenly, the staircase is physically capable of supporting my weight again. It's amazing how much power a piece of cardboard has over the laws of physics.");
+                    } else e.say("An 'OUT OF ORDER' sign. It's the ultimate gatekeeper of adventure games. I could climb it, but my character's moral code forbids using non-functional furniture.");
                 }
             },
             // Spiral staircase — usable only after sign removed
@@ -1366,9 +1369,9 @@ function buildMansionBackyard(bg) {
                 x: 550, y: 295, w: 260, h: 130, walkToX: 680, walkToY: 470,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') {
-                        e.say('I follow the shortcut. The path curves through the trees. Eyes watch from the dark. I pretend not to notice.');
+                        e.say("I follow the shortcut. The woods are dark, the atmosphere is heavy, and I'm fairly certain a raccoon is mocking my choice of footwear.");
                         setTimeout(() => e.changeRoom('police_station_ext', 160, 460), 2000);
-                    } else e.say('SHORTCUT TO MAGNETIC HILL with an arrow. The path winds into dark woods. Eyes glow among the trees. That\'s fine. That\'s fine.');
+                    } else e.say("A shortcut to Magnetic Hill. Usually, shortcuts in these games lead to death, but this is Moncton, so it probably just leads to more poutine.");
                 }
             },
             // The path through the gap
