@@ -47,15 +47,16 @@ const DAVE_ANIMS = {
     },
     walkR: {
         fps: 10,
+        flipH: true,
         frames: [
-            { x: 28, y: 19, w: 55, h: 153 },
-            { x: 125, y: 19, w: 67, h: 153 },
-            { x: 216, y: 19, w: 56, h: 153 },
-            { x: 299, y: 19, w: 75, h: 153 },
-            { x: 387, y: 19, w: 71, h: 153 },
-            { x: 481, y: 19, w: 60, h: 153 },
-            { x: 566, y: 19, w: 71, h: 153 },
-            { x: 651, y: 19, w: 74, h: 153 }
+            { x: 24, y: 188, w: 68, h: 149 },
+            { x: 123, y: 188, w: 69, h: 149 },
+            { x: 212, y: 188, w: 75, h: 149 },
+            { x: 312, y: 188, w: 52, h: 149 },
+            { x: 386, y: 188, w: 67, h: 149 },
+            { x: 486, y: 188, w: 50, h: 149 },
+            { x: 569, y: 188, w: 68, h: 149 },
+            { x: 666, y: 188, w: 45, h: 149 }
         ]
     },
     walkL: {
@@ -84,14 +85,15 @@ const FRAME_W = 59, FRAME_H = 163; // Updated fallback
 const CHARGEN_ANIMS = {
     walkR: {
         fps: 8,
+        flipH: true,
         frames: [
-            { x: 0, y: 0, w: 113, h: 210 },
-            { x: 113, y: 0, w: 113, h: 210 },
-            { x: 226, y: 0, w: 113, h: 210 },
-            { x: 339, y: 0, w: 113, h: 210 },
+            { x: 576, y: 0, w: 113, h: 210 },
+            { x: 689, y: 0, w: 113, h: 210 },
+            { x: 802, y: 0, w: 113, h: 210 },
+            { x: 915, y: 0, w: 113, h: 210 },
         ],
     },
-    walkL: {  // right half of top row (already facing left in sheet)
+    walkL: {
         fps: 8,
         frames: [
             { x: 576, y: 0, w: 113, h: 210 },
