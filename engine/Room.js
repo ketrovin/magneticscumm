@@ -8,9 +8,10 @@ class Room {
     constructor({ id, name, background, walkbox, hotspots = [] }) {
         this.id = id;
         this.name = name;
-        this.background = background; // HTMLImageElement
-        this.walkbox = walkbox;       // [{x,y}, ...]  polygon points (canvas coords)
+        this.background = background; 
+        this.walkbox = walkbox;       
         this.hotspots = hotspots;
+        this.props = []; // Added for dynamic scene elements
     }
 
     /** Point-in-polygon test (ray casting) */
@@ -52,20 +53,23 @@ class Room {
         return null;
     }
 
-    draw(ctx) {
+    draw(ctx, engine = null) {
         if (this.background && this.background.complete) {
             ctx.drawImage(this.background, 0, 0, ctx.canvas.width, ctx.canvas.height - 140);
         } else {
-            // Fallback gradient while image loads
             const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height - 140);
             grad.addColorStop(0, '#1a0a3a');
             grad.addColorStop(1, '#4a2060');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height - 140);
+        }
 
-            // Draw floor
-            ctx.fillStyle = '#2a1540';
-            ctx.fillRect(0, ctx.canvas.height - 200, ctx.canvas.width, 120);
+        // Draw visible props (e.g. traps, removed carpet) over background
+        for (const p of this.props) {
+            const visible = typeof p.isVisible === 'function' ? p.isVisible(engine) : true;
+            if (visible && p.image && p.image.complete) {
+                ctx.drawImage(p.image, p.x, p.y, p.w, p.h);
+            }
         }
     }
 

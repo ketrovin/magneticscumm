@@ -189,7 +189,7 @@ class Engine {
 
         // 1. Room fills entire scene area above UI panel
         if (this.room) {
-            this.room.draw(ctx);
+            this.room.draw(ctx, this);
             if (this.debug) this.room.drawDebugWalkbox(ctx);
         }
 

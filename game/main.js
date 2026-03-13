@@ -28,16 +28,51 @@ function loadImage(src) {
 // Dave3.png is 1024x559. 12 columns, 3 rows.
 // We use fractional steps for perfect grid alignment, but smaller frameW/H to "crop" 
 // out potential bleeding from neighboring characters.
-const DAVE_STEP_W = 1024 / 12;
-const DAVE_STEP_H = 559 / 3;
 const DAVE_ANIMS = {
-    idle: { row: 2, count: 1, fps: 1, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
-    impatient: { row: 2, count: 8, fps: 3, startFrame: 4.08, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H }, 
-    walkR: { row: 0, count: 8, fps: 8, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
-    walkL: { row: 1, count: 8, fps: 8, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H, startFrame: 0.08 }, 
-    walkBack: { row: 1, count: 4, fps: 6, startFrame: 8.08, frameW: 75, frameH: 170, stepW: DAVE_STEP_W, stepH: DAVE_STEP_H },
+    idle: {
+        fps: 1,
+        frames: [{ x: 27, y: 376, w: 59, h: 163 }]
+    },
+    impatient: {
+        fps: 4,
+        frames: [
+            { x: 111, y: 376, w: 59, h: 163 },
+            { x: 195, y: 376, w: 58, h: 163 },
+            { x: 308, y: 376, w: 59, h: 163 },
+            { x: 389, y: 376, w: 59, h: 163 },
+            { x: 502, y: 376, w: 60, h: 163 },
+            { x: 577, y: 376, w: 61, h: 163 },
+            { x: 648, y: 376, w: 89, h: 163 }
+        ]
+    },
+    walkR: {
+        fps: 10,
+        frames: [
+            { x: 28, y: 19, w: 55, h: 153 },
+            { x: 125, y: 19, w: 67, h: 153 },
+            { x: 216, y: 19, w: 56, h: 153 },
+            { x: 299, y: 19, w: 75, h: 153 },
+            { x: 387, y: 19, w: 71, h: 153 },
+            { x: 481, y: 19, w: 60, h: 153 },
+            { x: 566, y: 19, w: 71, h: 153 },
+            { x: 651, y: 19, w: 74, h: 153 }
+        ]
+    },
+    walkL: {
+        fps: 10,
+        frames: [
+            { x: 24, y: 188, w: 68, h: 149 },
+            { x: 123, y: 188, w: 69, h: 149 },
+            { x: 212, y: 188, w: 75, h: 149 },
+            { x: 312, y: 188, w: 52, h: 149 },
+            { x: 386, y: 188, w: 67, h: 149 },
+            { x: 486, y: 188, w: 50, h: 149 },
+            { x: 569, y: 188, w: 68, h: 149 },
+            { x: 666, y: 188, w: 45, h: 149 }
+        ]
+    }
 };
-const FRAME_W = 75, FRAME_H = 170; // Default fallback for procedural Dave
+const FRAME_W = 59, FRAME_H = 163; // Updated fallback
 
 // ── NPC spritesheet config (matches user-supplied chargen sheet format) ─────
 // Sheet layout (approx 1024 × 660 px):
@@ -195,7 +230,7 @@ function buildBedroom(bg) {
             },
             // Cell phone — sitting on desk next to computer
             {
-                id: 'phone', name: 'Cell Phone', x: 620, y: 310, w: 70, h: 60, walkToX: 620, walkToY: 450,
+                id: 'phone', name: 'Cell Phone', x: 615, y: 305, w: 50, h: 50, walkToX: 620, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
                         if (e.hasItem('cell_phone')) { e.say("I already have my phone."); }
@@ -211,8 +246,14 @@ function buildBedroom(bg) {
                     if (v === 'Push' || v === 'Pull') {
                         e.getRoomState('bedroom').carpetMoved = true;
                         e.say("I heave the carpet aside. There's a trapdoor under here. Since WHEN?!");
-                    } else { e.say("A perfectly normal green rug. Nothing to see here. Definitely no trapdors."); }
+                    } else { e.say("A perfectly normal green rug. Nothing to see here. Definitely no trapdoors."); }
                 }
+            },
+            // Rolled rug hotspot
+            {
+                id: 'rolled_rug_hot', name: 'Rolled Rug', x: 550, y: 320, w: 100, h: 120, walkToX: 520, walkToY: 450,
+                isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; },
+                onInteract(v, e) { e.say("The rug, rolled up and out of the way. It was hiding a lot of dust. And a trapdoor."); }
             },
             // Trapdoor — only visible after carpet moved
             {
@@ -291,17 +332,17 @@ function buildKitchen(bg) {
             },
             // Fridge contents — only visible when open
             {
-                id: 'big_battery', name: 'Enormous Battery', x: 595, y: 150, w: 50, h: 80,
+                id: 'big_battery', name: 'Enormous Battery', x: 590, y: 145, w: 50, h: 70,
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
-                        if (e.hasItem('big_battery')) e.say("I already have this extremely large battery.");
-                        else { e.addItem('big_battery', 'Enormous Battery'); e.say("A D-cell battery the size of a fire hydrant. D for Dave? D for Danger? D for... definitely weird."); }
+                        if (e.hasItem('battery')) e.say("I already have this extremely large battery.");
+                        else { e.addItem('battery', 'Enormous Battery'); e.say("A D-cell battery the size of a fire hydrant. D for Dave? D for Danger? D for... definitely weird."); }
                     } else e.say("An enormous battery chilling in my fridge. Completely normal.");
                 }
             },
             {
-                id: 'cheese', name: 'Old Cheese', x: 640, y: 200, w: 55, h: 55,
+                id: 'cheese', name: 'Old Cheese', x: 635, y: 195, w: 50, h: 50,
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
@@ -311,7 +352,7 @@ function buildKitchen(bg) {
                 }
             },
             {
-                id: 'rotten_egg', name: 'Rotten Egg', x: 600, y: 270, w: 50, h: 40,
+                id: 'rotten_egg', name: 'Rotten Egg', x: 595, y: 265, w: 50, h: 40,
                 isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen; },
                 onInteract(v, e) {
                     if (v === 'Pick up') {
@@ -321,12 +362,22 @@ function buildKitchen(bg) {
                 }
             },
             {
-                id: 'house_key', name: 'House Key', x: 640, y: 330, w: 40, h: 40,
+                id: 'house_key', name: 'House Key', x: 635, y: 325, w: 40, h: 40,
                 isVisible(e) { return e.getRoomState('kitchen').fridgeOpen && !e.hasItem('house_key'); },
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
                         e.addItem('house_key', 'House Key'); e.say("My HOUSE KEY! Why was it in the fridge?! Cold storage for important things, I guess.");
                     } else e.say("My house key. In the fridge. Fine.");
+                }
+            },
+            {
+                id: 'pizza', name: 'Pizza Slice', x: 375, y: 335, w: 50, h: 40,
+                isVisible(e) { return !e.hasItem('pizza'); },
+                onInteract(v, e) {
+                    if (v === 'Pick up' || v === 'Use') {
+                        if (e.hasItem('pizza')) e.say("I already have the remaining slice. It's cold anyway.");
+                        else { e.addItem('pizza', 'Cold Pizza'); e.say("Cold pizza. I'll eat it later. ...much later."); }
+                    } else e.say("A slice of cold pizza sitting on the box. It defies the laws of room-sharing.");
                 }
             },
             // Boombox / stereo
@@ -341,8 +392,10 @@ function buildKitchen(bg) {
             {
                 id: 'pizza', name: 'Pizza Box', x: 305, y: 330, w: 160, h: 80, walkToX: 385, walkToY: 460,
                 onInteract(v, e) {
-                    if (v === 'Pick up' || v === 'Use') e.say("Cold pizza. I'll eat it later. ...much later.");
-                    else e.say("A pizza box. There might be one slice left. There is never one slice left.");
+                    if (v === 'Pick up' || v === 'Use') {
+                        if (e.hasItem('pizza')) e.say("I already have the remaining slice. It's cold anyway.");
+                        else { e.addItem('pizza', 'Cold Pizza'); e.say("Cold pizza. I'll eat it later. ...much later."); }
+                    } else e.say("A pizza box. There's one slice left, remarkably. It defies the laws of room-sharing.");
                 }
             },
             // Couch
@@ -436,7 +489,7 @@ function buildStreet(bg) {
                             e.say("The poutine stand owner gives me a sympathetic look. 'No more rapée, friend. You finish it?'");
                         } else {
                             s.poutineGiven = true;
-                            e.addItem('poutine_rapee', 'Poutine Rapée');
+                            e.addItem('poutine', 'Poutine Rapée');
                             e.say("Owner: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway.");
                         }
                     } else e.say("A poutine stand. The sign says 'BEST POUTINE'. It is specifically poutine rapée. The distinction matters.");
@@ -570,20 +623,20 @@ function buildSecretRoom(bg) {
             },
             // Red herrings — left shelves
             {
-                id: 'herring_L1', name: 'Red Herring', x: 15, y: 195, w: 155, h: 70, walkToX: 120, walkToY: 460,
+                id: 'herring_L1', name: 'Red Herring', x: 65, y: 210, w: 60, h: 40, walkToX: 120, walkToY: 460,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_L1'); }
             },
             {
-                id: 'herring_L2', name: 'Red Herring', x: 15, y: 320, w: 155, h: 70, walkToX: 120, walkToY: 460,
+                id: 'herring_L2', name: 'Red Herring', x: 65, y: 335, w: 60, h: 40, walkToX: 120, walkToY: 460,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_L2'); }
             },
             // Red herrings — right shelves
             {
-                id: 'herring_R1', name: 'Red Herring', x: 790, y: 195, w: 155, h: 70, walkToX: 840, walkToY: 460,
+                id: 'herring_R1', name: 'Red Herring', x: 835, y: 210, w: 60, h: 40, walkToX: 840, walkToY: 460,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_R1'); }
             },
             {
-                id: 'herring_R2', name: 'Red Herring', x: 790, y: 320, w: 155, h: 70, walkToX: 840, walkToY: 460,
+                id: 'herring_R2', name: 'Red Herring', x: 835, y: 335, w: 60, h: 40, walkToX: 840, walkToY: 460,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_R2'); }
             },
             // The altar stone
@@ -684,8 +737,8 @@ function buildGateArea(bg) {
 const PAWN_ITEMS = [
     { id: 'spoon', name: 'Spoon', price: 5, desc: 'A regular spoon. In a display case. At a pawn shop. The price is $5. I wonder what it does. (It is a spoon.)' },
     { id: 'bent_knife', name: 'Bent Butter Knife', price: 15, desc: "A butter knife bent at a dramatic angle, mounted on a velvet plaque labelled 'NOT A SPOON'. I need this." },
-    { id: 'camera_pawn', name: 'Camera', price: 50, desc: 'A 35mm film camera. The film inside is from 1991. It has been... waiting.' },
-    { id: 'radio_pawn', name: 'Vintage Radio', price: 25, desc: 'A vintage tube radio. It picks up stations from 1987. Specifically one station. Always the same station.' },
+    { id: 'camera', name: 'Camera', price: 50, desc: 'A 35mm film camera. The film inside is from 1991. It has been... waiting.' },
+    { id: 'radio', name: 'Vintage Radio', price: 25, desc: 'A vintage tube radio. It picks up stations from 1987. Specifically one station. Always the same station.' },
     { id: 'binoculars', name: 'Binoculars', price: 30, desc: 'Binoculars. For seeing things far away. Useful if you believe someone watched this mansion from a distance. Which you now do.' },
     { id: 'battle_bread', name: 'Baguette Fragment', price: 8, desc: "A chunk of yesterday's Moncton bakery baguette. Dense enough to drive nails. Still warm, somehow." },
     { id: 'remote_control', name: 'Remote Control', price: 12, desc: 'A remote control. TV? Stereo? It has one extra button labelled MAGNET in red electrical tape. Weird.' },
@@ -758,32 +811,32 @@ function buildPawnShop(bg) {
             },
             // Van Horne Mansion Key — in the display case
             {
-                id: 'mansion_key', name: 'Van Horne Mansion Key', x: 695, y: 355, w: 100, h: 70, walkToX: 720, walkToY: 470,
+                id: 'mansion_key', name: 'Van Horne Mansion Key', x: 705, y: 360, w: 50, h: 50, walkToX: 720, walkToY: 470,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[7], e); }
             },
             // Spoon (in display case — ask shopkeeper)
             {
-                id: 'spoon', name: 'Spoon', x: 640, y: 375, w: 80, h: 60, walkToX: 660, walkToY: 470,
+                id: 'spoon', name: 'Spoon', x: 645, y: 375, w: 50, h: 50, walkToX: 660, walkToY: 470,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[0], e); }
             },
             // Bent butter knife — on plaque, prominent on the wall or shelf
             {
-                id: 'bent_knife', name: 'Bent Butter Knife ♦', x: 430, y: 180, w: 90, h: 80, walkToX: 480, walkToY: 450,
+                id: 'bent_knife', name: 'Bent Butter Knife ♦', x: 435, y: 185, w: 60, h: 50, walkToX: 480, walkToY: 450,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[1], e); }
             },
             // Shelves — cameras
             {
-                id: 'camera_pawn', name: 'Camera', x: 220, y: 195, w: 90, h: 70, walkToX: 310, walkToY: 440,
+                id: 'camera', name: 'Camera', x: 230, y: 200, w: 50, h: 50, walkToX: 310, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[2], e); }
             },
             // Shelves — radios
             {
-                id: 'radio_pawn', name: 'Vintage Radio', x: 325, y: 195, w: 115, h: 75, walkToX: 390, walkToY: 440,
+                id: 'radio', name: 'Vintage Radio', x: 340, y: 200, w: 60, h: 50, walkToX: 390, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[3], e); }
             },
             // Shelves — binoculars
             {
-                id: 'binoculars', name: 'Binoculars', x: 455, y: 195, w: 100, h: 65, walkToX: 510, walkToY: 440,
+                id: 'binoculars', name: 'Binoculars', x: 465, y: 195, w: 60, h: 50, walkToX: 510, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[4], e); }
             },
             // Battle bread fragment
@@ -793,7 +846,7 @@ function buildPawnShop(bg) {
             },
             // Remote control ← the game-changing item
             {
-                id: 'remote_control', name: 'Remote Control', x: 380, y: 235, w: 65, h: 50, walkToX: 415, walkToY: 440,
+                id: 'remote_control', name: 'Remote Control', x: 385, y: 235, w: 50, h: 40, walkToX: 415, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(PAWN_ITEMS[6], e); }
             },
             // Mannequin head
@@ -1708,8 +1761,10 @@ function buildGeoStrata(bg) {
             {
                 id: 'hammer_geo', name: 'Geological Hammer', x: 780, y: 410, w: 130, h: 100, walkToX: 840, walkToY: 455,
                 onInteract(v, e) {
-                    if (v === 'Pick up') { e.addItem('geo_hammer', 'Geological Hammer'); e.say('I pick up the geological hammer. For science. And also self-defense if the candle-lighter meets me down here.'); }
-                    else e.say('A geological hammer, for breaking rock samples. Standard field equipment. In a strange underground room under a haunted attraction. Sure.');
+                    if (v === 'Pick up') { 
+                        if (e.hasItem('geo_hammer')) e.say("I already have the geo hammer.");
+                        else { e.addItem('geo_hammer', 'Geological Hammer'); e.say('I pick up the geological hammer. For science. And also self-defense if the candle-lighter meets me down here.'); }
+                    } else e.say('A geological hammer, for breaking rock samples. Standard field equipment. In a strange underground room under a haunted attraction. Sure.');
                 }
             },
             // Eyes in corners
@@ -1767,11 +1822,11 @@ function buildMagneticHill(bg) {
                 id: 'magnet_receiver', name: 'Remote Receiver', x: 290, y: 310, w: 90, h: 60, walkToX: 400, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Use') {
-                        if (!e.hasItem('remote_control') && !e.hasItem('big_battery')) {
+                        if (!e.hasItem('remote_control') && !e.hasItem('battery')) {
                             e.say('A small IR receiver on the side of the magnet housing. It wants a remote signal. I have neither a remote nor any idea what powers it.');
                         } else if (!e.hasItem('remote_control')) {
                             e.say('I can sense this receiver wants a remote signal. I do not have the remote. I have the enormous battery though, which was extremely heavy to carry all the way here.');
-                        } else if (!e.hasItem('big_battery')) {
+                        } else if (!e.hasItem('battery')) {
                             e.say('I point the remote at the receiver. Nothing. I shake it. The battery compartment rattles. It is empty. This remote needs a battery. A very specific battery. An enormous one.');
 
                         } else {
@@ -1854,11 +1909,7 @@ async function main() {
     engine.debug = false; // set true to see walkboxes
 
     // Load all backgrounds (null-safe — gradient fallback used if file missing)
-    const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
-        courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, daveSheet,
-        npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
-        npcCat, npcPellerin, npcRaccoon] = await Promise.all([
+    const assets = await Promise.all([
             loadImage('assets/bedroom_bg.png'),
             loadImage('assets/kitchen_bg.jpg'),
             loadImage('assets/street_bg.jpg'),
@@ -1876,7 +1927,7 @@ async function main() {
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('Dave3.png'),
-            // NPC sprite sheets — null-safe, dialogue hotspots still work without them
+            // NPC sprite sheets
             loadImage('npc_baker_.png'),
             loadImage('npc_poutine_guy.png'),
             loadImage('npc_bouncer.png'),
@@ -1885,11 +1936,75 @@ async function main() {
             loadImage('assets/cat.png'),
             loadImage('npc_woman_scientist .png'),
             loadImage('npc_raccoon.png'),
+            loadImage('trapdoor_patch_bedroom_1773407490032.png'),
+            loadImage('rug_rolled_up_pixel_art_1773411308683.png'),
+            loadImage('cold_pizza_slice_pixel_art_icon_1773411325046.png')
         ]);
 
+    const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
+        courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
+        magEntranceBg, geoStrataBg, magHillBg, daveSheet,
+        npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
+        npcCat, npcPellerin, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
+
+    // Preload item images for props and inventory
+    const itemIcons = {};
+    const itemsToLoad = [
+        'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone', 
+        'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine', 
+        'battle_bread', 'mansion_key', 'remote_control', 'red_herring', 
+        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza'
+    ];
+    await Promise.all(itemsToLoad.map(async id => {
+        itemIcons[id] = await loadImage(`assets/item_${id}.png`);
+    }));
+
+    // Herrings all use the same icon
+    ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
+        itemIcons[id] = itemIcons['red_herring'];
+    });
+
+    // Map pizza specifically
+    itemIcons['pizza'] = pizzaImg;
+
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
-    engine.registerRoom(buildBedroom(bedroomBg));
-    engine.registerRoom(buildKitchen(kitchenBg));
+    const bedroom = buildBedroom(bedroomBg);
+    bedroom.props.push({
+        id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100,
+        isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; }
+    });
+    bedroom.props.push({
+        id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120,
+        isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; }
+    });
+    bedroom.props.push({
+        id: 'phone_prop', image: itemIcons['cell_phone'], x: 620, y: 310, w: 40, h: 40,
+        isVisible(e) { return !e.hasItem('cell_phone'); }
+    });
+    engine.registerRoom(bedroom);
+
+    const kitchen = buildKitchen(kitchenBg);
+    kitchen.props.push({
+        id: 'battery_prop', image: itemIcons['battery'], x: 595, y: 150, w: 40, h: 60,
+        isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('battery'); }
+    });
+    kitchen.props.push({
+        id: 'cheese_prop', image: itemIcons['cheese'], x: 640, y: 200, w: 40, h: 40,
+        isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('cheese'); }
+    });
+    kitchen.props.push({
+        id: 'egg_prop', image: itemIcons['rotten_egg'], x: 600, y: 270, w: 40, h: 30,
+        isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('rotten_egg'); }
+    });
+    kitchen.props.push({
+        id: 'key_prop', image: itemIcons['house_key'], x: 640, y: 330, w: 30, h: 30,
+        isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('house_key'); }
+    });
+     kitchen.props.push({
+        id: 'pizza_prop', image: itemIcons['pizza'], x: 380, y: 340, w: 40, h: 30,
+        isVisible(e) { return !e.hasItem('pizza'); }
+    });
+    engine.registerRoom(kitchen);
 
     { // Street — baker + poutine guy
         const r = buildStreet(streetBg);
@@ -1902,12 +2017,28 @@ async function main() {
         buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
         engine.registerRoom(r);
     }
-    engine.registerRoom(buildSecretRoom(secretBg));
+    const secret = buildSecretRoom(secretBg);
+    secret.props.push({ id: 'p_herring_L1', image: itemIcons['red_herring'], x: 70, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L1'); } });
+    secret.props.push({ id: 'p_herring_L2', image: itemIcons['red_herring'], x: 70, y: 340, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L2'); } });
+    secret.props.push({ id: 'p_herring_R1', image: itemIcons['red_herring'], x: 840, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_R1'); } });
+    secret.props.push({ id: 'p_herring_R2', image: itemIcons['red_herring'], x: 840, y: 340, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_R2'); } });
+    engine.registerRoom(secret);
+    
     engine.registerRoom(buildGateArea(gateBg));
 
     { // Pawn shop — pawnbroker
         const r = buildPawnShop(pawnBg);
         buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff' });
+        
+        // Add item props to shelves
+        r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 235, y: 205, w: 40, h: 40, isVisible(e) { return !e.hasItem('camera'); } });
+        r.props.push({ id: 'p_radio', image: itemIcons['radio'], x: 345, y: 205, w: 50, h: 40, isVisible(e) { return !e.hasItem('radio'); } });
+        r.props.push({ id: 'p_binoculars', image: itemIcons['binoculars'], x: 470, y: 200, w: 50, h: 40, isVisible(e) { return !e.hasItem('binoculars'); } });
+        r.props.push({ id: 'p_knife', image: itemIcons['bent_knife'], x: 440, y: 190, w: 50, h: 40, isVisible(e) { return !e.hasItem('bent_knife'); } });
+        r.props.push({ id: 'p_spoon', image: itemIcons['spoon'], x: 650, y: 380, w: 40, h: 40, isVisible(e) { return !e.hasItem('spoon'); } });
+        r.props.push({ id: 'p_mansion_key', image: itemIcons['mansion_key'], x: 710, y: 365, w: 40, h: 40, isVisible(e) { return !e.hasItem('mansion_key'); } });
+        r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 390, y: 240, w: 40, h: 30, isVisible(e) { return !e.hasItem('remote_control'); } });
+        
         engine.registerRoom(r);
     }
     { // Mansion courtyard — raccoon family in garden
@@ -1933,11 +2064,21 @@ async function main() {
         buildNPCActor({ room: r, id: 'savoie_npc', name: 'Officer Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff' });
         engine.registerRoom(r);
     }
-    engine.registerRoom(buildMagEntrance(magEntranceBg));
+    { // Mag entrance — signage props
+        const r = buildMagEntrance(magEntranceBg);
+        r.props.push({ id: 'p_oos_sign', image: itemIcons['oos_sign'], x: 200, y: 220, w: 60, h: 40, isVisible(e) { return !e.hasItem('oos_sign'); } });
+        r.props.push({ id: 'p_closed_sign', image: itemIcons['main_route_closed'], x: 500, y: 400, w: 80, h: 60, isVisible(e) { return !e.hasItem('main_route_closed'); } });
+        engine.registerRoom(r);
+    }
 
     { // Geo strata — Dr. Pellerin (been here since 1987)
         const r = buildGeoStrata(geoStrataBg);
         buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin, color: '#ffcc00' });
+        
+        // Add geological items
+        r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 500, y: 420, w: 60, h: 60, isVisible(e) { return !e.hasItem('canadian_shield'); } });
+        r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 350, y: 450, w: 40, h: 40, isVisible(e) { return !e.hasItem('geo_hammer'); } });
+        
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMagneticHill(magHillBg));
