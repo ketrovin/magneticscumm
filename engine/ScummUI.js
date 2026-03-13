@@ -16,8 +16,9 @@ class ScummUI {
         this.panelY = canvasHeight - this.panelH;
 
         this.verbs = [
-            'Walk to', 'Look at', 'Use', 'Pick up', 'Open',
-            'Push', 'Pull', 'Give', 'Talk to', 'Close',
+            'Walk to', 'Pick up', 'Look at', 'Talk to',
+            'Use', 'Open', 'Close', 'Buy',
+            'Give', 'Read', 'Push', 'Pull'
         ];
         this.selectedVerb = 'Walk to';
         this.hoveredVerb = null;
@@ -26,14 +27,14 @@ class ScummUI {
         this.hoveredInventoryItem = null;
         this.selectedInventoryItem = null;
 
-        // Zak EGA Style: 5 columns, 2 rows for 10 verbs
+        // EGA Style: 4 columns, 3 rows for 12 verbs
         this.verbAreaW = Math.floor(canvasWidth * 0.70);
-        this.cellW = Math.floor(this.verbAreaW / 5);
-        this.cellH = Math.floor((this.panelH - 30) / 2); // Leave space for status line
+        this.cellW = Math.floor(this.verbAreaW / 4);
+        this.cellH = Math.floor((this.panelH - 30) / 3); 
 
         this._verbRects = this.verbs.map((_, i) => ({
-            x: (i % 5) * this.cellW,
-            y: (this.panelY + 30) + Math.floor(i / 5) * this.cellH,
+            x: (i % 4) * this.cellW,
+            y: (this.panelY + 30) + Math.floor(i / 4) * this.cellH,
             w: this.cellW,
             h: this.cellH,
         }));

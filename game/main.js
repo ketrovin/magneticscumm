@@ -760,14 +760,24 @@ const PAWNBROKER_LINES = [
     '"You\'re investigating something, aren\'t you. I can tell. You have the look." He says nothing more.'
 ];
 
-function tryBuyItem(item, e) {
-    if (e.hasItem(item.id)) { e.say(`I already have the ${item.name}. One is sufficient.`); return; }
-    if (!e.hasItem('cash_card')) {
-        e.say(`That's $${item.price}. I don't have my cash card on me. I should find it first.`);
+function tryBuyItem(v, item, e) {
+    if (v === 'Look at' || v === 'Read') {
+        const priceSuffix = v === 'Read' ? ` The price tag says $${item.price}.` : "";
+        e.say((item.desc || `It's a ${item.name}. Priced at $${item.price}.`) + priceSuffix);
         return;
     }
-    e.addItem(item.id, item.name);
-    e.say(`I slide my cash card across the counter. The pawnbroker swipes it without looking up. I now own a ${item.name}. $${item.price}. This is a legitimate transaction.`);
+    
+    if (v === 'Buy' || v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Give') {
+        if (e.hasItem(item.id)) { e.say(`I already have the ${item.name}. One is sufficient.`); return; }
+        if (!e.hasItem('cash_card')) {
+            e.say(`That's $${item.price}. I don't have my cash card on me. I should find it first.`);
+            return;
+        }
+        e.addItem(item.id, item.name);
+        e.say(`I slide my cash card across the counter. The pawnbroker swipes it without looking up. I now own a ${item.name}. $${item.price}. This is a legitimate transaction.`);
+    } else {
+        e.say(`I'm not sure what to do with the ${item.name} right now. Buying it seems like the best option.`);
+    }
 }
 
 function buildPawnShop(bg) {
@@ -814,42 +824,42 @@ function buildPawnShop(bg) {
             // Van Horne Mansion Key — in the display case
             {
                 id: 'mansion_key', name: 'Van Horne Mansion Key', x: 705, y: 360, w: 50, h: 50, walkToX: 720, walkToY: 470,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[7], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[7], e); }
             },
             // Spoon (in display case — ask shopkeeper)
             {
                 id: 'spoon', name: 'Spoon', x: 645, y: 375, w: 50, h: 50, walkToX: 660, walkToY: 470,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[0], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[0], e); }
             },
             // Bent butter knife — on plaque, prominent on the wall or shelf
             {
                 id: 'bent_knife', name: 'Bent Butter Knife ♦', x: 435, y: 185, w: 60, h: 50, walkToX: 480, walkToY: 450,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[1], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[1], e); }
             },
             // Shelves — cameras
             {
                 id: 'camera', name: 'Camera', x: 230, y: 200, w: 50, h: 50, walkToX: 310, walkToY: 440,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[2], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[2], e); }
             },
             // Shelves — radios
             {
                 id: 'radio', name: 'Vintage Radio', x: 340, y: 200, w: 60, h: 50, walkToX: 390, walkToY: 440,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[3], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[3], e); }
             },
             // Shelves — binoculars
             {
                 id: 'binoculars', name: 'Binoculars', x: 465, y: 195, w: 60, h: 50, walkToX: 510, walkToY: 440,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[4], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[4], e); }
             },
             // Battle bread fragment
             {
                 id: 'battle_bread', name: 'Baguette Fragment', x: 185, y: 230, w: 70, h: 50, walkToX: 230, walkToY: 440,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[5], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[5], e); }
             },
             // Remote control ← the game-changing item
             {
                 id: 'remote_control', name: 'Remote Control', x: 385, y: 235, w: 50, h: 40, walkToX: 415, walkToY: 440,
-                onInteract(v, e) { tryBuyItem(PAWN_ITEMS[6], e); }
+                onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[6], e); }
             },
             // Mannequin head
             {
@@ -2012,6 +2022,7 @@ async function main() {
         const r = buildStreet(streetBg);
         buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555' });
         buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55' });
+        r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
         engine.registerRoom(r);
     }
     { // Alley — club doorman
@@ -2033,13 +2044,14 @@ async function main() {
         buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff' });
         
         // Add item props to shelves
-        r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 235, y: 205, w: 40, h: 40, isVisible(e) { return !e.hasItem('camera'); } });
-        r.props.push({ id: 'p_radio', image: itemIcons['radio'], x: 345, y: 205, w: 50, h: 40, isVisible(e) { return !e.hasItem('radio'); } });
-        r.props.push({ id: 'p_binoculars', image: itemIcons['binoculars'], x: 470, y: 200, w: 50, h: 40, isVisible(e) { return !e.hasItem('binoculars'); } });
-        r.props.push({ id: 'p_knife', image: itemIcons['bent_knife'], x: 440, y: 190, w: 50, h: 40, isVisible(e) { return !e.hasItem('bent_knife'); } });
-        r.props.push({ id: 'p_spoon', image: itemIcons['spoon'], x: 650, y: 380, w: 40, h: 40, isVisible(e) { return !e.hasItem('spoon'); } });
-        r.props.push({ id: 'p_mansion_key', image: itemIcons['mansion_key'], x: 710, y: 365, w: 40, h: 40, isVisible(e) { return !e.hasItem('mansion_key'); } });
-        r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 390, y: 240, w: 40, h: 30, isVisible(e) { return !e.hasItem('remote_control'); } });
+        r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 230, y: 200, w: 50, h: 50, isVisible(e) { return !e.hasItem('camera'); } });
+        r.props.push({ id: 'p_radio', image: itemIcons['radio'], x: 340, y: 200, w: 60, h: 50, isVisible(e) { return !e.hasItem('radio'); } });
+        r.props.push({ id: 'p_binoculars', image: itemIcons['binoculars'], x: 465, y: 195, w: 60, h: 50, isVisible(e) { return !e.hasItem('binoculars'); } });
+        r.props.push({ id: 'p_knife', image: itemIcons['bent_knife'], x: 435, y: 185, w: 60, h: 50, isVisible(e) { return !e.hasItem('bent_knife'); } });
+        r.props.push({ id: 'p_spoon', image: itemIcons['spoon'], x: 645, y: 375, w: 50, h: 50, isVisible(e) { return !e.hasItem('spoon'); } });
+        r.props.push({ id: 'p_mansion_key', image: itemIcons['mansion_key'], x: 705, y: 360, w: 50, h: 50, isVisible(e) { return !e.hasItem('mansion_key'); } });
+        r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 385, y: 235, w: 50, h: 40, isVisible(e) { return !e.hasItem('remote_control'); } });
+        r.props.push({ id: 'p_bread', image: itemIcons['battle_bread'], x: 185, y: 230, w: 70, h: 50, isVisible(e) { return !e.hasItem('battle_bread'); } });
         
         engine.registerRoom(r);
     }
@@ -2078,8 +2090,8 @@ async function main() {
         buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin, color: '#ffcc00' });
         
         // Add geological items
-        r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 500, y: 420, w: 60, h: 60, isVisible(e) { return !e.hasItem('canadian_shield'); } });
-        r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 350, y: 450, w: 40, h: 40, isVisible(e) { return !e.hasItem('geo_hammer'); } });
+        r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 540, y: 290, w: 120, h: 120, isVisible(e) { return !e.hasItem('canadian_shield'); } });
+        r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 780, y: 410, w: 130, h: 100, isVisible(e) { return !e.hasItem('geo_hammer'); } });
         
         engine.registerRoom(r);
     }
