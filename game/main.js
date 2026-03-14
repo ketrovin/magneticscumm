@@ -125,7 +125,7 @@ const CHARGEN_ANIMS = {
  * Engine.changeRoom re-adds room.npcs on every room entry automatically.
  * If sheet is null the NPC remains dialogue-only (hotspot still works).
  */
-function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 0.55 }) {
+function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 1.0 }) {
     if (!sheet) return;
 
     // AI generated NPC sheets are 9 columns x 4 rows
@@ -2424,7 +2424,6 @@ async function main() {
         },
         'auto' // Enable auto-transparency for Dave3.png
     );
-    animator.scale = 0.55; // Scale Dave down to fit room
     animator.play('idle');
 
     const dave = new Actor({ id: 'dave', name: 'Dave', x: 480, y: 450, animator });
