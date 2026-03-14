@@ -105,7 +105,7 @@ class SpriteAnimator {
  * transparent. Samples the top-left corner if bgColor is 'auto'.
  * Returns an HTMLCanvasElement usable as an image source.
  */
-function removeBackground(img, bgColor = 'auto', tolerance = 60) {
+function removeBackground(img, bgColor = 'auto', tolerance = 80) {
   const oc = document.createElement('canvas');
   oc.width = img.width || img.naturalWidth || 512;
   oc.height = img.height || img.naturalHeight || 512;

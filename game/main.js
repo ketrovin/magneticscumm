@@ -128,19 +128,22 @@ const CHARGEN_ANIMS = {
 function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 1.0 }) {
     if (!sheet) return;
 
-    // AI generated NPC sheets are 9 columns x 4 rows
-    // User provided sheets (like bouncer) might be 4x4 or 12x3
+    // AI generated NPC sheets are usually 9x4 (standard) or 4x4 (square/compact)
     let cols = 9;
     let rows = 4;
     
-    if (sheet.width === 640 && sheet.height === 640) {
+    // Check for square sheets (typical for 4x4 compact generator output)
+    const w = sheet.naturalWidth || sheet.width;
+    const h = sheet.naturalHeight || sheet.height;
+    
+    if (Math.abs(w - h) < 5) { // Square or near-square
         cols = 4; rows = 4;
-    } else if (sheet.width === 1024 && sheet.height === 559) {
+    } else if (w === 1024 && h === 559) {
         cols = 12; rows = 3; // Dave style
     }
 
-    const frameW = sheet.width / cols;
-    const frameH = sheet.height / rows;
+    const frameW = w / cols;
+    const frameH = h / rows;
 
     const customAnims = {
         idle: { row: 0, count: 2, fps: 1.5 }, // Subtle breathing effect
@@ -607,10 +610,22 @@ function buildAlley(bg) {
                 onInteract(v, e, item) {
                     const s = e.getRoomState('alley');
                     if (s.bouncerKnockedOut) {
-                        if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                            e.say("The doorman is snoring. I step over him and enter the Herring Club. It smells like exclusivity and tartar sauce.");
-                            setTimeout(() => e.changeRoom('herring_club', 100, 450), 1600);
-                        } else e.say("The Herring Club door. Now unattended. The snoring doorman provides a rhythmic welcome.");
+                        if (v === 'Open' || (v === 'Use' && item && (item === 'club_key' || (item.id && item.id === 'club_key')))) {
+                            if (e.hasItem('club_key')) {
+                                e.say("The door is locked, but the club key fits perfectly. I step over the snoring doorman and enter the Herring Club. It smells like exclusivity and tartar sauce.");
+                                setTimeout(() => e.changeRoom('herring_club', 100, 450), 2000);
+                            } else {
+                                e.say("The doorman is out cold, but he must have locked the door behind him. It's solid. I need a key.");
+                            }
+                        } else if (v === 'Walk to') {
+                            if (e.hasItem('club_key')) {
+                                e.changeRoom('herring_club', 100, 450);
+                            } else {
+                                e.say("I can't just walk in. The door is locked tight.");
+                            }
+                        } else {
+                            e.say("The Herring Club door. Now unattended. The snoring doorman provides a rhythmic welcome.");
+                        }
                         return;
                     }
 
@@ -2251,8 +2266,8 @@ async function main() {
             loadImage('assets/herring_club_bg.png'),
             loadImage('assets/Dave3.png'),
             // NPC sprite sheets
-            loadImage('assets/npc_baker_.png'),
-            loadImage('assets/npc_poutine_guy.png'),
+            loadImage('assets/npc_baker.png'),
+            loadImage('assets/poutine_guy.png'),
             loadImage('assets/npc_bouncer.png'),
             loadImage('assets/npc_pawnbroker.png'),
             loadImage('assets/npc_officer.png'),
