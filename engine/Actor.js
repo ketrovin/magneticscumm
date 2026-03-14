@@ -64,7 +64,7 @@ class Actor {
         // Canvas height is 600, UI panel is 80px, so scene height = 520
         const minY = 200, maxY = 480;
         const t = Math.max(0, Math.min(1, (this.y - minY) / (maxY - minY)));
-        this.animator.scale = 0.55 + t * 0.55;
+        this.animator.scale = (0.55 + t * 0.55) * this.baseScale;
 
         this.animator.update(dt);
     }

@@ -143,10 +143,10 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     };
 
     const anim = new SpriteAnimator(sheet, frameW, frameH, customAnims, 'auto');
-    anim.scale = scale; // Use the provided scale
 
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
+    actor.baseScale = scale; // Set base scale on actor
     actor.speed = 0; 
     actor.color = color;
 
@@ -2099,12 +2099,12 @@ async function main() {
     }
     { // Mansion foyer — cat on a pedestal
         const r = buildMansionFoyer(foyerBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.35 });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15 });
         engine.registerRoom(r);
     }
     { // Mansion library — cat reappears upstairs (same sheet)
         const r = buildMansionLibrary(libraryBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.35 });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15 });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMansionBackyard(backyardBg));
