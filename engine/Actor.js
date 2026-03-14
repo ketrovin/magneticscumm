@@ -16,6 +16,7 @@ class Actor {
 
         // Depth scaling: characters appear smaller near the top of the screen
         this.baseScale = 1.0;
+        this.isVisible = true; // Added for visibility control
     }
 
     /** Order the actor to walk to (tx, ty). Room clamping done by Engine. */

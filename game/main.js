@@ -129,8 +129,16 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     if (!sheet) return;
 
     // AI generated NPC sheets are 9 columns x 4 rows
-    const cols = 9;
-    const rows = 4;
+    // User provided sheets (like bouncer) might be 4x4 or 12x3
+    let cols = 9;
+    let rows = 4;
+    
+    if (sheet.width === 640 && sheet.height === 640) {
+        cols = 4; rows = 4;
+    } else if (sheet.width === 1024 && sheet.height === 559) {
+        cols = 12; rows = 3; // Dave style
+    }
+
     const frameW = sheet.width / cols;
     const frameH = sheet.height / rows;
 
@@ -601,6 +609,8 @@ function buildAlley(bg) {
                     if (v === 'Use' && item && (item === 'battle_bread' || item.id === 'battle_bread')) {
                         e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
                         s.bouncerKnockedOut = true;
+                        const bouncer = e.actors.find(a => a.id === 'doorman_npc');
+                        if (bouncer) bouncer.isVisible = false;
                         e.addItem('club_key', 'Herring Club Key');
                         e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
                         return;
@@ -2333,7 +2343,15 @@ async function main() {
     }
     { // Alley — club doorman
         const r = buildAlley(alleyBg);
-        buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
+        const bouncer = buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
+        
+        // Ensure bouncer hides if already knocked out on room entry
+        r.onEnter = (e) => {
+            if (e.getRoomState('alley').bouncerKnockedOut) {
+                bouncer.isVisible = false;
+            }
+        };
+
         engine.registerRoom(r);
     }
     { // Herring Club — weather scientist

@@ -284,8 +284,11 @@ class Engine {
             if (this.debug) this.room.drawDebugWalkbox(ctx);
         }
 
-        // 2. Actors sorted by Y (depth)
-        [...this.actors].sort((a, b) => a.y - b.y).forEach(a => a.draw(ctx));
+        // 2. Actors sorted        // Draw actors
+        [...this.actors]
+          .filter(a => a.isVisible !== false) // Only draw visible actors
+          .sort((a, b) => a.y - b.y)
+          .forEach(a => a.draw(ctx));
 
         // 3. Dialogue speech (above speaker's head)
         if (this.gameState.dialogLine) {
