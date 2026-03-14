@@ -22,6 +22,12 @@ class Engine {
             dialogTimer: 0,
             activeDialogChoices: null, // [string] or null
             onChoiceCallback: null,
+            music: {
+                currentTrack: null,
+                volume: 0.5,
+                isLooping: true,
+                tracks: [] // { id, name, url }
+            }
         };
 
         this.quips = {
@@ -154,6 +160,33 @@ class Engine {
         this.gameState.onChoiceCallback = null;
         this.ui.selectedVerb = 'Walk to'; // Reset verb
         if (callback) callback(index, choice);
+    }
+
+    // ── Music ──────────────────────────────────────────────────────────────
+    playMusic(trackId) {
+        const track = this.gameState.music.tracks.find(t => t.id === trackId);
+        if (!track) return;
+
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+
+        const audio = new Audio(track.url);
+        audio.loop = this.gameState.music.isLooping;
+        audio.volume = this.gameState.music.volume;
+        audio.play().catch(e => console.warn("Music auto-play blocked by browser. Click to start."));
+        
+        this.currentAudio = audio;
+        this.gameState.music.currentTrack = trackId;
+    }
+
+    stopMusic() {
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+            this.gameState.music.currentTrack = null;
+        }
     }
 
     // ── Interactable helpers ───────────────────────────────────────────────

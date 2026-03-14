@@ -14,6 +14,43 @@
 // ── Canvas / scene dims ────────────────────────────────────────────────────────
 const CW = 960, CH = 600, PANEL_H = 80, SCENE_H = CH - PANEL_H; // 520
 
+// ── Music Tracks ───────────────────────────────────────────────────────────────
+const MUSIC_TRACKS = [
+    { id: 'track1', name: "Neon Grit", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+    { id: 'track2', name: "Magnetic Pulse", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+    { id: 'track3', name: "Dave's Theme", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" },
+    { id: 'track4', name: "Radio Active", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3" },
+    { id: 'track5', name: "Cloud Drifting", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3" },
+    { id: 'track6', name: "Poutine Jive", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" },
+    { id: 'track7', name: "Synoptic Beat", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3" },
+    { id: 'track8', name: "Metamorphic Rock", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" },
+    { id: 'track9', name: "Static Dream", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3" },
+    { id: 'track10', name: "The Last Barometer", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3" }
+];
+
+window._openPhoneMenu = (e) => {
+    const showMusicMenu = () => {
+        const choices = MUSIC_TRACKS.map(t => t.name);
+        choices.push("Stop Music", "Close Phone");
+        
+        e.enterDialog(choices, (idx) => {
+            if (idx < MUSIC_TRACKS.length) {
+                const track = MUSIC_TRACKS[idx];
+                e.say(`Dave: 'Playing ${track.name} on a loop. It really sets the mood for... whatever this is.'`);
+                e.playMusic(track.id);
+            } else if (idx === MUSIC_TRACKS.length) {
+                e.stopMusic();
+                e.say("Dave: 'Silence. Finally. I can hear myself think about how much I hate these puzzles.'");
+            } else {
+                e.say("Dave: 'Back to the real world.'");
+            }
+        });
+    };
+    
+    e.say("I open my phone. The screen is cracked, but the music player still works. Miraculously.");
+    setTimeout(showMusicMenu, 2500);
+};
+
 // ── Asset loading ──────────────────────────────────────────────────────────────
 function loadImage(src) {
     return new Promise(resolve => {
@@ -238,10 +275,12 @@ function buildBedroom(bg) {
             // Cell phone — sitting on desk next to computer
             {
                 id: 'phone', name: 'Cell Phone', x: 615, y: 305, w: 50, h: 50, walkToX: 620, walkToY: 450,
-                onInteract(v, e) {
-                    if (v === 'Pick up' || v === 'Use') {
+                onInteract(v, e, item) {
+                    if (v === 'Pick up') {
                         if (e.hasItem('cell_phone')) { e.say("I already have my phone. Zero bars, zero friends, 100% fish screensaver."); }
                         else { e.addItem('cell_phone', 'Cell Phone'); e.say("My cell phone! It's low on battery and even lower on purpose, but at least I can look busy while I'm being ignored."); }
+                    } else if (v === 'Use' || (item && (item.id === 'cell_phone' || item === 'cell_phone'))) {
+                        window._openPhoneMenu(e);
                     } else { e.say("My phone is sitting next to the computer. It hasn't buzzed since 2004. I'm sure it's just a network issue."); }
                 }
             },
@@ -2610,7 +2649,25 @@ async function main() {
     animator.play('idle');
 
     const dave = new Actor({ id: 'dave', name: 'Dave', x: 480, y: 450, animator });
+    dave.onInteract = (v, e, item) => {
+        const itemId = (item && (typeof item === 'string' ? item : item.id));
+        if (v === 'Use' && itemId === 'cell_phone') {
+            const phoneHotspot = e.room.hotspots.find(h => h.id === 'phone');
+            if (phoneHotspot) {
+                phoneHotspot.onInteract('Use', e, item);
+            } else {
+                // If phone hotspot isn't in this room, we need to manually trigger the menu logic
+                // or we can just define a helper in main.js
+                window._openPhoneMenu(e);
+            }
+        } else if (v === 'Look at') {
+            e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
+        }
+    };
     engine.setPlayer(dave);
+
+    // Initialize music tracks in engine
+    engine.gameState.music.tracks = MUSIC_TRACKS;
 
     // Start in bedroom
     engine.changeRoom('bedroom', 480, 450);
