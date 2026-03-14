@@ -598,6 +598,22 @@ function buildAlley(bg) {
                 id: 'club_door', name: 'Herring Club Door', x: 590, y: 220, w: 200, h: 310, walkToX: 660, walkToY: 470,
                 onInteract(v, e) {
                     const s = e.getRoomState('alley');
+                    if (v === 'Use' && item && (item === 'battle_bread' || item.id === 'battle_bread')) {
+                        e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
+                        s.bouncerKnockedOut = true;
+                        e.addItem('club_key', 'Herring Club Key');
+                        e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
+                        return;
+                    }
+
+                    if (s.bouncerKnockedOut) {
+                        if (v === 'Open' || v === 'Walk to' || v === 'Use') {
+                            e.say("The doorman is snoring. I step over him and enter the Herring Club. It smells like exclusivity and tartar sauce.");
+                            setTimeout(() => e.changeRoom('herring_club', 100, 450), 1600);
+                        } else e.say("The Herring Club door. Now unattended. The snoring doorman provides a rhythmic welcome.");
+                        return;
+                    }
+
                     if (v === 'Talk to' || v === 'Knock' || v === 'Use' || v === 'Open') {
                         // Dave's Not Here joke — cycles through exchange
                         s.daveCount = (s.daveCount || 0) + 1;
@@ -626,6 +642,81 @@ function buildAlley(bg) {
             {
                 id: 'neon_sign', name: 'Neon Fish Sign', x: 565, y: 40, w: 375, h: 190,
                 onInteract(v, e) { e.say("A massive neon fish wearing a crown. It winks. Or maybe that's the flicker. Either way, I feel judged by a neon fish."); }
+            },
+        ]
+    });
+}
+
+// ── HERRING CLUB ──────────────────────────────────────────────────────────────
+function buildHerringClub(bg) {
+    return new Room({
+        id: 'herring_club', name: 'The Herring Club',
+        background: bg,
+        walkbox: [
+            { x: 50, y: 510 }, { x: 910, y: 510 },
+            { x: 800, y: 340 }, { x: 150, y: 340 },
+        ],
+        hotspots: [
+            // Exit back to alley
+            {
+                id: 'to_alley', name: 'Exit', x: 0, y: 350, w: 80, h: 170, walkToX: 60, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 660, 460);
+                    else e.say("Back to the reality of the alley. I'm not ready to leave the neon fish quite yet.");
+                }
+            },
+            // The Weather Scientist NPC
+            {
+                id: 'weather_scientist', name: 'Weather Scientist', x: 450, y: 320, w: 100, h: 180, walkToX: 520, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Talk to') {
+                        const startWeatherBranch = () => {
+                            e.enterDialog([
+                                "Tell me about the clouds!",
+                                "Why all the rain?",
+                                "What's with the wind?",
+                                "Bye."
+                            ], (idx) => {
+                                if (idx === 0) {
+                                    e.say("Weather Scientist: 'CLOUDS! They are the lungs of the sky! Cumulonimbus, Cirrus, Altostratus! It's a grand ballet of moisture and pressure! Did you know a single cloud can weigh a million pounds?'");
+                                    setTimeout(startWeatherBranch, 5000);
+                                } else if (idx === 1) {
+                                    e.say("Weather Scientist: 'Precipitation is the planet's way of recycling its spirit! In Moncton, it rains because the sky is just so full of potential! It's not gloom, it's GEOPHYSICAL CELEBRATION!'");
+                                    setTimeout(startWeatherBranch, 5000);
+                                } else if (idx === 2) {
+                                    e.say("Weather Scientist: 'The wind is the Earth's breath! It carries the seeds of time and the scent of distant oceans! It's invisible power! GLORIOUS!'");
+                                    setTimeout(() => {
+                                        const s = e.getRoomState('herring_club');
+                                        if (!s.gotToken) {
+                                            s.gotToken = true;
+                                            e.addItem('fishy_token', 'Fishy Token');
+                                            e.say("Weather Scientist: 'You have a good ear for the atmosphere, Dave! Take this FISHY TOKEN. It acknowledges your atmospheric excellence!'");
+                                        }
+                                        setTimeout(startWeatherBranch, 3000);
+                                    }, 5000);
+                                } else {
+                                    e.say("Weather Scientist: 'Keep your eyes on the barometer, friend!'");
+                                }
+                            });
+                        };
+                        startWeatherBranch();
+                    } else if (v === 'Look at') {
+                        e.say("A scientist in a very bright yellow raincoat. He's holding a barometer and looking at the ceiling as if he's expecting a hurricane.");
+                    } else e.say("He's busy calculating the dew point. Best not to interfere.");
+                }
+            },
+            // Red Herring Key on a pedestal
+            {
+                id: 'red_herring_key', name: 'Red Herring Key', x: 235, y: 355, w: 60, h: 60, walkToX: 265, walkToY: 430,
+                onInteract(v, e) {
+                    if (v === 'Pick up' || v === 'Use') {
+                        if (e.hasItem('red_herring_key')) e.say("I already have the Red Herring Key. It's suspiciously bright.");
+                        else {
+                            e.addItem('red_herring_key', 'Red Herring Key');
+                            e.say("I pick up the Red Herring Key. It's literally shaped like a fish and painted bright red. This is getting ridiculous.");
+                        }
+                    } else e.say("A bright red key on a velvet cushion. It looks important. Which probably means it's a distraction.");
+                }
             },
         ]
     });
@@ -2055,6 +2146,7 @@ async function main() {
             loadImage('assets/mag_entrance_bg.jpg'),
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
+            loadImage('assets/herring_club_bg.png'),
             loadImage('Dave3.png'),
             // NPC sprite sheets
             loadImage('npc_baker_.png'),
@@ -2064,6 +2156,7 @@ async function main() {
             loadImage('npc_officer.png'),
             loadImage('assets/cat.png'),
             loadImage('npc_woman_scientist .png'),
+            loadImage('npc_weather_scientist.png'),
             loadImage('npc_raccoon.png'),
             loadImage('trapdoor_patch_bedroom_1773407490032.png'),
             loadImage('rug_rolled_up_pixel_art_1773411308683.png'),
@@ -2072,9 +2165,9 @@ async function main() {
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, daveSheet,
+        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, daveSheet,
         npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
-        npcCat, npcPellerin, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
+        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
 
     // Preload item images for props and inventory
     const itemIcons = {};
@@ -2082,7 +2175,8 @@ async function main() {
         'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone', 
         'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine', 
         'battle_bread', 'mansion_key', 'remote_control', 'red_herring', 
-        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza'
+        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza',
+        'club_key', 'red_herring_key', 'fishy_token'
     ];
     await Promise.all(itemsToLoad.map(async id => {
         itemIcons[id] = await loadImage(`assets/item_${id}.png`);
@@ -2145,6 +2239,11 @@ async function main() {
     { // Alley — club doorman
         const r = buildAlley(alleyBg);
         buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
+        engine.registerRoom(r);
+    }
+    { // Herring Club — weather scientist
+        const r = buildHerringClub(herringClubBg);
+        buildNPCActor({ room: r, id: 'weather_npc', name: 'Weather Scientist', x: 480, y: 460, sheet: npcWeatherSheet, color: '#ffff55' });
         engine.registerRoom(r);
     }
     const secret = buildSecretRoom(secretBg);
