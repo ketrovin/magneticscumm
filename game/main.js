@@ -135,7 +135,7 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     const frameH = sheet.height / rows;
 
     const customAnims = {
-        idle: { row: 0, count: 1, fps: 1 },
+        idle: { row: 0, count: 2, fps: 1.5 }, // Subtle breathing effect
         walkR: { row: 1, count: 8, fps: 8 },
         walkL: { row: 2, count: 8, fps: 8 },
         walkFront: { row: 0, count: 8, fps: 8 },
@@ -2253,9 +2253,9 @@ async function main() {
             loadImage('npc_woman_scientist .png'),
             loadImage('npc_weather_scientist.png'),
             loadImage('npc_raccoon.png'),
-            loadImage('trapdoor_patch_bedroom_1773407490032.png'),
-            loadImage('rug_rolled_up_pixel_art_1773411308683.png'),
-            loadImage('cold_pizza_slice_pixel_art_icon_1773411325046.png')
+            loadImage('assets/trapdoor_patch.png'),
+            loadImage('assets/rug_rolled_up.png'),
+            loadImage('assets/item_pizza.png')
         ]);
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
