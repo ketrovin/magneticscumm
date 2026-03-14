@@ -496,9 +496,9 @@ function buildStreet(bg) {
                         } else {
                             s.poutineGiven = true;
                             e.addItem('poutine', 'Poutine Rapée');
-                            e.say("Owner: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway. And now I own it. Literally.");
+                            e.say("Poutine Guy: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway. And now I own it. Literally.");
                         }
-                    } else e.say("A poutine stand. The sign says 'BEST POUTINE'. It is specifically poutine rapée. The distinction matters.");
+                    } else e.say("A poutine stand. The sign says 'BEST POUTINE'. It is specifically poutine rapée. The poutine guy looks friendly.");
                 }
             },
             // CB Phone Co.
@@ -2082,7 +2082,7 @@ async function main() {
 
     { // Police station interior — Officer Savoie at desk
         const r = buildPoliceInt(policeIntBg);
-        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Officer Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff' });
+        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff' });
         engine.registerRoom(r);
     }
     { // Mag entrance — signage props

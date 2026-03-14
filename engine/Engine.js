@@ -17,7 +17,8 @@ class Engine {
         this.gameState = {
             inventory: [],          // item ids collected
             roomStates: {},         // per-room state: { roomId: { key: value } }
-            dialogLine: null,       // current one-liner text for Dave
+            dialogLine: null,       // current one-liner text
+            dialogSpeaker: null,    // the Actor who is speaking
             dialogTimer: 0,
         };
 
@@ -104,9 +105,32 @@ class Engine {
         }
     }
 
-    say(text, duration = 3500) {
-        this.gameState.dialogLine = text;
+    say(text, duration = 3500, speaker = null) {
+        let actualText = text;
+        let actualSpeaker = speaker;
+
+        // Smart speaker detection: if text starts with "Name: ", try to find that actor
+        if (!actualSpeaker) {
+            const colonIndex = text.indexOf(':');
+            if (colonIndex > 0 && colonIndex < 20) { // arbitrary limit to avoid catching long sentences
+                const possibleName = text.substring(0, colonIndex).trim();
+                // Find actor by name (case-insensitive)
+                const found = this.actors.find(a => a.name.toLowerCase() === possibleName.toLowerCase());
+                if (found) {
+                    actualSpeaker = found;
+                    // Strip the "Name: " and any surrounding quotes
+                    actualText = text.substring(colonIndex + 1).trim();
+                    if ((actualText.startsWith('"') && actualText.endsWith('"')) || 
+                        (actualText.startsWith("'") && actualText.endsWith("'"))) {
+                        actualText = actualText.substring(1, actualText.length - 1);
+                    }
+                }
+            }
+        }
+
+        this.gameState.dialogLine = actualText;
         this.gameState.dialogTimer = duration;
+        this.gameState.dialogSpeaker = actualSpeaker || this.player;
     }
 
     // ── Room state helpers ─────────────────────────────────────────────────
@@ -172,9 +196,9 @@ class Engine {
         // Track if say was called during interaction
         let saidSomething = false;
         const originalSay = this.say;
-        this.say = (text, dur) => {
+        this.say = (text, dur, speaker) => {
             saidSomething = true;
-            originalSay.call(this, text, dur);
+            originalSay.call(this, text, dur, speaker);
         };
 
         if (typeof hotspot.onInteract === 'function') {
@@ -212,7 +236,10 @@ class Engine {
         // Dialog timer
         if (this.gameState.dialogTimer > 0) {
             this.gameState.dialogTimer -= dt;
-            if (this.gameState.dialogTimer <= 0) this.gameState.dialogLine = null;
+            if (this.gameState.dialogTimer <= 0) {
+                this.gameState.dialogLine = null;
+                this.gameState.dialogSpeaker = null;
+            }
         }
 
         for (const actor of this.actors) {
@@ -240,21 +267,22 @@ class Engine {
         // 2. Actors sorted by Y (depth)
         [...this.actors].sort((a, b) => a.y - b.y).forEach(a => a.draw(ctx));
 
-        // 3. Dave's dialog speech bubble
+        // 3. Dialogue speech (above speaker's head)
         if (this.gameState.dialogLine) {
-            this._drawDialog(ctx, this.gameState.dialogLine);
+            this._drawDialog(ctx, this.gameState.dialogLine, this.gameState.dialogSpeaker);
         }
 
         // 4. UI panel
         this.ui.draw(ctx);
     }
 
-    _drawDialog(ctx, text) {
-        const x = this.player ? this.player.x : this.canvas.width / 2;
-        const y = this.player ? (this.player.y - (this.player.animator.frameH * this.player.animator.scale) - 10) : 80;
+    _drawDialog(ctx, text, speaker) {
+        const actor = speaker || this.player;
+        const x = actor ? actor.x : this.canvas.width / 2;
+        const h = actor ? (actor.animator.defaultFrameH * actor.animator.scale) : 60;
+        const y = actor ? (actor.y - h - 10) : 80;
 
         ctx.save();
-        // Use a bold, blocky font similar to Zak EGA
         ctx.font = 'bold 18px "Share Tech Mono", monospace';
         ctx.textAlign = 'center';
         
@@ -280,12 +308,12 @@ class Engine {
         lines.forEach((l, i) => {
             const ly = startY + i * lh;
             
-            // Text Shadow for contrast (essential since we removed the bubble)
+            // Text Shadow
             ctx.fillStyle = '#000000';
             ctx.fillText(l, x + 2, ly + 2);
             
-            // Main Text Color (Zak is white, NPCs can vary)
-            ctx.fillStyle = this.player ? (this.player.color || '#ffffff') : '#ffffff';
+            // Main Text Color (from actor or white)
+            ctx.fillStyle = actor ? (actor.color || '#ffffff') : '#ffffff';
             ctx.fillText(l, x, ly);
         });
 

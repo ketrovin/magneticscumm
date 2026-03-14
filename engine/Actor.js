@@ -76,7 +76,7 @@ class Actor {
         if (Actor.debugMode) {
             ctx.fillStyle = 'yellow';
             ctx.font = '10px monospace';
-            ctx.fillText(this.name, this.x - 12, this.y - (this.animator.frameH * this.animator.scale) - 4);
+            ctx.fillText(this.name, this.x - 12, this.y - (this.animator.defaultFrameH * this.animator.scale) - 4);
         }
     }
 }
