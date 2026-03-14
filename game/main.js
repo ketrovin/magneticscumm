@@ -16,16 +16,16 @@ const CW = 960, CH = 600, PANEL_H = 80, SCENE_H = CH - PANEL_H; // 520
 
 // ── Music Tracks ───────────────────────────────────────────────────────────────
 const MUSIC_TRACKS = [
-    { id: 'track1', name: "Neon Grit", url: "assets/music/track1.mp3" },
-    { id: 'track2', name: "Magnetic Pulse", url: "assets/music/track2.mp3" },
-    { id: 'track3', name: "Dave's Theme", url: "assets/music/track3.mp3" },
-    { id: 'track4', name: "Radio Active", url: "assets/music/track4.mp3" },
-    { id: 'track5', name: "Cloud Drifting", url: "assets/music/track5.mp3" },
-    { id: 'track6', name: "Poutine Jive", url: "assets/music/track6.mp3" },
-    { id: 'track7', name: "Synoptic Beat", url: "assets/music/track7.mp3" },
-    { id: 'track8', name: "Metamorphic Rock", url: "assets/music/track8.mp3" },
-    { id: 'track9', name: "Static Dream", url: "assets/music/track9.mp3" },
-    { id: 'track10', name: "The Last Barometer", url: "assets/music/track10.mp3" }
+    { id: 'track1', name: "Neon Grit", url: "assets/music/game1.mp3" },
+    { id: 'track2', name: "Magnetic Pulse", url: "assets/music/game2.mp3" },
+    { id: 'track3', name: "Dave's Theme", url: "assets/music/game3.mp3" },
+    { id: 'track4', name: "Radio Active", url: "assets/music/game4.mp3" },
+    { id: 'track5', name: "Cloud Drifting", url: "assets/music/game5.mp3" },
+    { id: 'track6', name: "Poutine Jive", url: "assets/music/game6.mp3" },
+    { id: 'track7', name: "Synoptic Beat", url: "assets/music/game7.mp3" },
+    { id: 'track8', name: "Metamorphic Rock", url: "assets/music/game8.mp3" },
+    { id: 'track9', name: "Static Dream", url: "assets/music/game9.mp3" },
+    { id: 'track10', name: "The Last Barometer", url: "assets/music/game10.mp3" }
 ];
 
 window._openPhoneMenu = (e) => {
