@@ -20,6 +20,8 @@ class Engine {
             dialogLine: null,       // current one-liner text
             dialogSpeaker: null,    // the Actor who is speaking
             dialogTimer: 0,
+            activeDialogChoices: null, // [string] or null
+            onChoiceCallback: null,
         };
 
         this.quips = {
@@ -106,6 +108,9 @@ class Engine {
     }
 
     say(text, duration = 3500, speaker = null) {
+        // Clear any previous dialogue immediately when a new one starts
+        if (this.gameState.dialogTimer > 3500) this.gameState.dialogTimer = 3500; 
+
         let actualText = text;
         let actualSpeaker = speaker;
 
@@ -131,6 +136,21 @@ class Engine {
         this.gameState.dialogLine = actualText;
         this.gameState.dialogTimer = duration;
         this.gameState.dialogSpeaker = actualSpeaker || this.player;
+    }
+
+    enterDialog(choices, callback) {
+        this.gameState.activeDialogChoices = choices;
+        this.gameState.onChoiceCallback = callback;
+        this.ui.selectedVerb = null; // Hide the active verb pointer
+    }
+
+    onChoiceClick(index) {
+        const callback = this.gameState.onChoiceCallback;
+        const choice = this.gameState.activeDialogChoices[index];
+        this.gameState.activeDialogChoices = null;
+        this.gameState.onChoiceCallback = null;
+        this.ui.selectedVerb = 'Walk to'; // Reset verb
+        if (callback) callback(index, choice);
     }
 
     // ── Room state helpers ─────────────────────────────────────────────────

@@ -1767,17 +1767,62 @@ function buildGeoStrata(bg) {
             {
                 id: 'dr_pellerin', name: 'Dr. Pellerin', x: 100, y: 295, w: 90, h: 190, walkToX: 175, walkToY: 450,
                 onInteract(v, e) {
-                    const s = e.getRoomState('geo_strata');
-                    s.pellerinTalks = (s.pellerinTalks || 0) + 1;
-                    const lines = [
-                        'Dr. Pellerin: "Oh! A visitor! I am Dr. Réjean Pellerin, geological surveyor. I have been down here for six weeks. Have they found me yet?"',
-                        'Dr. Pellerin: "The strata! Look at that Grenville Province band — the pink! The feldspar! I have dedicated eleven careers to this layer. This one. Is. MINE."',
-                        'Dr. Pellerin: "The Van Hornes hired me in 1987. I found the Shield at this depth and simply did not stop. No one came for me. I have chosen to see this as freedom."',
-                        'Dr. Pellerin: "The magnetic anomaly above us is REAL but entirely unrelated to the tourist magnet. The magnet was installed in 1948. The anomaly is 3.8 billion years old. One is doing more work."',
-                        'Dr. Pellerin: "If you find my report upstairs — it says COMPLETED — could you mail it? The address is on the cover. Or just tell them I am well. I am extremely well."',
-                        'Dr. Pellerin: "You have my geological hammer, do you not. I broke the others on the Shield. You cannot break the Shield. It breaks things instead. Be careful with it."',
-                    ];
-                    e.say(lines[(s.pellerinTalks - 1) % lines.length]);
+                    if (v === 'Talk to') {
+                        const startBranch = () => {
+                            e.enterDialog([
+                                "Who are you?",
+                                "What is this place?",
+                                "The magnetic hill...",
+                                "Bye."
+                            ], (idx) => {
+                                if (idx === 0) {
+                                    e.say("Dr. Pellerin: 'I am Dr. Réjean Pellerin, geological surveyor. I have been down here for six weeks. Or maybe since 1987. Time is... different under the Shield.'");
+                                    setTimeout(startBranch, 4000);
+                                } else if (idx === 1) {
+                                    e.say("Dr. Pellerin: 'This is the Geo Strata room. Van Horne built it to study the Precambrian Shield. He was obsessed with literal foundations.'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Tell me about the Van Hornes.",
+                                            "Foundations for what?",
+                                            "Back."
+                                        ], (idx2) => {
+                                            if (idx2 === 0) {
+                                                e.say("Dr. Pellerin: 'They were a family of steel and stone. Van Horne senior didn't believe in progress, only in persistence. His son... he only believed in himself.'");
+                                                setTimeout(startBranch, 4000);
+                                            } else if (idx2 === 1) {
+                                                e.say("Dr. Pellerin: 'For a legacy that never ends. He wanted to build the tallest tower in Moncton. On top of a magnetic hill. He didn't understand the pull until it was too late.'");
+                                                setTimeout(startBranch, 4000);
+                                            } else startBranch();
+                                        });
+                                    }, 4000);
+                                } else if (idx === 2) {
+                                    e.say("Dr. Pellerin: 'The magnet above is a toy. The true power is in the Shield below. It pulls at the mind as much as the metal.'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Is the murder related?",
+                                            "Can I help you get out?",
+                                            "Back."
+                                        ], (idx3) => {
+                                            if (idx3 === 0) {
+                                                e.say("Dr. Pellerin: 'A man was found in the foyer? Interesting. The pull of the magnet works in strange ways. Sometimes it pulls people... into outlines.'");
+                                                setTimeout(startBranch, 4000);
+                                            } else if (idx3 === 1) {
+                                                e.say("Dr. Pellerin: 'Out? Why would I want to go out? I have feldspar. I have silence. If you find my report upstairs, just... leave it. I am well where I am.'");
+                                                setTimeout(startBranch, 4000);
+                                            } else startBranch();
+                                        });
+                                    }, 4000);
+                                } else {
+                                    e.say("Dr. Pellerin: 'Be careful of the Shield, Dave. It doesn't forgive, and it certainly doesn't forget.'");
+                                }
+                            });
+                        };
+                        startBranch();
+                    } else if (v === 'Look at') {
+                        e.say("She's wearing a lab coat that looks like it's seen better decades. Her eyes are bright with the kind of focus that only comes from staring at rocks for 30 years.");
+                    } else {
+                        e.say("She looks busy with her strata. Best not to disturb the geological peace.");
+                    }
                 }
             },
 

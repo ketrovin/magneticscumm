@@ -41,6 +41,17 @@ class ScummUI {
 
         this.invX = this.verbAreaW;
         this.invW = canvasWidth - this.verbAreaW;
+
+        // Dialog choice area (same as verb area)
+        this.dialogChoiceRects = [];
+        for (let i = 0; i < 4; i++) {
+            this.dialogChoiceRects.push({
+                x: 20,
+                y: this.panelY + 36 + i * 25,
+                w: this.verbAreaW - 40,
+                h: 25
+            });
+        }
     }
 
     onMouseMove(mx, my) {
@@ -48,6 +59,20 @@ class ScummUI {
         this.hoveredInventoryItem = null;
         if (my < this.panelY) return null;
         
+        // Dialog choices hit detection
+        const engine = window.engine; // Injected globally usually, or we can assume it exists
+        if (engine && engine.gameState.activeDialogChoices) {
+            for (let i = 0; i < engine.gameState.activeDialogChoices.length; i++) {
+                const r = this.dialogChoiceRects[i];
+                if (r && mx >= r.x && mx < r.x + r.w && my >= r.y && my < r.y + r.h) {
+                    this.hoveredDialogChoice = i;
+                    return i;
+                }
+            }
+            this.hoveredDialogChoice = null;
+            return null;
+        }
+
         for (let i = 0; i < this._verbRects.length; i++) {
             const r = this._verbRects[i];
             if (mx >= r.x && mx < r.x + r.w && my >= r.y && my < r.y + r.h) {
@@ -73,6 +98,16 @@ class ScummUI {
 
     onClick(mx, my) {
         if (my < this.panelY) return false;
+
+        const engine = window.engine;
+        if (engine && engine.gameState.activeDialogChoices) {
+            const idx = this.onMouseMove(mx, my);
+            if (typeof idx === 'number' && idx >= 0 && idx < engine.gameState.activeDialogChoices.length) {
+                engine.onChoiceClick(idx);
+                return true;
+            }
+            return true; // Clicked in panel but not on choice
+        }
         
         for (let i = 0; i < this._verbRects.length; i++) {
             const r = this._verbRects[i];
@@ -127,14 +162,27 @@ class ScummUI {
         const COLOR_AVAILABLE = '#c8a84b'; // Title Gold
         const COLOR_SELECTED = '#ff00ff';  // Pure Pink/Magenta
 
-        for (let i = 0; i < this.verbs.length; i++) {
-            const v = this.verbs[i];
-            const r = this._verbRects[i];
-            const isSelected = v === this.selectedVerb;
-            const isHovered = v === this.hoveredVerb;
+        // Check for dialogue choices
+        const engine = window.engine;
+        if (engine && engine.gameState.activeDialogChoices) {
+            ctx.font = '20px "Share Tech Mono", monospace';
+            engine.gameState.activeDialogChoices.forEach((choice, i) => {
+                const r = this.dialogChoiceRects[i];
+                if (!r) return;
+                const isHovered = this.hoveredDialogChoice === i;
+                ctx.fillStyle = isHovered ? '#ffffff' : '#00aaaa';
+                ctx.fillText(`> ${choice}`, r.x, r.y);
+            });
+        } else {
+            for (let i = 0; i < this.verbs.length; i++) {
+                const v = this.verbs[i];
+                const r = this._verbRects[i];
+                const isSelected = v === this.selectedVerb;
+                const isHovered = v === this.hoveredVerb;
 
-            ctx.fillStyle = isSelected ? COLOR_SELECTED : (isHovered ? '#ffffff' : COLOR_AVAILABLE);
-            ctx.fillText(v, r.x + 10, r.y + 5);
+                ctx.fillStyle = isSelected ? COLOR_SELECTED : (isHovered ? '#ffffff' : COLOR_AVAILABLE);
+                ctx.fillText(v, r.x + 10, r.y + 5);
+            }
         }
 
         // 4. Inventory
