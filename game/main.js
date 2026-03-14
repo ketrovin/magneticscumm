@@ -1489,6 +1489,17 @@ function buildPoliceExt(bg) {
                 id: 'alley_eyes', name: 'Eyes', x: 825, y: 270, w: 140, h: 150,
                 onInteract(v, e) { e.say('Eyes in the dark alley beside the station. I do not know what they belong to. Given the pattern this evening, probably raccoons. Or something raccoon-adjacent.'); }
             },
+            // Road to Magnetic Hill
+            {
+                id: 'to_mag_hill', name: 'Road to Attraction', x: 880, y: 360, w: 80, h: 200, walkToX: 920, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use') {
+                        e.changeRoom('mag_entrance', 100, 450);
+                    } else {
+                        e.say("The road leads toward Magnetic Hill. The attraction of the century, according to the signs I saw earlier.");
+                    }
+                }
+            },
             // Cracked wall
             {
                 id: 'wall_crack', name: 'Cracked Wall', x: 90, y: 200, w: 220, h: 260,
@@ -1737,6 +1748,16 @@ function buildGeoStrata(bg) {
                     } else e.say('A wooden ladder leading up through the ceiling. There\'s a trapdoor up there, which explains how I got here.');
                 }
             },
+            // Stairs back up to the shack
+            {
+                id: 'stairs_up', name: 'Stairs Up', x: 860, y: 150, w: 100, h: 360, walkToX: 900, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Climb' || v === 'Walk to' || v === 'Use') {
+                        e.say("I head back up the stone stairs to the shack entrance on the hill.");
+                        setTimeout(() => e.changeRoom('magnetic_hill', 455, 470), 1600);
+                    } else e.say("Dark stone stairs leading up to the surface. To the shack. To the reality above.");
+                }
+            },
             // GEO STRATA label / wall
             {
                 id: 'strata_label', name: 'GEO STRATA', x: 300, y: 370, w: 375, h: 65, walkToX: 490, walkToY: 445,
@@ -1905,14 +1926,14 @@ function buildMagneticHill(bg) {
                     } else e.say('A small receiver unit on the magnet housing. It wants a remote signal. Specifically.');
                 }
             },
-            // Underground door in hillside
+            // Shack entrance in hillside
             {
-                id: 'hill_door', name: 'Door in the Hill', x: 385, y: 380, w: 155, h: 175, walkToX: 455, walkToY: 470,
+                id: 'shack_entrance', name: 'Shack Entrance', x: 385, y: 380, w: 155, h: 175, walkToX: 455, walkToY: 470,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                        e.say('The door in the hillside opens to a set of stairs going down. I\'ve already fallen through a floor tonight. Stairs are practically a luxury.');
-                        setTimeout(() => e.changeRoom('geo_strata', 600, 430), 1600);
-                    } else e.say('A stone-framed door embedded in the hillside below the magnet. Leading underground. Obviously.');
+                        e.say('The shack door leads to a set of stairs going down. I\'ve already fallen through a floor tonight. Stairs are practically a luxury.');
+                        setTimeout(() => e.changeRoom('geo_strata', 800, 430), 1600);
+                    } else e.say('A small, sturdy shack embedded in the hillside below the magnet. Leading underground. Obviously.');
                 }
             },
             // Geological strata layers visible in hill
