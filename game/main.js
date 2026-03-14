@@ -273,7 +273,31 @@ function buildBedroom(bg) {
                 id: 'kitchen_door', name: 'Living Room Door', x: 790, y: 100, w: 155, h: 330, walkToX: 860, walkToY: 430,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                        e.changeRoom('kitchen', 95, 440);
+                        if (e.hasItem('cash_card')) {
+                            e.changeRoom('kitchen', 95, 440);
+                        } else {
+                            e.say("Wait! I shouldn't leave without my cash card. This city doesn't run on good intentions.");
+                            // Auto-pickup sequence
+                            setTimeout(() => {
+                                e.player.walkTo(120, 450); // Walk to nightstand
+                                const checkArrival = setInterval(() => {
+                                    if (e.player.state === 'idle') {
+                                        clearInterval(checkArrival);
+                                        e.addItem('cash_card', 'Cash Card');
+                                        e.say("Got it. Now I can face the world with $12.43 of buying power.");
+                                        setTimeout(() => {
+                                            e.player.walkTo(860, 430); // Walk back to door
+                                            const checkExit = setInterval(() => {
+                                                if (e.player.state === 'idle') {
+                                                    clearInterval(checkExit);
+                                                    e.changeRoom('kitchen', 95, 440);
+                                                }
+                                            }, 100);
+                                        }, 1800);
+                                    }
+                                }, 100);
+                            }, 2000);
+                        }
                     } else { e.say("The door to the living room slash kitchen slash wherever I put things."); }
                 }
             },
