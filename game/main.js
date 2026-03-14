@@ -2520,100 +2520,107 @@ async function main() {
         if (pellerin) {
             pellerin.onInteract = (v, e) => {
                 if (v === 'Talk to') {
-                    const startBranch = () => {
-                        e.enterDialog([
-                            "Tell me about the STRATA!",
-                            "How does weather affect this?",
-                            "What about 'DEEP TIME'?",
-                            "Tell me about the minerals!",
-                            "I'm bored, let's go."
-                        ], (idx) => {
-                            if (idx === 0) {
-                                e.say("Dr. Pellerin: 'Oh! The STRATA! Look at these rhythmic successions! These are billions of years of story told in silicate and carbonate! Each layer is a fossilized mood of the planet!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "What are we looking at right here?",
-                                        "Tell me about the Grenville Province!",
-                                        "Is it all just rock?",
-                                        "I'm bored, let's go."
-                                    ], (idx2) => {
-                                        if (idx2 === 0) {
-                                            e.say("Dr. Pellerin: 'This! This is the Grenville Province! It's a high-grade metamorphic belt. We're talking granulite and amphibolite facies! It was cooked in the heart of a mountain range taller than the Himalayas!'");
+                    e.say("Dave: 'Excuse me, Dr. Pellerin? I'm looking for... well, I'm not sure what I'm looking for down here.'");
+                    
+                    setTimeout(() => {
+                        e.say("Dr. Pellerin: 'Dave! You've arrived just as I was documenting the rhythmic successions of the Grenville Province! Look at these silicate bands! Billions of years of history, etched in rock! What aspect of the Shield shall we dissect today?'");
+                        
+                        setTimeout(() => {
+                            const startBranch = () => {
+                                e.enterDialog([
+                                    "Tell me about these 'rhythmic successions'.",
+                                    "Wait, there were supercontinents before Pangea?",
+                                    "Is the Canadian Shield really that old?",
+                                    "Sometimes I feel small. Does this place do that to you?",
+                                    "I think my brain is lithifying. I have to go."
+                                ], (idx) => {
+                                    if (idx === 0) {
+                                        e.say("Dave: 'Tell me about these 'rhythmic successions' you're so excited about.'");
+                                        setTimeout(() => {
+                                            e.say("Dr. Pellerin: 'Oh! The STRATA! Look at these successions! These are billions of years of story told in silicate and carbonate! Each layer is a fossilized mood of the planet! It's a high-grade metamorphic belt—we're talking granulite and amphibolite facies!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "What exactly is the Grenville Province?",
+                                                    "Is it all just rock and chemistry?",
+                                                    "Back to the main lecture.",
+                                                    "I'm bored, let's go."
+                                                ], (idx2) => {
+                                                    if (idx2 === 0) {
+                                                        e.say("Dave: 'What exactly is the Grenville Province?'");
+                                                        setTimeout(() => {
+                                                            e.say("Dr. Pellerin: 'It's a high-grade metamorphic belt, Dave! It was cooked in the heart of a mountain range taller than the Himalayas! The Grenville Orogeny assembled the supercontinent Rodinia 1.1 billion years ago!'");
+                                                            setTimeout(startBranch, 5000);
+                                                        }, 2000);
+                                                    } else if (idx2 === 1) {
+                                                        e.say("Dave: 'So is it all just rock and chemistry down here?'");
+                                                        setTimeout(() => {
+                                                            e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure in a subterranean alchemical process!'");
+                                                            setTimeout(startBranch, 5000);
+                                                        }, 2000);
+                                                    } else if (idx2 === 2) {
+                                                        startBranch();
+                                                    } else {
+                                                        e.say("Dave: 'I think my brain is melting, I have to go.'");
+                                                        setTimeout(() => e.say("Dr. Pellerin: 'The rocks will still be here when you return, Dave! Watch your step—don't want to become a trace fossil just yet!'"), 2500);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 2000);
+                                    } else if (idx === 1) {
+                                        e.say("Dave: 'Wait, there were supercontinents before Pangea?'");
+                                        setTimeout(() => {
+                                            e.say("Dr. Pellerin: 'Absolutely! Rodinia was the grand-ancestor! The Grenville Orogeny was the collision that brought it together. We are standing in the deep-crustal roots of an ancient world that existed long before the first dinosaur was even a thought!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "How do we know any of this?",
+                                                    "What happened to Rodinia?",
+                                                    "Back to the main lecture.",
+                                                    "I have to go."
+                                                ], (idx3) => {
+                                                    if (idx3 === 0) {
+                                                        e.say("Dave: 'How do we even know all this happened?'");
+                                                        setTimeout(() => {
+                                                            e.say("Dr. Pellerin: 'Geochronology, Dave! Uranium-Lead ratios in zircon crystals! They are the time-capsules of the planet! The precision is breathtaking! We measure the daughter products to determine the crystallization age of the magma!'");
+                                                            setTimeout(startBranch, 5000);
+                                                        }, 2000);
+                                                    } else if (idx3 === 1) {
+                                                        e.say("Dave: 'What eventually happened to Rodinia?'");
+                                                        setTimeout(() => {
+                                                            e.say("Dr. Pellerin: 'It rifts apart, Dave! Continental breakup! The cycle of supercontinents is the heartbeat of the Earth. Birth, collision, erode, rift. Repeat for four billion years!'");
+                                                            setTimeout(startBranch, 5000);
+                                                        }, 2000);
+                                                    } else if (idx3 === 2) {
+                                                        startBranch();
+                                                    } else {
+                                                        e.say("Dave: 'My head is spinning. I'm leaving.'");
+                                                        setTimeout(() => e.say("Dr. Pellerin: 'Billions of years wait for no man, Dave. Keep looking at the rocks!'"), 2500);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 2000);
+                                    } else if (idx === 2) {
+                                        e.say("Dave: 'Is the Canadian Shield really that old?'");
+                                        setTimeout(() => {
+                                            e.say("Dr. Pellerin: 'It is the core of the continent! Some parts are 3.8 billion years old. To the Shield, a human life is just a single photon's transit across a crystal lattice! We are living on the crust of a truly ancient giant.'");
                                             setTimeout(startBranch, 5000);
-                                        } else if (idx2 === 1) {
-                                            e.say("Dr. Pellerin: 'The Grenville Orogeny! A 1.1 billion year old collision of tectonic plates that assembled the supercontinent Rodinia! We are standing in the roots of an ancient world!'");
+                                        }, 2000);
+                                    } else if (idx === 3) {
+                                        e.say("Dave: 'Sometimes I feel small. Does standing on 3.8 billion years of history do that to you?'");
+                                        setTimeout(() => {
+                                            e.say("Dr. Pellerin: 'Small? No! It makes me feel IMMENSE! I am the eyes through which the Shield finally gets to see itself! What a privilege to witness the deep architecture of time!'");
                                             setTimeout(startBranch, 5000);
-                                        } else if (idx2 === 2) {
-                                            e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else e.say("Dr. Pellerin: 'The rocks will still be here when you return, Dave!'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 1) {
-                                e.say("Dr. Pellerin: 'Weathering! The great sculptor! Even down here, the rain from millions of years ago has left its CHEMICAL signature. Water is the universal solvent!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Does it reach down here?",
-                                        "What about Hydrothermal Alteration?",
-                                        "Back to the main lecture.",
-                                        "I'm bored, let's go."
-                                    ], (idx3) => {
-                                        if (idx3 === 0) {
-                                            e.say("Dr. Pellerin: 'Hydrothermal alteration, Dave! Hot fluids circulating through cracks, depositing minerals! It's weather from the INSIDE! It's glorious!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx3 === 1) {
-                                            e.say("Dr. Pellerin: 'Fluids leaching ions from the host rock and reprecipitating them as new mineral phases! It's a subterranean alchemical process! Simply EXHILARATING!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx3 === 2) startBranch();
-                                        else e.say("Dr. Pellerin: 'Watch out for the erosion on your way out!'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 2) {
-                                e.say("Dr. Pellerin: 'Deep Time is the only time that matters! We are standing on 3.8 BILLION years of history. To the Shield, a human life is just a single photon's transit!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Does it make you feel small?",
-                                        "How do you track it?",
-                                        "Tell me about Isotopic Dating!",
-                                        "I'm bored, let's go."
-                                    ], (idx4) => {
-                                        if (idx4 === 0) {
-                                            e.say("Dr. Pellerin: 'Small? No! It makes me feel IMMENSE! I am the eyes through which the Shield finally gets to see itself! What a privilege!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx4 === 1) {
-                                            e.say("Dr. Pellerin: 'Isotopic dating! Uranium-Lead ratios in zircon crystals! They are the time-capsules of the planet! The precision is breathtaking!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx4 === 2) {
-                                            e.say("Dr. Pellerin: 'The decay of radioactive isotopes at a constant rate! We measure the daughter products to determine the crystallization age of the magma! It's the clock of the universe!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else e.say("Dr. Pellerin: 'Billions of years wait for no man, Dave.'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 3) {
-                                e.say("Dr. Pellerin: 'MINERALS! The alphabet of the Earth! Every crystal system is a geometric masterpiece!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Tell me about Potassium Feldspar!",
-                                        "What about the Mica?",
-                                        "Back.",
-                                        "I'm bored, let's go."
-                                    ], (idx5) => {
-                                        if (idx5 === 0) {
-                                            e.say("Dr. Pellerin: 'Orthoclase! Monoclinic crystal habit! It provides the vibrant pink hue to the granitic intrusions. It's the blush of the Precambrian!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx5 === 1) {
-                                            e.say("Dr. Pellerin: 'Phyllosilicates! Perfect basal cleavage! You can peel the history of the world apart like the pages of a book!'");
-                                            setTimeout(startBranch, 5000);
-                                        } else if (idx5 === 2) startBranch();
-                                        else e.say("Dr. Pellerin: 'Enjoy your walk on the surface, Dave!'");
-                                    });
-                                }, 4000);
-                            } else {
-                                e.say("Dr. Pellerin: 'Keep looking at the rocks, Dave! They have so much to tell us!'");
-                            }
-                        });
-                    };
-                    startBranch();
+                                        }, 2000);
+                                    } else {
+                                        e.say("Dave: 'I think my brain is lithifying. I should probably head back to the surface.'");
+                                        setTimeout(() => {
+                                            e.say("Dr. Pellerin: 'The strata will wait, Dave! Don't let the surface-world erode your curiosity! Come back when you're ready for more... enlightenment!'");
+                                        }, 2500);
+                                    }
+                                });
+                            };
+                            startBranch();
+                        }, 4500);
+                    }, 3500);
                 } else if (v === 'Look at') {
                     e.say("Dr. Pellerin is practically vibrating with scientific excitement. Her lab coat is stained with various mineral dusts, and she looks like she hasn't slept in a geological era.");
                 } else {
