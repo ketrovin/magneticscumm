@@ -19,7 +19,6 @@ class Engine {
             roomStates: {},         // per-room state: { roomId: { key: value } }
             dialogLine: null,       // current one-liner text for Dave
             dialogTimer: 0,
-            originalTitle: null,    // backup of #game-title text
         };
 
         this.quips = {
@@ -105,19 +104,9 @@ class Engine {
         }
     }
 
-    // ── Dave says ──────────────────────────────────────────────────────────
     say(text, duration = 3500) {
         this.gameState.dialogLine = text;
         this.gameState.dialogTimer = duration;
-
-        // Sync with HTML title bar
-        const titleEl = document.getElementById('game-title');
-        if (titleEl) {
-            if (this.gameState.originalTitle === null) {
-                this.gameState.originalTitle = titleEl.innerText;
-            }
-            titleEl.innerText = text;
-        }
     }
 
     // ── Room state helpers ─────────────────────────────────────────────────
@@ -223,15 +212,7 @@ class Engine {
         // Dialog timer
         if (this.gameState.dialogTimer > 0) {
             this.gameState.dialogTimer -= dt;
-            if (this.gameState.dialogTimer <= 0) {
-                this.gameState.dialogLine = null;
-                // Restore original title
-                const titleEl = document.getElementById('game-title');
-                if (titleEl && this.gameState.originalTitle !== null) {
-                    titleEl.innerText = this.gameState.originalTitle;
-                    this.gameState.originalTitle = null; // reset for next time
-                }
-            }
+            if (this.gameState.dialogTimer <= 0) this.gameState.dialogLine = null;
         }
 
         for (const actor of this.actors) {
