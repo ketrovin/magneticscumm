@@ -675,27 +675,92 @@ function buildHerringClub(bg) {
                                 "Tell me about the clouds!",
                                 "Why all the rain?",
                                 "What's with the wind?",
-                                "Bye."
+                                "Tell me about Thermodynamics!",
+                                "Get bored and depart."
                             ], (idx) => {
                                 if (idx === 0) {
-                                    e.say("Weather Scientist: 'CLOUDS! They are the lungs of the sky! Cumulonimbus, Cirrus, Altostratus! It's a grand ballet of moisture and pressure! Did you know a single cloud can weigh a million pounds?'");
-                                    setTimeout(startWeatherBranch, 5000);
-                                } else if (idx === 1) {
-                                    e.say("Weather Scientist: 'Precipitation is the planet's way of recycling its spirit! In Moncton, it rains because the sky is just so full of potential! It's not gloom, it's GEOPHYSICAL CELEBRATION!'");
-                                    setTimeout(startWeatherBranch, 5000);
-                                } else if (idx === 2) {
-                                    e.say("Weather Scientist: 'The wind is the Earth's breath! It carries the seeds of time and the scent of distant oceans! It's invisible power! GLORIOUS!'");
+                                    e.say("Weather Scientist: 'CLOUDS! They are the lungs of the sky! Cumulonimbus, Cirrus, Altostratus! It's a grand ballet of moisture and pressure!'");
                                     setTimeout(() => {
-                                        const s = e.getRoomState('herring_club');
-                                        if (!s.gotToken) {
-                                            s.gotToken = true;
-                                            e.addItem('fishy_token', 'Fishy Token');
-                                            e.say("Weather Scientist: 'You have a good ear for the atmosphere, Dave! Take this FISHY TOKEN. It acknowledges your atmospheric excellence!'");
-                                        }
-                                        setTimeout(startWeatherBranch, 3000);
-                                    }, 5000);
+                                        e.enterDialog([
+                                            "Tell me about the Bergeron-Findeisen process!",
+                                            "How much does a cloud weigh?",
+                                            "Back.",
+                                            "Get bored and depart."
+                                        ], (idx2) => {
+                                            if (idx2 === 0) {
+                                                e.say("Weather Scientist: 'The process of ice crystal growth in mixed-phase clouds! Water vapor deposits on ice at the expense of liquid droplets! It's the engine of precipitation!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx2 === 1) {
+                                                e.say("Weather Scientist: 'A single cumulus can weigh a million pounds! It stays afloat because it's slightly warmer than the surrounding air. Thermodynamics in action!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx2 === 2) startWeatherBranch();
+                                            else e.say("Weather Scientist: 'Keep your head in the clouds, Dave!'");
+                                        });
+                                    }, 4000);
+                                } else if (idx === 1) {
+                                    e.say("Weather Scientist: 'Precipitation is the planet's way of recycling its spirit! It's GEOPHYSICAL CELEBRATION!'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Tell me about Adiabatic Cooling!",
+                                            "What about Orographic Lift?",
+                                            "Back.",
+                                            "Get bored and depart."
+                                        ], (idx3) => {
+                                            if (idx3 === 0) {
+                                                e.say("Weather Scientist: 'The reduction of heat as air pressure decreases! Rising air expands and cools, leading to saturation and condensation! It's the fundamental law of the troposphere!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx3 === 1) {
+                                                e.say("Weather Scientist: 'Air forced upward by terrain! As it rises over the Magnetic Hill, it cools adiabatically and dumps its moisture! That's why Moncton is so... damp!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx3 === 2) startWeatherBranch();
+                                            else e.say("Weather Scientist: 'Don't forget your yellow raincoat!'");
+                                        });
+                                    }, 4000);
+                                } else if (idx === 2) {
+                                    e.say("Weather Scientist: 'The wind is the Earth's breath! It carries the seeds of time!'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Tell me about the Coriolis Effect!",
+                                            "What is Geostrophic Balance?",
+                                            "Back.",
+                                            "Get bored and depart."
+                                        ], (idx4) => {
+                                            if (idx4 === 0) {
+                                                e.say("Weather Scientist: 'The deflection of moving objects due to Earth's rotation! It curves the winds into the great cyclones! It's the invisible hand of the world!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx4 === 1) {
+                                                e.say("Weather Scientist: 'The equilibrium between the Pressure Gradient Force and the Coriolis Force! It's why the wind blows parallel to the isobars! It's mathematical beauty!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx4 === 2) startWeatherBranch();
+                                            else e.say("Weather Scientist: 'The wind will always find you, Dave.'");
+                                        });
+                                    }, 4000);
+                                } else if (idx === 3) {
+                                    e.say("Weather Scientist: 'THERMODYNAMICS! The study of energy and entropy! It's the reason anything happens at all!'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Explain Latent Heat!",
+                                            "What about Convection?",
+                                            "Back.",
+                                            "Get bored and depart."
+                                        ], (idx5) => {
+                                            if (idx5 === 0) {
+                                                e.say("Weather Scientist: 'The energy absorbed or released during a phase change! When water vapor condenses, it releases heat, fueling the massive power of thunderstorms!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx5 === 1) {
+                                                e.say("Weather Scientist: 'Vertical transport of heat and moisture! Warm air rises, cold air sinks—creating the currents that build the sky! It's a never-ending cycle of energy!'");
+                                                setTimeout(startWeatherBranch, 5000);
+                                            } else if (idx5 === 2) startWeatherBranch();
+                                            else e.say("Weather Scientist: 'May your entropy always be low, Dave!'");
+                                        });
+                                    }, 4000);
                                 } else {
-                                    e.say("Weather Scientist: 'Keep your eyes on the barometer, friend!'");
+                                    const s = e.getRoomState('herring_club');
+                                    if (!s.gotToken) {
+                                        s.gotToken = true;
+                                        e.addItem('fishy_token', 'Fishy Token');
+                                        e.say("Weather Scientist: 'Wait! Before you depart, take this FISHY TOKEN. It acknowledges your atmospheric excellence!'");
+                                    } else e.say("Weather Scientist: 'Keep your eyes on the barometer, friend!'");
                                 }
                             });
                         };
@@ -1861,60 +1926,90 @@ function buildGeoStrata(bg) {
                     if (v === 'Talk to') {
                         const startBranch = () => {
                             e.enterDialog([
-                                "Tell me about the strata!",
+                                "Tell me about the STRATA!",
                                 "How does weather affect this?",
-                                "What about 'Deep Time'?",
-                                "Bye."
+                                "What about 'DEEP TIME'?",
+                                "Tell me about the minerals!",
+                                "Get bored and depart."
                             ], (idx) => {
                                 if (idx === 0) {
                                     e.say("Dr. Pellerin: 'Oh! The STRATA! Look at these rhythmic successions! These are billions of years of story told in silicate and carbonate! Each layer is a fossilized mood of the planet!'");
                                     setTimeout(() => {
                                         e.enterDialog([
                                             "What are we looking at right here?",
+                                            "Tell me about the Grenville Province!",
                                             "Is it all just rock?",
-                                            "Back."
+                                            "Get bored and depart."
                                         ], (idx2) => {
                                             if (idx2 === 0) {
                                                 e.say("Dr. Pellerin: 'This! This is the Grenville Province! It's a high-grade metamorphic belt. We're talking granulite and amphibolite facies! It was cooked in the heart of a mountain range taller than the Himalayas!'");
                                                 setTimeout(startBranch, 5000);
                                             } else if (idx2 === 1) {
-                                                e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure from the assembly of Rodinia!'");
+                                                e.say("Dr. Pellerin: 'The Grenville Orogeny! A 1.1 billion year old collision of tectonic plates that assembled the supercontinent Rodinia! We are standing in the roots of an ancient world!'");
                                                 setTimeout(startBranch, 5000);
-                                            } else startBranch();
+                                            } else if (idx2 === 2) {
+                                                e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else e.say("Dr. Pellerin: 'The rocks will still be here when you return, Dave!'");
                                         });
                                     }, 4000);
                                 } else if (idx === 1) {
-                                    e.say("Dr. Pellerin: 'Weathering! The great sculptor! Even down here, the rain from millions of years ago has left its CHEMICAL signature. Water is the universal solvent, and it has an ETERNITY to work!'");
+                                    e.say("Dr. Pellerin: 'Weathering! The great sculptor! Even down here, the rain from millions of years ago has left its CHEMICAL signature. Water is the universal solvent!'");
                                     setTimeout(() => {
                                         e.enterDialog([
                                             "Does it reach down here?",
-                                            "What about the current weather?",
-                                            "Back."
+                                            "What about Hydrothermal Alteration?",
+                                            "Back to the main lecture.",
+                                            "Get bored and depart."
                                         ], (idx3) => {
                                             if (idx3 === 0) {
                                                 e.say("Dr. Pellerin: 'Hydrothermal alteration, Dave! Hot fluids circulating through cracks, depositing minerals! It's weather from the INSIDE! It's glorious!'");
                                                 setTimeout(startBranch, 5000);
                                             } else if (idx3 === 1) {
-                                                e.say("Dr. Pellerin: 'The rain today is a blink. But over a million blinks, it carves the hill above us. Erosion is just the planet's way of showing its bones!'");
+                                                e.say("Dr. Pellerin: 'Fluids leaching ions from the host rock and reprecipitating them as new mineral phases! It's a subterranean alchemical process! Simply EXHILARATING!'");
                                                 setTimeout(startBranch, 5000);
-                                            } else startBranch();
+                                            } else if (idx3 === 2) startBranch();
+                                            else e.say("Dr. Pellerin: 'Watch out for the erosion on your way out!'");
                                         });
                                     }, 4000);
                                 } else if (idx === 2) {
-                                    e.say("Dr. Pellerin: 'Deep Time is the only time that matters! We are standing on 3.8 BILLION years of history. To the Shield, a human life is just a single photon's transit across a room!'");
+                                    e.say("Dr. Pellerin: 'Deep Time is the only time that matters! We are standing on 3.8 BILLION years of history. To the Shield, a human life is just a single photon's transit!'");
                                     setTimeout(() => {
                                         e.enterDialog([
                                             "Does it make you feel small?",
                                             "How do you track it?",
-                                            "Back."
+                                            "Tell me about Isotopic Dating!",
+                                            "Get bored and depart."
                                         ], (idx4) => {
                                             if (idx4 === 0) {
                                                 e.say("Dr. Pellerin: 'Small? No! It makes me feel IMMENSE! I am the eyes through which the Shield finally gets to see itself! What a privilege!'");
                                                 setTimeout(startBranch, 5000);
                                             } else if (idx4 === 1) {
-                                                e.say("Dr. Pellerin: 'Isotopic dating! Uranium-Lead ratios! It's like reading the clock of the universe by counting the dust on the hands. It's exhilarating!'");
+                                                e.say("Dr. Pellerin: 'Isotopic dating! Uranium-Lead ratios in zircon crystals! They are the time-capsules of the planet! The precision is breathtaking!'");
                                                 setTimeout(startBranch, 5000);
-                                            } else startBranch();
+                                            } else if (idx4 === 2) {
+                                                e.say("Dr. Pellerin: 'The decay of radioactive isotopes at a constant rate! We measure the daughter products to determine the crystallization age of the magma! It's the clock of the universe!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else e.say("Dr. Pellerin: 'Billions of years wait for no man, Dave.'");
+                                        });
+                                    }, 4000);
+                                } else if (idx === 3) {
+                                    e.say("Dr. Pellerin: 'MINERALS! The alphabet of the Earth! Every crystal system is a geometric masterpiece!'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Tell me about Potassium Feldspar!",
+                                            "What about the Mica?",
+                                            "Back.",
+                                            "Get bored and depart."
+                                        ], (idx5) => {
+                                            if (idx5 === 0) {
+                                                e.say("Dr. Pellerin: 'Orthoclase! Monoclinic crystal habit! It provides the vibrant pink hue to the granitic intrusions. It's the blush of the Precambrian!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else if (idx5 === 1) {
+                                                e.say("Dr. Pellerin: 'Phyllosilicates! Perfect basal cleavage! You can peel the history of the world apart like the pages of a book!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else if (idx5 === 2) startBranch();
+                                            else e.say("Dr. Pellerin: 'Enjoy your walk on the surface, Dave!'");
                                         });
                                     }, 4000);
                                 } else {
