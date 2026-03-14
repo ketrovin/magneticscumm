@@ -124,7 +124,7 @@ class ScummUI {
         ctx.textAlign = 'left';
         ctx.textBaseline = 'top';
 
-        const COLOR_AVAILABLE = '#00ff00'; // Pure Green
+        const COLOR_AVAILABLE = '#c8a84b'; // Title Gold
         const COLOR_SELECTED = '#ff00ff';  // Pure Pink/Magenta
 
         for (let i = 0; i < this.verbs.length; i++) {

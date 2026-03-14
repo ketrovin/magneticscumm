@@ -449,7 +449,11 @@ function buildStreet(bg) {
             {
                 id: 'apt_window', name: 'Apartment Window', x: 110, y: 230, w: 145, h: 180, walkToX: 180, walkToY: 440,
                 onInteract(v, e) {
-                    e.say("That's my room. But I'M out here. I hope whoever's in there is at least charging their phone correctly.");
+                    if (v === 'Look at') {
+                        e.say("I look into my own window and... wait. The furniture is different. The layout is backwards. And I'm pretty sure I don't own a velvet bust of a penguin. This is deeply confusing.");
+                    } else {
+                        e.say("That's my room. But I'M out here. I hope whoever's in there is at least charging their phone correctly.");
+                    }
                 }
             },
             // Moncton Bakery — Baker NPC (prime suspect)

@@ -21,6 +21,18 @@ class Engine {
             dialogTimer: 0,
         };
 
+        this.quips = {
+            'Look at': ["It's just a {T}.", "I've seen better {T}s.", "Not much to say about this {T}.", "Standard issue {T}."],
+            'Pick up': ["I can't carry a {T}!", "It's bolted down.", "My pockets aren't that big.", "I don't think that's portable."],
+            'Talk to': ["It doesn't seem to want to talk to me.", "I'm talking to a {T}. I need a vacation.", "No response.", "It's giving me the silent treatment."],
+            'Use': ["Use it how? I'm not a magician.", "I can't figure out how to use it.", "That doesn't seem to do anything."],
+            'Push': ["It won't budge.", "It's heavier than it looks.", "I'm not strong enough to move that."],
+            'Pull': ["It's stuck.", "I'm pulling, but nothing's happening.", "It seems firmly attached."],
+            'Nothing': ["Nothing there.", "I'm staring at the scenery.", "Just empty space.", "Yep, that's part of the background."],
+            'Default': ["I can't do that.", "No.", "Doesn't work.", "Maybe later."],
+            'Item': ["Using {I} on {T}... nope.", "That doesn't fit.", "I don't think {I} works with {T}.", "Unlikely."]
+        };
+
         this.ui = new ScummUI(this.canvas.width, this.canvas.height);
         this.input = new InputManager(this.canvas);
         this._lastTime = null;
@@ -137,15 +149,48 @@ class Engine {
             } else if (this.ui.selectedVerb === 'Walk to') {
                 const clamped = this.room.clampToWalkbox(mx, my);
                 if (this.player) this.player.walkTo(clamped.x, clamped.y);
+            } else if (!this.ui.isInPanel(mx, my)) {
+                // Clicked on background (no hotspot)
+                if (this.ui.selectedVerb !== 'Walk to') {
+                    this.triggerQuip('Nothing');
+                }
             }
         });
+    }
+
+    triggerQuip(type, targetName = '', itemName = '') {
+        const list = this.quips[type] || this.quips['Default'];
+        let text = list[Math.floor(Math.random() * list.length)];
+        text = text.replace('{T}', targetName || 'thing');
+        text = text.replace('{I}', itemName || 'item');
+        this.say(text);
     }
 
     _onHotspotInteract(hotspot) {
         const verb = this.ui.selectedVerb;
         const item = this.ui.selectedInventoryItem;
+        
+        // Track if say was called during interaction
+        let saidSomething = false;
+        const originalSay = this.say;
+        this.say = (text, dur) => {
+            saidSomething = true;
+            originalSay.call(this, text, dur);
+        };
+
         if (typeof hotspot.onInteract === 'function') {
             hotspot.onInteract(verb, this, item);
+        }
+
+        this.say = originalSay;
+
+        // Fallback if the interaction didn't trigger any dialogue
+        if (!saidSomething && verb !== 'Walk to') {
+            if (item) {
+                this.triggerQuip('Item', hotspot.name, (typeof item === 'string' ? item : item.name));
+            } else {
+                this.triggerQuip(verb, hotspot.name);
+            }
         }
     }
 
