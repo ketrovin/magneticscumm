@@ -119,6 +119,14 @@ const FRAME_W = 59, FRAME_H = 163; // Updated fallback
 //   Bottom mini-row (y≈555): 6 small talk/idle frames
 //
 // All coords are ESTIMATES — tweak if sprites appear offset.
+const PELLERIN_ANIMS = {
+    walkFront: { row: 0, count: 4, startFrame: 0, fps: 8 },
+    walkR:     { row: 0, count: 4, startFrame: 5, fps: 8, flipH: true },
+    walkBack:  { row: 1, count: 4, startFrame: 0, fps: 8 },
+    walkL:     { row: 1, count: 4, startFrame: 5, fps: 8 },
+    idle:      { row: 0, count: 1, startFrame: 0, fps: 1 },
+    talk:      { row: 3, count: 4, startFrame: 5, fps: 6 }
+};
 const CHARGEN_ANIMS = {
     walkR: {
         fps: 8,
@@ -162,7 +170,7 @@ const CHARGEN_ANIMS = {
  * Engine.changeRoom re-adds room.npcs on every room entry automatically.
  * If sheet is null the NPC remains dialogue-only (hotspot still works).
  */
-function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 1.0, cols = 9, rows = 4 }) {
+function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 1.0, cols = 9, rows = 4, anims = null }) {
     if (!sheet) return;
 
     const w = sheet.naturalWidth || sheet.width;
@@ -176,7 +184,7 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     const frameW = w / cols;
     const frameH = h / rows;
 
-    const customAnims = {
+    const customAnims = anims || {
         idle: { row: 0, count: 2, fps: 1.5 }, // Subtle breathing effect
         walkR: { row: 1, count: 8, fps: 8 },
         walkL: { row: 2, count: 8, fps: 8 },
@@ -192,10 +200,12 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     actor.speed = 0; 
     actor.color = color;
 
-    // Talking animation: Cycle front-walk or just play
+    // Talking animation
     actor.talkAnim = () => {
-        anim.play('walkFront');
-        setTimeout(() => anim.play('idle'), 1500);
+        if (customAnims.talk) anim.play('talk');
+        else if (customAnims.walkFront) anim.play('walkFront');
+        
+        setTimeout(() => anim.play('idle'), 2500);
     };
 
     room.npcs = room.npcs ?? [];
@@ -2515,7 +2525,11 @@ async function main() {
 
     { // Geo strata — Dr. Pellerin (been here since 1987)
         const r = buildGeoStrata(geoStrataBg);
-        const pellerin = buildNPCActor({ room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', x: 175, y: 450, sheet: npcPellerin, color: '#ffcc00', cols: 9, rows: 4 });
+        const pellerin = buildNPCActor({ 
+            room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', 
+            x: 175, y: 450, sheet: npcPellerin, 
+            color: '#ffcc00', scale: 1.3, anims: PELLERIN_ANIMS 
+        });
         
         if (pellerin) {
             pellerin.onInteract = (v, e) => {

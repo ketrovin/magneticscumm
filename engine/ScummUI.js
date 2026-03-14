@@ -44,12 +44,12 @@ class ScummUI {
 
         // Dialog choice area (same as verb area)
         this.dialogChoiceRects = [];
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < 6; i++) {
             this.dialogChoiceRects.push({
                 x: 20,
-                y: this.panelY + 36 + i * 25,
+                y: this.panelY + 32 + i * 20,
                 w: this.verbAreaW - 40,
-                h: 25
+                h: 20
             });
         }
     }
