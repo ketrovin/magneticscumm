@@ -282,18 +282,7 @@ function buildBedroom(bg) {
                     else e.say("My trusty computer. It's so old, it actually has 'adventure' listed as a hardware requirement.");
                 }
             },
-            // Cell phone — sitting on desk next to computer
-            {
-                id: 'phone', name: 'Cell Phone', x: 615, y: 305, w: 50, h: 50, walkToX: 620, walkToY: 450,
-                onInteract(v, e, item) {
-                    if (v === 'Pick up') {
-                        if (e.hasItem('cell_phone')) { e.say("I already have my phone. Zero bars, zero friends, 100% fish screensaver."); }
-                        else { e.addItem('cell_phone', 'Cell Phone'); e.say("My cell phone! It's low on battery and even lower on purpose, but at least I can look busy while I'm being ignored."); }
-                    } else if (v === 'Use' || (item && (item.id === 'cell_phone' || item === 'cell_phone'))) {
-                        window._openPhoneMenu(e);
-                    } else { e.say("My phone is sitting next to the computer. It hasn't buzzed since 2004. I'm sure it's just a network issue."); }
-                }
-            },
+
             // Green carpet — Push/Pull to reveal trapdoor
             {
                 id: 'carpet', name: 'Green Rug', x: 270, y: 300, w: 300, h: 150, walkToX: 420, walkToY: 450,
@@ -2148,10 +2137,7 @@ async function main() {
         id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120,
         isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; }
     });
-    bedroom.props.push({
-        id: 'phone_prop', image: itemIcons['cell_phone'], x: 620, y: 310, w: 40, h: 40,
-        isVisible(e) { return !e.hasItem('cell_phone'); }
-    });
+
     engine.registerRoom(bedroom);
 
     const kitchen = buildKitchen(kitchenBg);
@@ -2690,7 +2676,8 @@ async function main() {
     // Initialize music tracks in engine
     engine.gameState.music.tracks = MUSIC_TRACKS;
 
-    // Start in bedroom
+    // Start in bedroom with phone
+    engine.addItem('cell_phone', 'Cell Phone');
     engine.changeRoom('bedroom', 480, 450);
     engine.start();
 
