@@ -2470,7 +2470,7 @@ async function main() {
             walkR: { row: 0, count: 6, fps: 8 },
             walkL: { row: 0, count: 6, fps: 8, flipH: true },
         },
-        'auto' // Enable auto-transparency for Dave3.png
+        null // Background already removed in Dave3.png
     );
     animator.play('idle');
 
