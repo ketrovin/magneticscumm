@@ -596,7 +596,7 @@ function buildAlley(bg) {
             // The Herring Club door + doorman
             {
                 id: 'club_door', name: 'Herring Club Door', x: 590, y: 220, w: 200, h: 310, walkToX: 660, walkToY: 470,
-                onInteract(v, e) {
+                onInteract(v, e, item) {
                     const s = e.getRoomState('alley');
                     if (v === 'Use' && item && (item === 'battle_bread' || item.id === 'battle_bread')) {
                         e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
@@ -2250,7 +2250,7 @@ async function main() {
             loadImage('npc_pawnbroker.png'),
             loadImage('npc_officer.png'),
             loadImage('assets/cat.png'),
-            loadImage('npc_woman_scientist .png'),
+            loadImage('npc_woman_scientist.png'),
             loadImage('npc_weather_scientist.png'),
             loadImage('npc_raccoon.png'),
             loadImage('assets/trapdoor_patch.png'),
