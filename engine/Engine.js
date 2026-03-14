@@ -153,7 +153,26 @@ class Engine {
         if (callback) callback(index, choice);
     }
 
-    // ── Room state helpers ─────────────────────────────────────────────────
+    // ── Interactable helpers ───────────────────────────────────────────────
+    getInteractableAt(mx, my) {
+        if (!this.room) return null;
+
+        // 1. Check actors (front to back)
+        const actors = [...this.actors]
+            .filter(a => a.isVisible !== false)
+            .sort((a, b) => b.y - a.y); // Closest to bottom = front
+            
+        for (const actor of actors) {
+            const h = actor.getHitbox();
+            if (mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) {
+                return h; // Returns hitbox object which acts like a hotspot
+            }
+        }
+
+        // 2. Check room hotspots
+        return this.room.getHotspotAt(mx, my, this);
+    }
+
     getRoomState(roomId) {
         if (!this.gameState.roomStates[roomId])
             this.gameState.roomStates[roomId] = {};
@@ -165,7 +184,7 @@ class Engine {
         this.input.onMouseMove((mx, my) => {
             this.ui.onMouseMove(mx, my);
             if (this.room && !this.ui.isInPanel(mx, my)) {
-                this.ui.hoveredHotspot = this.room.getHotspotAt(mx, my, this);
+                this.ui.hoveredHotspot = this.getInteractableAt(mx, my);
             } else {
                 this.ui.hoveredHotspot = null;
             }
@@ -176,7 +195,7 @@ class Engine {
             if (verbClicked) return;
             if (!this.room) return;
 
-            const hotspot = this.room.getHotspotAt(mx, my, this);
+            const hotspot = this.getInteractableAt(mx, my);
             if (hotspot) {
                 // Walk Dave toward hotspot centre first, then interact
                 if (this.player) {

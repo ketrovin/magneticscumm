@@ -9,6 +9,7 @@ class Actor {
         this.x = x;
         this.y = y;
         this.animator = animator;
+        this.onInteract = null; // Optional callback for clicks
         this.speed = 120; // pixels per second (at canvas resolution)
         this.target = null;    // { x, y }
         this.facing = 'right'; // 'left' | 'right'
@@ -79,6 +80,21 @@ class Actor {
             ctx.font = '10px monospace';
             ctx.fillText(this.name, this.x - 12, this.y - (this.animator.defaultFrameH * this.animator.scale) - 4);
         }
+    }
+
+    /** Return current screen-space hitbox based on animator frames */
+    getHitbox() {
+        const sw = this.animator.defaultFrameW * this.animator.scale;
+        const sh = this.animator.defaultFrameH * this.animator.scale;
+        return {
+            id: this.id,
+            name: this.name,
+            x: this.x - sw / 2,
+            y: this.y - sh,
+            w: sw,
+            h: sh,
+            onInteract: this.onInteract
+        };
     }
 }
 

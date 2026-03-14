@@ -606,16 +606,6 @@ function buildAlley(bg) {
                 id: 'club_door', name: 'Herring Club Door', x: 590, y: 220, w: 200, h: 310, walkToX: 660, walkToY: 470,
                 onInteract(v, e, item) {
                     const s = e.getRoomState('alley');
-                    if (v === 'Use' && item && (item === 'battle_bread' || item.id === 'battle_bread')) {
-                        e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
-                        s.bouncerKnockedOut = true;
-                        const bouncer = e.actors.find(a => a.id === 'doorman_npc');
-                        if (bouncer) bouncer.isVisible = false;
-                        e.addItem('club_key', 'Herring Club Key');
-                        e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
-                        return;
-                    }
-
                     if (s.bouncerKnockedOut) {
                         if (v === 'Open' || v === 'Walk to' || v === 'Use') {
                             e.say("The doorman is snoring. I step over him and enter the Herring Club. It smells like exclusivity and tartar sauce.");
@@ -625,6 +615,13 @@ function buildAlley(bg) {
                     }
 
                     if (v === 'Talk to' || v === 'Knock' || v === 'Use' || v === 'Open') {
+                        // Forward interaction to bouncer logic if he's still there
+                        const bouncer = e.actors.find(a => a.id === 'doorman_npc');
+                        if (bouncer && bouncer.isVisible && bouncer.onInteract) {
+                            bouncer.onInteract(v, e, item);
+                            return;
+                        }
+
                         // Dave's Not Here joke — cycles through exchange
                         s.daveCount = (s.daveCount || 0) + 1;
                         if (s.daveCount === 1) {
@@ -2252,17 +2249,17 @@ async function main() {
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('assets/herring_club_bg.png'),
-            loadImage('Dave3.png'),
+            loadImage('assets/Dave3.png'),
             // NPC sprite sheets
-            loadImage('npc_baker_.png'),
-            loadImage('npc_poutine_guy.png'),
-            loadImage('npc_bouncer.png'),
-            loadImage('npc_pawnbroker.png'),
-            loadImage('npc_officer.png'),
+            loadImage('assets/npc_baker_.png'),
+            loadImage('assets/npc_poutine_guy.png'),
+            loadImage('assets/npc_bouncer.png'),
+            loadImage('assets/npc_pawnbroker.png'),
+            loadImage('assets/npc_officer.png'),
             loadImage('assets/cat.png'),
-            loadImage('npc_woman_scientist.png'),
-            loadImage('npc_weather_scientist.png'),
-            loadImage('npc_raccoon.png'),
+            loadImage('assets/npc_woman_scientist.png'),
+            loadImage('assets/npc_weather_scientist.png'),
+            loadImage('assets/npc_raccoon.png'),
             loadImage('assets/trapdoor_patch.png'),
             loadImage('assets/rug_rolled_up.png'),
             loadImage('assets/item_pizza.png')
@@ -2345,6 +2342,33 @@ async function main() {
         const r = buildAlley(alleyBg);
         const bouncer = buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff' });
         
+        bouncer.onInteract = (v, e, item) => {
+            const s = e.getRoomState('alley');
+            const itemId = (item && (typeof item === 'string' ? item : item.id));
+            if (v === 'Use' && itemId === 'battle_bread') {
+                e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
+                s.bouncerKnockedOut = true;
+                bouncer.isVisible = false;
+                e.addItem('club_key', 'Herring Club Key');
+                e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
+                return;
+            }
+
+            // Dave's Not Here joke logic
+            if (v === 'Talk to' || v === 'Knock' || v === 'Use' || v === 'Open') {
+                s.daveCount = (s.daveCount || 0) + 1;
+                if (s.daveCount === 1) {
+                    e.say("I knock on the doorman's resolve. Voice from inside: 'Who's there?' Me: 'Dave.' Voice: 'Dave's not here, man.'");
+                } else if (s.daveCount === 2) {
+                    e.say("I try again. 'DAVE IS RIGHT HERE.' Bouncer: 'Dave's not here, man.' He seems committed to the bit.");
+                } else if (s.daveCount === 3) {
+                    e.say("Third time's a charm? 'I AM DAVE.' Bouncer: 'Dave's not here, man.' ...I'm starting to believe him.");
+                } else {
+                    e.say("He won't let me in. He's firmly convinced I'm not here. It's an existential crisis in a cyan suit.");
+                }
+            }
+        };
+
         // Ensure bouncer hides if already knocked out on room entry
         r.onEnter = (e) => {
             if (e.getRoomState('alley').bouncerKnockedOut) {
