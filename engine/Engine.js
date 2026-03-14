@@ -142,6 +142,9 @@ class Engine {
         this.gameState.activeDialogChoices = choices;
         this.gameState.onChoiceCallback = callback;
         this.ui.selectedVerb = null; // Hide the active verb pointer
+        
+        // Track that we successfully entered a conversation to prevent fallback quips
+        this.gameState._interactTriggered = true;
     }
 
     onChoiceClick(index) {
@@ -232,11 +235,11 @@ class Engine {
         const verb = this.ui.selectedVerb;
         const item = this.ui.selectedInventoryItem;
         
-        // Track if say was called during interaction
-        let saidSomething = false;
+        // Track if any activity was triggered during interaction
+        this.gameState._interactTriggered = false;
         const originalSay = this.say;
         this.say = (text, dur, speaker) => {
-            saidSomething = true;
+            this.gameState._interactTriggered = true;
             originalSay.call(this, text, dur, speaker);
         };
 
@@ -246,8 +249,8 @@ class Engine {
 
         this.say = originalSay;
 
-        // Fallback if the interaction didn't trigger any dialogue
-        if (!saidSomething && verb !== 'Walk to') {
+        // Fallback if the interaction didn't trigger any dialogue or menu
+        if (!this.gameState._interactTriggered && verb !== 'Walk to') {
             if (item) {
                 this.triggerQuip('Item', hotspot.name, (typeof item === 'string' ? item : item.name));
             } else {

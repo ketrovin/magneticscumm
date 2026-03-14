@@ -2175,111 +2175,246 @@ async function main() {
 
         engine.registerRoom(r);
     }
-    { // Herring Club — weather scientist
+    { // Herring Club — Weatherman (Enthusiastic Meteorological Observer)
         const r = buildHerringClub(herringClubBg);
-        const weatherScientist = buildNPCActor({ room: r, id: 'weather_npc', name: 'Weather Scientist', x: 480, y: 460, sheet: npcWeatherSheet, color: '#ffff55', cols: 9, rows: 4 });
+        const weatherman = buildNPCActor({ room: r, id: 'weather_npc', name: 'Weatherman', x: 480, y: 460, sheet: npcWeatherSheet, color: '#ffff55', cols: 9, rows: 4 });
         
-        if (weatherScientist) {
-            weatherScientist.onInteract = (v, e) => {
+        if (weatherman) {
+            weatherman.onInteract = (v, e) => {
                 if (v === 'Talk to') {
-                    const startWeatherBranch = () => {
-                        e.enterDialog([
-                            "Tell me about the clouds!",
-                            "Why all the rain?",
-                            "What's with the wind?",
-                            "Tell me about Thermodynamics!",
-                            "I'm bored, let's go."
-                        ], (idx) => {
-                            if (idx === 0) {
-                                e.say("Weather Scientist: 'CLOUDS! They are the lungs of the sky! Cumulonimbus, Cirrus, Altostratus! It's a grand ballet of moisture and pressure!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Tell me about the Bergeron-Findeisen process!",
-                                        "How much does a cloud weigh?",
-                                        "Back.",
-                                        "I'm bored, let's go."
-                                    ], (idx2) => {
-                                        if (idx2 === 0) {
-                                            e.say("Weather Scientist: 'The process of ice crystal growth in mixed-phase clouds! Water vapor deposits on ice at the expense of liquid droplets! It's the engine of precipitation!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx2 === 1) {
-                                            e.say("Weather Scientist: 'A single cumulus can weigh a million pounds! It stays afloat because it's slightly warmer than the surrounding air. Thermodynamics in action!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx2 === 2) startWeatherBranch();
-                                        else e.say("Weather Scientist: 'Keep your head in the clouds, Dave!'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 1) {
-                                e.say("Weather Scientist: 'Precipitation is the planet's way of recycling its spirit! It's GEOPHYSICAL CELEBRATION!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Tell me about Adiabatic Cooling!",
-                                        "What about Orographic Lift?",
-                                        "Back.",
-                                        "I'm bored, let's go."
-                                    ], (idx3) => {
-                                        if (idx3 === 0) {
-                                            e.say("Weather Scientist: 'The reduction of heat as air pressure decreases! Rising air expands and cools, leading to saturation and condensation! It's the fundamental law of the troposphere!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx3 === 1) {
-                                            e.say("Weather Scientist: 'Air forced upward by terrain! As it rises over the Magnetic Hill, it cools adiabatically and dumps its moisture! That's why Moncton is so... damp!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx3 === 2) startWeatherBranch();
-                                        else e.say("Weather Scientist: 'Don't forget your yellow raincoat!'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 2) {
-                                e.say("Weather Scientist: 'The wind is the Earth's breath! It carries the seeds of time!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Tell me about the Coriolis Effect!",
-                                        "What is Geostrophic Balance?",
-                                        "Back.",
-                                        "I'm bored, let's go."
-                                    ], (idx4) => {
-                                        if (idx4 === 0) {
-                                            e.say("Weather Scientist: 'The deflection of moving objects due to Earth's rotation! It curves the winds into the great cyclones! It's the invisible hand of the world!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx4 === 1) {
-                                            e.say("Weather Scientist: 'The equilibrium between the Pressure Gradient Force and the Coriolis Force! It's why the wind blows parallel to the isobars! It's mathematical beauty!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx4 === 2) startWeatherBranch();
-                                        else e.say("Weather Scientist: 'The wind will always find you, Dave.'");
-                                    });
-                                }, 4000);
-                            } else if (idx === 3) {
-                                e.say("Weather Scientist: 'THERMODYNAMICS! The study of energy and entropy! It's the reason anything happens at all!'");
-                                setTimeout(() => {
-                                    e.enterDialog([
-                                        "Explain Latent Heat!",
-                                        "What about Convection?",
-                                        "Back.",
-                                        "I'm bored, let's go."
-                                    ], (idx5) => {
-                                        if (idx5 === 0) {
-                                            e.say("Weather Scientist: 'The energy absorbed or released during a phase change! When water vapor condenses, it releases heat, fueling the massive power of thunderstorms!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx5 === 1) {
-                                            e.say("Weather Scientist: 'Vertical transport of heat and moisture! Warm air rises, cold air sinks—creating the currents that build the sky! It's a never-ending cycle of energy!'");
-                                            setTimeout(startWeatherBranch, 5000);
-                                        } else if (idx5 === 2) startWeatherBranch();
-                                        else e.say("Weather Scientist: 'May your entropy always be low, Dave!'");
-                                    });
-                                }, 4000);
-                            } else {
-                                const s = e.getRoomState('herring_club');
-                                if (!s.gotToken) {
-                                    s.gotToken = true;
-                                    e.addItem('fishy_token', 'Fishy Token');
-                                    e.say("Weather Scientist: 'Wait! Before you depart, take this FISHY TOKEN. It acknowledges your atmospheric excellence!'");
-                                } else e.say("Weather Scientist: 'Keep your eyes on the barometer, friend!'");
-                            }
-                        });
-                    };
-                    startWeatherBranch();
+                    e.say("Dave: 'Excuse me, are you the one everyone calls the Weatherman?'");
+                    
+                    setTimeout(() => {
+                        e.say("Weatherman: 'Dave! You've arrived just as the barometric pressure is plummeting! We're seeing a textbook example of cyclogenesis right outside! The atmosphere is vibrating with potential! What shall we analyze first?'");
+                        
+                        setTimeout(() => {
+                            const startWeatherBranch = () => {
+                                e.enterDialog([
+                                    "I want to discuss Atmospheric Dynamics and Vorticity.",
+                                    "Let's analyze Cloud Microphysics and Phase Changes.",
+                                    "Can we debate the Thermodynamics of Convection?",
+                                    "I'm curious about Synoptic-Scale Systems.",
+                                    "Explain the nuances of Radiative Transfer and Albedo.",
+                                    "[Leave] 'I think my brain is melting, I have to go.'"
+                                ], (idx) => {
+                                    if (idx === 0) {
+                                        e.say("Dave: 'I want to discuss Atmospheric Dynamics and Vorticity.'");
+                                        setTimeout(() => {
+                                            e.say("Weatherman: 'VORTICITY! The measure of local rotation in the fluid flow! We're talking about the interplay between curvature and shear! It's the very soul of the wind!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "Tell me about Vorticity Advection!",
+                                                    "Explain the Coriolis parameter (f)?",
+                                                    "How does it relate to Geostrophic Balance?",
+                                                    "Back to the main menu.",
+                                                    "[Leave] 'I need to step outside for some... non-spinning air.'"
+                                                ], (idx2) => {
+                                                    if (idx2 === 0) {
+                                                        e.say("Dave: 'Tell me about Vorticity Advection.'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'Positive vorticity advection in the upper troposphere leads to upward vertical motion! It's why we get low-pressure systems, Dave! It's literally pulling the air up from the surface!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx2 === 1) {
+                                                        e.say("Dave: 'Can you explain the Coriolis parameter, f?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'f = 2 * Ω * sin(φ)! It depends entirely on your latitude! At the equator, it's zero! That's why hurricanes can't cross the line! The physics won't allow it!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx2 === 2) {
+                                                        e.say("Dave: 'How does this relate to Geostrophic Balance?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'When the pressure gradient force perfectly balances the Coriolis force, the wind flows parallel to the isobars! It's an approximation, but a beautiful one!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx2 === 3) {
+                                                        startWeatherBranch();
+                                                    } else {
+                                                        e.say("Dave: 'I need to step outside for some... non-spinning air.'");
+                                                        setTimeout(() => e.say("Weatherman: 'The atmosphere never stops spinning, Dave! Even if you do!'"), 4000);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 4000);
+                                    } else if (idx === 1) {
+                                        e.say("Dave: 'Let's analyze Cloud Microphysics and Phase Changes.'");
+                                        setTimeout(() => {
+                                            e.say("Weatherman: 'MICROPHYSICS! The secret life of a droplet! We're talking about nucleation, accretion, and the complex geometry of dendrites!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "Explain the Bergeron-Findeisen Process.",
+                                                    "What is Collisional Coalescence?",
+                                                    "Tell me about the Latent Heat of Deposition.",
+                                                    "Back.",
+                                                    "[Leave] 'My interest is evaporating. Goodbye.'"
+                                                ], (idx3) => {
+                                                    if (idx3 === 0) {
+                                                        e.say("Dave: 'Explain the Bergeron-Findeisen Process.'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'Ice crystals have a lower saturation vapor pressure than liquid water! So the crystals grow at the expense of the droplets! It's the primary way we get rain in the mid-latitudes!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx3 === 1) {
+                                                        e.say("Dave: 'What exactly is Collisional Coalescence?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'Larger droplets fall faster, smashing into smaller ones and merging! It's the dominant process in warm tropical clouds! A violent, wet chain reaction!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx3 === 2) {
+                                                        e.say("Dave: 'Tell me about the Latent Heat of Deposition.'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'When water vapor goes straight to ice, bypassing the liquid phase! It releases 2834 kJ/kg of energy! That energy fuels the updraft! It's a self-sustaining engine of power!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx3 === 3) {
+                                                        startWeatherBranch();
+                                                    } else {
+                                                        e.say("Dave: 'My interest is evaporating. Goodbye.'");
+                                                        setTimeout(() => e.say("Weatherman: 'Keep an eye on the dew point, Dave!'"), 4000);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 4000);
+                                    } else if (idx === 2) {
+                                        e.say("Dave: 'Can we debate the Thermodynamics of Convection?'");
+                                        setTimeout(() => {
+                                            e.say("Weatherman: 'THERMODYNAMICS! Let's plot our path on a Skew-T Log-P diagram! We're looking at stability, buoyancy, and the LCL!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "Can you explain CAPE vs CIN?",
+                                                    "What is the Dry Adiabatic Lapse Rate?",
+                                                    "What is the Level of Free Convection?",
+                                                    "Back.",
+                                                    "[Leave] 'I'm reaching my thermal limit. Bye.'"
+                                                ], (idx4) => {
+                                                    if (idx4 === 0) {
+                                                        e.say("Dave: 'Can you explain the difference between CAPE and CIN?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'CAPE is the potential energy available to a rising parcel! CIN is the 'cap' holding it back! When the CIN breaks... BOOM! Thunderstorms!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx4 === 1) {
+                                                        e.say("Dave: 'What exactly is the Dry Adiabatic Lapse Rate?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: '9.8°C per kilometer! It's how much an unsaturated parcel cools as it rises! Once it hits saturation, it switches to the Moist rate! The transition is crucial!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx4 === 2) {
+                                                        e.say("Dave: 'What is the Level of Free Convection?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'The altitude where a parcel becomes warmer than its environment and starts rising on its own! It's the launchpad of the sky, Dave!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx4 === 3) {
+                                                        startWeatherBranch();
+                                                    } else {
+                                                        e.say("Dave: 'I'm reaching my thermal limit. Bye.'");
+                                                        setTimeout(() => e.say("Weatherman: 'May your entropy always be descending, Dave!'"), 4000);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 4000);
+                                    } else if (idx === 3) {
+                                        e.say("Dave: 'I'm curious about Synoptic-Scale Systems.'");
+                                        setTimeout(() => {
+                                            e.say("Weatherman: 'SYNOPTIC METEROLOGY! The big picture! Rossby waves, baroclinic instability, and the great conveyor belts of the atmosphere!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "What is Baroclinic Instability?",
+                                                    "How does the Warm Conveyor Belt work?",
+                                                    "Explain Teleconnections like ENSO.",
+                                                    "Back.",
+                                                    "[Leave] 'I can't handle the scale of this. See ya.'"
+                                                ], (idx5) => {
+                                                    if (idx5 === 0) {
+                                                        e.say("Dave: 'What exactly is Baroclinic Instability?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'When potential energy stored in horizontal temperature gradients is converted into the kinetic energy of a storm! It's why we have mid-latitude cyclones at all!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx5 === 1) {
+                                                        e.say("Dave: 'How does the Warm Conveyor Belt work?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'A stream of warm, moist air originating in the subtropics and riding up over the warm front! It's responsible for the vast majority of our precipitation!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx5 === 2) {
+                                                        e.say("Dave: 'Can you explain Teleconnections like ENSO?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'The El Niño Southern Oscillation! Changes in sea surface temps in the Pacific that shift the entire global jet stream! Everything is connected, Dave!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx5 === 3) {
+                                                        startWeatherBranch();
+                                                    } else {
+                                                        e.say("Dave: 'I can't handle the scale of this. See ya.'");
+                                                        setTimeout(() => e.say("Weatherman: 'The atmosphere is a global conversation, Dave! Try to keep up!'"), 4000);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 4000);
+                                    } else if (idx === 4) {
+                                        e.say("Dave: 'Explain the nuances of Radiative Transfer and Albedo.'");
+                                        setTimeout(() => {
+                                            e.say("Weatherman: 'RADIATIVE TRANSFER! The energy balance! From shortwave solar flux to longwave terrestrial emission! It's the bookkeeping of the planet!'");
+                                            setTimeout(() => {
+                                                e.enterDialog([
+                                                    "Tell me about the Albedo Effect.",
+                                                    "Explain the Stefan-Boltzmann Law.",
+                                                    "What are the Greenhouse Gas Absorption Windows?",
+                                                    "Back.",
+                                                    "[Leave] 'I'm radiating out of here. Goodbye.'"
+                                                ], (idx6) => {
+                                                    if (idx6 === 0) {
+                                                        e.say("Dave: 'Tell me about the Albedo Effect.'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'The reflectivity of a surface! Fresh snow has an albedo of 0.9! It reflects 90% of the energy! The ocean? Only about 0.06! It's a massive feedback loop!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx6 === 1) {
+                                                        e.say("Dave: 'Can you explain the Stefan-Boltzmann Law?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'The power radiated by a black body is proportional to the fourth power of its temperature! Double the temp, and you get SIXTEEN times the energy! It's exponential madness!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx6 === 2) {
+                                                        e.say("Dave: 'What are the Greenhouse Gas Absorption Windows?'");
+                                                        setTimeout(() => {
+                                                            e.say("Weatherman: 'Certain wavelengths of infrared escape to space, but CO2 and Methane 'close the window' on others! It's the blanket that keeps us from freezing solid!'");
+                                                            setTimeout(startWeatherBranch, 7000);
+                                                        }, 4000);
+                                                    } else if (idx6 === 3) {
+                                                        startWeatherBranch();
+                                                    } else {
+                                                        e.say("Dave: 'I'm radiating out of here. Goodbye.'");
+                                                        setTimeout(() => e.say("Weatherman: 'Don't let your shortwave radiation get blocked on the way out, Dave!'"), 4000);
+                                                    }
+                                                });
+                                            }, 5000);
+                                        }, 4000);
+                                    } else {
+                                        e.say("Dave: 'I think my brain is melting, I have to go.'");
+                                        setTimeout(() => {
+                                            const s = e.getRoomState('herring_club');
+                                            if (!s.gotToken) {
+                                                s.gotToken = true;
+                                                e.addItem('fishy_token', 'Fishy Token');
+                                                e.say("Weatherman: 'Leaving so soon? The fog is just reaching saturation! But wait—take this FISHY TOKEN. It's awarded only to those who survive a full synoptic overview! Be well, Dave!'");
+                                            } else {
+                                                e.say("Weatherman: 'The observations never stop, Dave! Come back when you're ready for more... enlightenment!'");
+                                            }
+                                        }, 4000);
+                                    }
+                                });
+                            };
+                            startWeatherBranch();
+                        }, 5000);
+                    }, 4000);
                 } else if (v === 'Look at') {
-                    e.say("A scientist in a very bright yellow raincoat. He's holding a barometer and looking at the ceiling as if he's expecting a hurricane.");
-                } else e.say("He's busy calculating the dew point. Best not to interfere.");
+                    e.say("The Weatherman is practically vibrating with scientific zeal. His yellow raincoat is covered in scribbled formulas for potential vorticity and latent heat. He looks like he hasn't looked at anything besides a barometer for three weeks.");
+                } else if (v === 'Push' || v === 'Pull') {
+                    e.say("Weatherman: 'Careful, Dave! You're threatening to disrupt my laminar flow! I'm currently a stationary front; I don't suggest trying to accelerate this air mass!'");
+                } else e.say("He's far too busy plotting isentropic surfaces to notice that.");
             };
         }
         engine.registerRoom(r);
