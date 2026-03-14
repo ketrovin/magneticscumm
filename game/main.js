@@ -1770,56 +1770,70 @@ function buildGeoStrata(bg) {
                     if (v === 'Talk to') {
                         const startBranch = () => {
                             e.enterDialog([
-                                "Who are you?",
-                                "What is this place?",
-                                "The magnetic hill...",
+                                "Tell me about the strata!",
+                                "How does weather affect this?",
+                                "What about 'Deep Time'?",
                                 "Bye."
                             ], (idx) => {
                                 if (idx === 0) {
-                                    e.say("Dr. Pellerin: 'I am Dr. Réjean Pellerin, geological surveyor. I have been down here for six weeks. Or maybe since 1987. Time is... different under the Shield.'");
-                                    setTimeout(startBranch, 4000);
-                                } else if (idx === 1) {
-                                    e.say("Dr. Pellerin: 'This is the Geo Strata room. Van Horne built it to study the Precambrian Shield. He was obsessed with literal foundations.'");
+                                    e.say("Dr. Pellerin: 'Oh! The STRATA! Look at these rhythmic successions! These are billions of years of story told in silicate and carbonate! Each layer is a fossilized mood of the planet!'");
                                     setTimeout(() => {
                                         e.enterDialog([
-                                            "Tell me about the Van Hornes.",
-                                            "Foundations for what?",
+                                            "What are we looking at right here?",
+                                            "Is it all just rock?",
                                             "Back."
                                         ], (idx2) => {
                                             if (idx2 === 0) {
-                                                e.say("Dr. Pellerin: 'They were a family of steel and stone. Van Horne senior didn't believe in progress, only in persistence. His son... he only believed in himself.'");
-                                                setTimeout(startBranch, 4000);
+                                                e.say("Dr. Pellerin: 'This! This is the Grenville Province! It's a high-grade metamorphic belt. We're talking granulite and amphibolite facies! It was cooked in the heart of a mountain range taller than the Himalayas!'");
+                                                setTimeout(startBranch, 5000);
                                             } else if (idx2 === 1) {
-                                                e.say("Dr. Pellerin: 'For a legacy that never ends. He wanted to build the tallest tower in Moncton. On top of a magnetic hill. He didn't understand the pull until it was too late.'");
-                                                setTimeout(startBranch, 4000);
+                                                e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure from the assembly of Rodinia!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else startBranch();
+                                        });
+                                    }, 4000);
+                                } else if (idx === 1) {
+                                    e.say("Dr. Pellerin: 'Weathering! The great sculptor! Even down here, the rain from millions of years ago has left its CHEMICAL signature. Water is the universal solvent, and it has an ETERNITY to work!'");
+                                    setTimeout(() => {
+                                        e.enterDialog([
+                                            "Does it reach down here?",
+                                            "What about the current weather?",
+                                            "Back."
+                                        ], (idx3) => {
+                                            if (idx3 === 0) {
+                                                e.say("Dr. Pellerin: 'Hydrothermal alteration, Dave! Hot fluids circulating through cracks, depositing minerals! It's weather from the INSIDE! It's glorious!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else if (idx3 === 1) {
+                                                e.say("Dr. Pellerin: 'The rain today is a blink. But over a million blinks, it carves the hill above us. Erosion is just the planet's way of showing its bones!'");
+                                                setTimeout(startBranch, 5000);
                                             } else startBranch();
                                         });
                                     }, 4000);
                                 } else if (idx === 2) {
-                                    e.say("Dr. Pellerin: 'The magnet above is a toy. The true power is in the Shield below. It pulls at the mind as much as the metal.'");
+                                    e.say("Dr. Pellerin: 'Deep Time is the only time that matters! We are standing on 3.8 BILLION years of history. To the Shield, a human life is just a single photon's transit across a room!'");
                                     setTimeout(() => {
                                         e.enterDialog([
-                                            "Is the murder related?",
-                                            "Can I help you get out?",
+                                            "Does it make you feel small?",
+                                            "How do you track it?",
                                             "Back."
-                                        ], (idx3) => {
-                                            if (idx3 === 0) {
-                                                e.say("Dr. Pellerin: 'A man was found in the foyer? Interesting. The pull of the magnet works in strange ways. Sometimes it pulls people... into outlines.'");
-                                                setTimeout(startBranch, 4000);
-                                            } else if (idx3 === 1) {
-                                                e.say("Dr. Pellerin: 'Out? Why would I want to go out? I have feldspar. I have silence. If you find my report upstairs, just... leave it. I am well where I am.'");
-                                                setTimeout(startBranch, 4000);
+                                        ], (idx4) => {
+                                            if (idx4 === 0) {
+                                                e.say("Dr. Pellerin: 'Small? No! It makes me feel IMMENSE! I am the eyes through which the Shield finally gets to see itself! What a privilege!'");
+                                                setTimeout(startBranch, 5000);
+                                            } else if (idx4 === 1) {
+                                                e.say("Dr. Pellerin: 'Isotopic dating! Uranium-Lead ratios! It's like reading the clock of the universe by counting the dust on the hands. It's exhilarating!'");
+                                                setTimeout(startBranch, 5000);
                                             } else startBranch();
                                         });
                                     }, 4000);
                                 } else {
-                                    e.say("Dr. Pellerin: 'Be careful of the Shield, Dave. It doesn't forgive, and it certainly doesn't forget.'");
+                                    e.say("Dr. Pellerin: 'Keep looking at the rocks, Dave! They have so much to tell us!'");
                                 }
                             });
                         };
                         startBranch();
                     } else if (v === 'Look at') {
-                        e.say("She's wearing a lab coat that looks like it's seen better decades. Her eyes are bright with the kind of focus that only comes from staring at rocks for 30 years.");
+                        e.say("She's practically vibrating with scientific excitement. Her lab coat is stained with various mineral dusts, and she looks like she hasn't slept in a geological era.");
                     } else {
                         e.say("She looks busy with her strata. Best not to disturb the geological peace.");
                     }
