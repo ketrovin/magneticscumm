@@ -125,7 +125,7 @@ const CHARGEN_ANIMS = {
  * Engine.changeRoom re-adds room.npcs on every room entry automatically.
  * If sheet is null the NPC remains dialogue-only (hotspot still works).
  */
-function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00' }) {
+function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale = 0.55 }) {
     if (!sheet) return;
 
     // AI generated NPC sheets are 9 columns x 4 rows
@@ -143,7 +143,7 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00' }) {
     };
 
     const anim = new SpriteAnimator(sheet, frameW, frameH, customAnims, 'auto');
-    anim.scale = 0.55; // Matches Dave's typical scale
+    anim.scale = scale; // Use the provided scale
 
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
@@ -1079,8 +1079,14 @@ function buildMansionFoyer(bg) {
             },
             // Right door (locked with padlock)
             {
-                id: 'right_door', name: 'Locked Door', x: 795, y: 200, w: 140, h: 310, walkToX: 840, walkToY: 470,
-                onInteract(v, e) { e.say('Locked. With a padlock, even from the inside. Whoever locked this from the inside is either still in there or is VERY committed to privacy.'); }
+                id: 'right_door', name: 'Library Door', x: 795, y: 200, w: 140, h: 310, walkToX: 840, walkToY: 470,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') {
+                        e.changeRoom('mansion_library', 150, 440);
+                    } else {
+                        e.say('A heavy oak door. The label says "LIBRARY". It smells of old paper and even older secrets.');
+                    }
+                }
             },
             // Grand staircase
             {
@@ -2093,12 +2099,12 @@ async function main() {
     }
     { // Mansion foyer — cat on a pedestal
         const r = buildMansionFoyer(foyerBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff' });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.35 });
         engine.registerRoom(r);
     }
     { // Mansion library — cat reappears upstairs (same sheet)
         const r = buildMansionLibrary(libraryBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff' });
+        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.35 });
         engine.registerRoom(r);
     }
     engine.registerRoom(buildMansionBackyard(backyardBg));
