@@ -96,6 +96,23 @@ class Actor {
             onInteract: this.onInteract
         };
     }
+
+    /** Trigger a temporary talking animation */
+    talkAnim() {
+        if (!this.animator) return;
+        const current = this.animator.current;
+        const hasTalk = !!this.animator.animations['talk'];
+        
+        if (hasTalk) {
+            this.animator.play('talk');
+            // Revert after a delay
+            setTimeout(() => {
+                if (this.animator.current === 'talk') {
+                    this.animator.play(current || 'idle');
+                }
+            }, 2500);
+        }
+    }
 }
 
 Actor.debugMode = false;

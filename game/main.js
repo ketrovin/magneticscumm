@@ -108,6 +108,15 @@ const DAVE_ANIMS = {
             { x: 569, y: 188, w: 68, h: 149 },
             { x: 666, y: 188, w: 45, h: 149 }
         ]
+    },
+    talk: {
+        fps: 4,
+        frames: [
+            { x: 111, y: 376, w: 59, h: 163 },
+            { x: 195, y: 376, w: 58, h: 163 },
+            { x: 308, y: 376, w: 59, h: 163 },
+            { x: 389, y: 376, w: 59, h: 163 }
+        ]
     }
 };
 const FRAME_W = 59, FRAME_H = 163; // Updated fallback
@@ -732,6 +741,96 @@ function buildHerringClub(bg) {
                     } else e.say("A bright red key on a velvet cushion. It looks important. Which probably means it's a distraction.");
                 }
             },
+            // Exit to TV Weather Station
+            {
+                id: 'to_weather_station', name: 'Studio Door', x: 880, y: 340, w: 80, h: 180, walkToX: 900, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('weather_station', 120, 460);
+                    else e.say("A sound-proofed door with a red 'ON AIR' sign. It leads to the studio where they film the local weather.");
+                }
+            },
+        ]
+    });
+}
+
+// ── TV WEATHER STATION ───────────────────────────────────────────────────────
+function buildWeatherStation(bg) {
+    return new Room({
+        id: 'weather_station', name: 'TV Weather Station',
+        background: bg,
+        walkbox: [
+            { x: 50, y: 510 }, { x: 910, y: 510 },
+            { x: 800, y: 350 }, { x: 150, y: 350 },
+        ],
+        hotspots: [
+            // Back to Herring Club
+            {
+                id: 'to_herring', name: 'Studio Exit', x: 0, y: 340, w: 100, h: 180, walkToX: 80, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('herring_club', 860, 460);
+                    else e.say("The exit to the studio. It leads back to the neon lights of the Herring Club.");
+                }
+            },
+            // Green Screen
+            {
+                id: 'green_screen', name: 'Green Screen', x: 740, y: 150, w: 220, h: 360, walkToX: 800, walkToY: 470,
+                onInteract(v, e) {
+                    e.say("A massive green wall. I look at it and see potential. Also, chromakeying errors on the edge of my jacket.");
+                }
+            },
+            // Doppler Radar Monitor
+            {
+                id: 'monitor_doppler', name: 'Doppler Radar Screen', x: 150, y: 180, w: 120, h: 100, walkToX: 210, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "DOPPLER RADAR: Measures the velocity of precipitation particles.",
+                            "By tracking the change in frequency of the reflected microwave signal, meteorologists can see exactly where the rain is moving, not just where it is.",
+                            "It's our best tool for detecting the hook echo signature of a developing tornado."
+                        ]);
+                    } else e.say("A glowing screen filled with colorful blobs of precipitation patterns.");
+                }
+            },
+            // Cloud Type Chart
+            {
+                id: 'monitor_clouds', name: 'Cloud Classification Screen', x: 300, y: 180, w: 120, h: 100, walkToX: 360, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "CLOUD TYPES: Based on altitude and appearance.",
+                            "High clouds (>6km) are mostly ice: Cirrus, Cirrostratus, Cirrocumulus.",
+                            "Mid clouds (2-6km) are often liquid: Altostratus, Altocumulus.",
+                            "Low clouds (<2km) are thick: Stratus, Stratocumulus, and the vertical giant, Cumulonimbus."
+                        ]);
+                    } else e.say("A screen showing different cloud formations from wispy cirrus to massive thunderheads.");
+                }
+            },
+            // Synoptic Weather Map
+            {
+                id: 'monitor_synoptic', name: 'Synoptic Chart', x: 450, y: 180, w: 120, h: 100, walkToX: 510, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "SYNOPTIC CHART: A snapshot of the atmosphere's current state.",
+                            "Isobars connect points of equal pressure. Tight gradients mean high winds. 'L' marks low-pressure cyclones, 'H' marks high-pressure anticyclones.",
+                            "The red lines with semicircles are Warm Fronts; the blue lines with triangles are Cold Fronts."
+                        ]);
+                    } else e.say("A complex map covered in isobars and colorful front lines.");
+                }
+            },
+            // Humidity/Dew Point Station
+            {
+                id: 'station_humidity', name: 'Hygrometer Station', x: 600, y: 220, w: 100, h: 80, walkToX: 650, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "RELATIVE HUMIDITY & DEW POINT: Humidity is the percentage of moisture the air *can* hold at its current temperature.",
+                            "Dew Point is the actual temperature the air must cool to for saturation and condensation to occur.",
+                            "When the temp reaches the dew point, you get fog, dew, or clouds. The closer they are, the muggier it feels."
+                        ]);
+                    } else e.say("An instrument panel tracking moisture and temperature in the studio.");
+                }
+            }
         ]
     });
 }
@@ -1382,8 +1481,7 @@ function buildMansionLibrary(bg) {
                             e.say('The staircase has an OUT OF ORDER sign on it. I cannot use an out-of-order staircase. That would be irresponsible.');
                         } else {
                             e.say('I climb the spiral staircase. The upper level has more books. Of course it does. It\'s a library.');
-                            // Upper level — narrated for now, no separate room
-                            setTimeout(() => e.say('Up here: a reading nook, a telescope pointed at the street, and a cat who was NOT here a moment ago. The upper shelves have only one book without dust: "How To Get Away With Everything In Moncton." Checked out.'), 2500);
+                            setTimeout(() => e.changeRoom('mansion_library_balcony', 250, 460), 1000);
                         }
                     } else e.say('A beautiful wrought-iron spiral staircase. It goes up to a second level. There is currently a sign on it.');
                 }
@@ -1457,6 +1555,113 @@ function buildMansionLibrary(bg) {
                 id: 'chandelier', name: 'Chandelier', x: 360, y: 0, w: 290, h: 100,
                 onInteract(v, e) { e.say('A chandelier with all twelve candles lit. Someone lit twelve candles in this library tonight. Setting the mood for... research? Murder investigation? Both?'); }
             },
+        ]
+    });
+}
+
+// ── MANSION LIBRARY BALCONY ──────────────────────────────────────────────────
+function buildMansionLibraryBalcony(bg) {
+    return new Room({
+        id: 'mansion_library_balcony', name: 'Library Balcony',
+        background: bg,
+        walkbox: [
+            { x: 100, y: 510 }, { x: 860, y: 510 },
+            { x: 750, y: 315 }, { x: 160, y: 315 },
+        ],
+        hotspots: [
+            // Spiral staircase (Return Path)
+            {
+                id: 'to_library', name: 'Spiral Staircase (Return)', x: 185, y: 140, w: 200, h: 365, walkToX: 250, walkToY: 460,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use' || v === 'Climb' || v === 'Open') {
+                        e.say("I head back down the spiral staircase. The main library floor is calling me back to the mystery.");
+                        setTimeout(() => e.changeRoom('mansion_library', 285, 460), 1000);
+                    } else e.say('The spiral staircase leading down to the main floor. The wrought iron is beautifully crafted.');
+                }
+            },
+            // Troposphere Plaque
+            {
+                id: 'plaque_tropo', name: 'Troposphere Plaque', x: 120, y: 220, w: 80, h: 100, walkToX: 160, walkToY: 400,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "TROPOSPHERE: From the surface to ~12km. This is the 'Weather Sphere'.",
+                            "The air here is thickest and most turbulent. As the sun warms the Earth, the air rises and cools, creating the convection currents that drive our storms and winds.",
+                            "The 'Tropopause' at the top acts as a ceiling, stopping most weather from rising higher into the atmosphere."
+                        ]);
+                    } else e.say("An ornate brass plaque with diagrams of storm clouds and rising heat arrows.");
+                }
+            },
+            // Stratosphere Plaque
+            {
+                id: 'plaque_strato', name: 'Stratosphere Plaque', x: 260, y: 220, w: 80, h: 100, walkToX: 300, walkToY: 400,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "STRATOSPHERE: 12km to 50km. The 'Shielding Sphere'.",
+                            "The Ozone Layer lives here, absorbing 97-99% of the Sun's high-frequency ultraviolet light. Without this layer, life on the surface would be nearly impossible.",
+                            "Unlike the layer below, it's very stable. Commercial jets fly here to avoid the turbulence of the troposphere."
+                        ]);
+                    } else e.say("A brass plaque showing a protective layer being struck by golden solar rays.");
+                }
+            },
+            // Mesosphere Plaque
+            {
+                id: 'plaque_meso', name: 'Mesosphere Plaque', x: 440, y: 220, w: 80, h: 100, walkToX: 480, walkToY: 400,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "MESOSPHERE: 50km to 85km. The 'Cold Sphere'.",
+                            "It is the coldest place in the Earth's system, reaching -130°F (-90°C). Yet, it's just thick enough to cause friction for incoming meteors.",
+                            "Meteors burn up here, turning into 'shooting stars'. They are compressed so hard by the air that they reach incandescence before they can hit the ground."
+                        ]);
+                    } else e.say("A plaque depicting a meteor disintegrating into a streak of fire.");
+                }
+            },
+            // Thermosphere Plaque
+            {
+                id: 'plaque_thermo', name: 'Thermosphere Plaque', x: 620, y: 220, w: 80, h: 100, walkToX: 660, walkToY: 400,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "THERMOSPHERE: 85km to 600km. The 'Heat Sphere'.",
+                            "Though the temperature can reach 4,500°F (2,500°C), the air is so sparse you wouldn't feel warm. This layer also contains the IONOSPHERE.",
+                            "The Ionosphere reflects radio waves, allowing long-distance communication across the globe. It also hosts the Aurora Borealis as solar particles collide with atmospheric gasses."
+                        ]);
+                    } else e.say("A plaque showing swirling green lights and radio waves bouncing off the sky.");
+                }
+            },
+            // Exosphere Plaque
+            {
+                id: 'plaque_exo', name: 'Exosphere Plaque', x: 780, y: 220, w: 80, h: 100, walkToX: 820, walkToY: 400,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "EXOSPHERE: Above 600km. The 'Exit Sphere'.",
+                            "The final frontier before the vacuum of space. Molecules here are so far apart they can escape Earth's gravity entirely and drift into the cosmos.",
+                            "Most satellites orbit within this layer where drag is almost nonexistent, yet still present enough to cause orbit decay over decades."
+                        ]);
+                    } else e.say("A plaque showing a lonely satellite drifting above the curve of the Earth.");
+                }
+            },
+            // Telescope
+            {
+                id: 'telescope', name: 'Brass Telescope', x: 380, y: 200, w: 100, h: 150, walkToX: 450, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Use' || v === 'Look at') {
+                        e.say("I peer through the telescope. The lenses are perfectly calibrated. I can see the moon... and a single raccoon on a distant rooftop who seems to be checking its watch. Strange.");
+                    } else e.say("A vintage brass telescope, mounted on a swivel. It's pointed firmly toward the horizon.");
+                }
+            },
+            // Reading nook
+            {
+                id: 'nook', name: 'Reading Nook', x: 520, y: 320, w: 180, h: 120, walkToX: 600, walkToY: 450,
+                onInteract(v, e) {
+                    if (v === 'Use' || v === 'Look at') {
+                        e.say("A plush velvet reading chair. The perfect spot to ponder the vastness of the atmosphere and my own insignificance.");
+                    } else e.say("A cozy reading nook tucked between two massive mahogany bookshelves.");
+                }
+            }
         ]
     });
 }
@@ -1868,9 +2073,69 @@ function buildGeoStrata(bg) {
                 id: 'strata_label', name: 'GEO STRATA', x: 300, y: 370, w: 375, h: 65, walkToX: 490, walkToY: 445,
                 onInteract(v, e) { e.say('"GEO STRATA" is carved into the stone. Someone carved this sign into billion-year-old geological formations. The Van Hornes had no concept of boundaries.'); }
             },
-            // Rock layers on walls
+            // Upper Sedimentary Layer
             {
-                id: 'rock_layers', name: 'Rock Layers', x: 0, y: 250, w: 960, h: 175, walkToX: 480, walkToY: 430,
+                id: 'strata_upper', name: 'Upper Sedimentary Layer', x: 0, y: 150, w: 960, h: 50, walkToX: 480, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "UPPER LAYER: Carboniferous sandstone and shale (~300-360 million years old).",
+                            "During this period, New Brunswick was a tropical swamp near the equator. This layer formed from the silt and mud of that ancient world."
+                        ]);
+                    } else e.say("The top layer of the rock wall, a dull grey sandstone.");
+                }
+            },
+            // Windsor Group / Evaporites
+            {
+                id: 'strata_evaporite', name: 'Evaporite Band', x: 0, y: 200, w: 960, h: 40, walkToX: 480, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "EVAPORITE BAND: Windsor Group gypsum and rock salt (~340 million years old).",
+                            "These minerals were deposited when an ancient inland sea repeatedly evaporated. It's why the ground in the Maritimes is so rich in salt and gypsum."
+                        ]);
+                    } else e.say("A pale, slightly crystalline band of rock salt and gypsum.");
+                }
+            },
+            // Grenville Province (The Pink Band)
+            {
+                id: 'strata_grenville', name: 'Grenville Metamorphic Band', x: 0, y: 240, w: 960, h: 60, walkToX: 480, walkToY: 420,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "GRENVILLE BAND: 1.0-1.3 billion year old metamorphic rock.",
+                            "Pre-existing granite crushed and recrystallized under extreme heat and pressure. The distinctive pink color comes from feldspar minerals undergoing solid-state transformation."
+                        ]);
+                    } else e.say("A striking pinkish-purple band of ancient, highly compressed rock.");
+                }
+            },
+            // Canadian Shield (The Basement)
+            {
+                id: 'strata_shield', name: 'Precambrian Shield', x: 0, y: 300, w: 540, h: 70, walkToX: 480, walkToY: 430,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                        e.saySequence([
+                            "PRECAMBRIAN SHIELD: The stable heart of North America, 2.5 to 4 billion years old.",
+                            "Some of the oldest rock on the planet. It forms the foundation that all the other layers rest upon. It is billions of years of silent, crystalline history."
+                        ]);
+                    } else e.say("The dense, dark basement rock of the Canadian Shield.");
+                }
+            },
+            // Fault Line
+            {
+                id: 'strata_fault', name: 'Thrust Fault', x: 660, y: 300, w: 300, h: 100, walkToX: 750, walkToY: 440,
+                onInteract(v, e) {
+                    if (v === 'Read' || v === 'Look at' || v === 'Use') {
+                         e.saySequence([
+                            "THRUST FAULT: A diagonal crack from the Acadian Orogeny (~360 million years ago).",
+                            "Immense compressive forces shoved older rocks up over younger ones. It's a scar from when continents collided to build mountains."
+                        ]);
+                    } else e.say("A sharp diagonal fracture cutting through the lower rock layers.");
+                }
+            },
+            // General rock layers catch-all (for the rest of the wall)
+            {
+                id: 'rock_layers', name: 'Geological Strata', x: 0, y: 250, w: 960, h: 175, walkToX: 480, walkToY: 430,
                 onInteract(v, e) {
                     const s = e.getRoomState('geo_strata');
                     s.geoRead = (s.geoRead || 0) + 1;
@@ -2084,6 +2349,8 @@ async function main() {
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
             loadImage('assets/herring_club_bg.png'),
+            loadImage('assets/weather_station_bg.png'),
+            loadImage('assets/library_balcony_bg.png'),
             loadImage('assets/Dave3.png'),
             // NPC sprite sheets
             loadImage('assets/npc_baker.png'),
@@ -2102,7 +2369,7 @@ async function main() {
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, daveSheet,
+        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
         npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
         npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
 
@@ -2210,246 +2477,298 @@ async function main() {
 
         engine.registerRoom(r);
     }
-    { // Herring Club — Weatherman (Enthusiastic Meteorological Observer)
+    { // Herring Club
         const r = buildHerringClub(herringClubBg);
-        const weatherman = buildNPCActor({ room: r, id: 'weather_npc', name: 'Weatherman', x: 480, y: 460, sheet: npcWeatherSheet, color: '#ffff55', cols: 9, rows: 4 });
+        engine.registerRoom(r);
+    }
+    { // TV Weather Station — Weatherman (Enthusiastic Meteorological Observer)
+        const r = buildWeatherStation(weatherStationBg);
+        const weatherman = buildNPCActor({ room: r, id: 'weather_npc', name: 'Weatherman', x: 650, y: 460, sheet: npcWeatherSheet, color: '#ffff55', cols: 9, rows: 4 });
         
         if (weatherman) {
             weatherman.onInteract = (v, e) => {
                 if (v === 'Talk to') {
-                    e.say("Dave: 'Excuse me, are you the one everyone calls the Weatherman?'");
-                    
-                    setTimeout(() => {
-                        e.say("Weatherman: 'Dave! You've arrived just as the barometric pressure is plummeting! We're seeing a textbook example of cyclogenesis right outside! The atmosphere is vibrating with potential! What shall we analyze first?'");
-                        
-                        setTimeout(() => {
-                            const startWeatherBranch = () => {
-                                e.enterDialog([
-                                    "I want to discuss Atmospheric Dynamics and Vorticity.",
-                                    "Let's analyze Cloud Microphysics and Phase Changes.",
-                                    "Can we debate the Thermodynamics of Convection?",
-                                    "I'm curious about Synoptic-Scale Systems.",
-                                    "Explain the nuances of Radiative Transfer and Albedo.",
-                                    "[Leave] 'I think my brain is melting, I have to go.'"
-                                ], (idx) => {
-                                    if (idx === 0) {
-                                        e.say("Dave: 'I want to discuss Atmospheric Dynamics and Vorticity.'");
-                                        setTimeout(() => {
-                                            e.say("Weatherman: 'VORTICITY! The measure of local rotation in the fluid flow! We're talking about the interplay between curvature and shear! It's the very soul of the wind!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "Tell me about Vorticity Advection!",
-                                                    "Explain the Coriolis parameter (f)?",
-                                                    "How does it relate to Geostrophic Balance?",
-                                                    "Back to the main menu.",
-                                                    "[Leave] 'I need to step outside for some... non-spinning air.'"
-                                                ], (idx2) => {
-                                                    if (idx2 === 0) {
-                                                        e.say("Dave: 'Tell me about Vorticity Advection.'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'Positive vorticity advection in the upper troposphere leads to upward vertical motion! It's why we get low-pressure systems, Dave! It's literally pulling the air up from the surface!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx2 === 1) {
-                                                        e.say("Dave: 'Can you explain the Coriolis parameter, f?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'f = 2 * Ω * sin(φ)! It depends entirely on your latitude! At the equator, it's zero! That's why hurricanes can't cross the line! The physics won't allow it!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx2 === 2) {
-                                                        e.say("Dave: 'How does this relate to Geostrophic Balance?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'When the pressure gradient force perfectly balances the Coriolis force, the wind flows parallel to the isobars! It's an approximation, but a beautiful one!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx2 === 3) {
-                                                        startWeatherBranch();
-                                                    } else {
-                                                        e.say("Dave: 'I need to step outside for some... non-spinning air.'");
-                                                        setTimeout(() => e.say("Weatherman: 'The atmosphere never stops spinning, Dave! Even if you do!'"), 4000);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 4000);
-                                    } else if (idx === 1) {
-                                        e.say("Dave: 'Let's analyze Cloud Microphysics and Phase Changes.'");
-                                        setTimeout(() => {
-                                            e.say("Weatherman: 'MICROPHYSICS! The secret life of a droplet! We're talking about nucleation, accretion, and the complex geometry of dendrites!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "Explain the Bergeron-Findeisen Process.",
-                                                    "What is Collisional Coalescence?",
-                                                    "Tell me about the Latent Heat of Deposition.",
-                                                    "Back.",
-                                                    "[Leave] 'My interest is evaporating. Goodbye.'"
-                                                ], (idx3) => {
-                                                    if (idx3 === 0) {
-                                                        e.say("Dave: 'Explain the Bergeron-Findeisen Process.'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'Ice crystals have a lower saturation vapor pressure than liquid water! So the crystals grow at the expense of the droplets! It's the primary way we get rain in the mid-latitudes!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx3 === 1) {
-                                                        e.say("Dave: 'What exactly is Collisional Coalescence?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'Larger droplets fall faster, smashing into smaller ones and merging! It's the dominant process in warm tropical clouds! A violent, wet chain reaction!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx3 === 2) {
-                                                        e.say("Dave: 'Tell me about the Latent Heat of Deposition.'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'When water vapor goes straight to ice, bypassing the liquid phase! It releases 2834 kJ/kg of energy! That energy fuels the updraft! It's a self-sustaining engine of power!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx3 === 3) {
-                                                        startWeatherBranch();
-                                                    } else {
-                                                        e.say("Dave: 'My interest is evaporating. Goodbye.'");
-                                                        setTimeout(() => e.say("Weatherman: 'Keep an eye on the dew point, Dave!'"), 4000);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 4000);
-                                    } else if (idx === 2) {
-                                        e.say("Dave: 'Can we debate the Thermodynamics of Convection?'");
-                                        setTimeout(() => {
-                                            e.say("Weatherman: 'THERMODYNAMICS! Let's plot our path on a Skew-T Log-P diagram! We're looking at stability, buoyancy, and the LCL!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "Can you explain CAPE vs CIN?",
-                                                    "What is the Dry Adiabatic Lapse Rate?",
-                                                    "What is the Level of Free Convection?",
-                                                    "Back.",
-                                                    "[Leave] 'I'm reaching my thermal limit. Bye.'"
-                                                ], (idx4) => {
-                                                    if (idx4 === 0) {
-                                                        e.say("Dave: 'Can you explain the difference between CAPE and CIN?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'CAPE is the potential energy available to a rising parcel! CIN is the 'cap' holding it back! When the CIN breaks... BOOM! Thunderstorms!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx4 === 1) {
-                                                        e.say("Dave: 'What exactly is the Dry Adiabatic Lapse Rate?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: '9.8°C per kilometer! It's how much an unsaturated parcel cools as it rises! Once it hits saturation, it switches to the Moist rate! The transition is crucial!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx4 === 2) {
-                                                        e.say("Dave: 'What is the Level of Free Convection?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'The altitude where a parcel becomes warmer than its environment and starts rising on its own! It's the launchpad of the sky, Dave!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx4 === 3) {
-                                                        startWeatherBranch();
-                                                    } else {
-                                                        e.say("Dave: 'I'm reaching my thermal limit. Bye.'");
-                                                        setTimeout(() => e.say("Weatherman: 'May your entropy always be descending, Dave!'"), 4000);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 4000);
-                                    } else if (idx === 3) {
-                                        e.say("Dave: 'I'm curious about Synoptic-Scale Systems.'");
-                                        setTimeout(() => {
-                                            e.say("Weatherman: 'SYNOPTIC METEROLOGY! The big picture! Rossby waves, baroclinic instability, and the great conveyor belts of the atmosphere!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "What is Baroclinic Instability?",
-                                                    "How does the Warm Conveyor Belt work?",
-                                                    "Explain Teleconnections like ENSO.",
-                                                    "Back.",
-                                                    "[Leave] 'I can't handle the scale of this. See ya.'"
-                                                ], (idx5) => {
-                                                    if (idx5 === 0) {
-                                                        e.say("Dave: 'What exactly is Baroclinic Instability?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'When potential energy stored in horizontal temperature gradients is converted into the kinetic energy of a storm! It's why we have mid-latitude cyclones at all!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx5 === 1) {
-                                                        e.say("Dave: 'How does the Warm Conveyor Belt work?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'A stream of warm, moist air originating in the subtropics and riding up over the warm front! It's responsible for the vast majority of our precipitation!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx5 === 2) {
-                                                        e.say("Dave: 'Can you explain Teleconnections like ENSO?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'The El Niño Southern Oscillation! Changes in sea surface temps in the Pacific that shift the entire global jet stream! Everything is connected, Dave!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx5 === 3) {
-                                                        startWeatherBranch();
-                                                    } else {
-                                                        e.say("Dave: 'I can't handle the scale of this. See ya.'");
-                                                        setTimeout(() => e.say("Weatherman: 'The atmosphere is a global conversation, Dave! Try to keep up!'"), 4000);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 4000);
-                                    } else if (idx === 4) {
-                                        e.say("Dave: 'Explain the nuances of Radiative Transfer and Albedo.'");
-                                        setTimeout(() => {
-                                            e.say("Weatherman: 'RADIATIVE TRANSFER! The energy balance! From shortwave solar flux to longwave terrestrial emission! It's the bookkeeping of the planet!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "Tell me about the Albedo Effect.",
-                                                    "Explain the Stefan-Boltzmann Law.",
-                                                    "What are the Greenhouse Gas Absorption Windows?",
-                                                    "Back.",
-                                                    "[Leave] 'I'm radiating out of here. Goodbye.'"
-                                                ], (idx6) => {
-                                                    if (idx6 === 0) {
-                                                        e.say("Dave: 'Tell me about the Albedo Effect.'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'The reflectivity of a surface! Fresh snow has an albedo of 0.9! It reflects 90% of the energy! The ocean? Only about 0.06! It's a massive feedback loop!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx6 === 1) {
-                                                        e.say("Dave: 'Can you explain the Stefan-Boltzmann Law?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'The power radiated by a black body is proportional to the fourth power of its temperature! Double the temp, and you get SIXTEEN times the energy! It's exponential madness!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx6 === 2) {
-                                                        e.say("Dave: 'What are the Greenhouse Gas Absorption Windows?'");
-                                                        setTimeout(() => {
-                                                            e.say("Weatherman: 'Certain wavelengths of infrared escape to space, but CO2 and Methane 'close the window' on others! It's the blanket that keeps us from freezing solid!'");
-                                                            setTimeout(startWeatherBranch, 7000);
-                                                        }, 4000);
-                                                    } else if (idx6 === 3) {
-                                                        startWeatherBranch();
-                                                    } else {
-                                                        e.say("Dave: 'I'm radiating out of here. Goodbye.'");
-                                                        setTimeout(() => e.say("Weatherman: 'Don't let your shortwave radiation get blocked on the way out, Dave!'"), 4000);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 4000);
-                                    } else {
-                                        e.say("Dave: 'I think my brain is melting, I have to go.'");
-                                        setTimeout(() => {
-                                            const s = e.getRoomState('herring_club');
-                                            if (!s.gotToken) {
-                                                s.gotToken = true;
-                                                e.addItem('fishy_token', 'Fishy Token');
-                                                e.say("Weatherman: 'Leaving so soon? The fog is just reaching saturation! But wait—take this FISHY TOKEN. It's awarded only to those who survive a full synoptic overview! Be well, Dave!'");
-                                            } else {
-                                                e.say("Weatherman: 'The observations never stop, Dave! Come back when you're ready for more... enlightenment!'");
-                                            }
-                                        }, 4000);
+                    const startWeatherBranch = () => {
+                        e.enterDialog([
+                            "I want to discuss Atmospheric Dynamics and Vorticity.",
+                            "Let's analyze Cloud Microphysics and Phase Changes.",
+                            "Can we debate the Thermodynamics of Convection?",
+                            "I'm curious about Synoptic-Scale Systems.",
+                            "Explain the nuances of Radiative Transfer and Albedo.",
+                            "Tell me about the Planetary Boundary Layer and Turbulence.",
+                            "[Leave] 'I think my brain is melting, I have to go.'"
+                        ], (idx) => {
+                            if (idx === 0) {
+                                e.saySequence([
+                                    "Dave: 'I want to discuss Atmospheric Dynamics and Vorticity.'",
+                                    "Weatherman: 'VORTICITY! The measure of local rotation in the fluid flow! We're talking about the interplay between curvature and shear! It's the very soul of the wind!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Tell me about Vorticity Advection!",
+                                        "Explain the Coriolis parameter (f)?",
+                                        "How does it relate to Geostrophic Balance?",
+                                        "What about the Ertel Potential Vorticity?",
+                                        "Back to the main menu.",
+                                        "[Leave] 'I need to step outside for some... non-spinning air.'"
+                                    ], (idx2) => {
+                                        if (idx2 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about Vorticity Advection.'",
+                                                "Weatherman: 'Positive vorticity advection in the upper troposphere leads to upward vertical motion! It's why we get low-pressure systems, Dave! It's literally pulling the air up from the surface, creating convergence at the ground!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx2 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Can you explain the Coriolis parameter, f?'",
+                                                "Weatherman: 'f = 2 * Ω * sin(φ)! It depends entirely on your latitude! At the equator, it's zero! That's why hurricanes can't cross the line! The physics won't allow the necessary rotation to develop!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx2 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'How does this relate to Geostrophic Balance?'",
+                                                "Weatherman: 'When the pressure gradient force perfectly balances the Coriolis force, the wind flows parallel to the isobars! It's an approximation, but it's why the wind follows the pressure contours on your map!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx2 === 3) {
+                                            e.saySequence([
+                                                "Dave: 'What about the Ertel Potential Vorticity?'",
+                                                "Weatherman: 'EPV! The combination of absolute vorticity and static stability! It's conserved for adiabatic, frictionless flow! Atmospheric scientists use it as a tracer to follow air masses from the stratosphere into the troposphere!'",
+                                                "Weatherman: 'It is the most powerful tool for diagnosing deep cyclogenesis! If you see an EPV anomaly, you're looking at the engine of a major storm!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx2 === 4) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'I need to step outside for some... non-spinning air.'");
+                                            setTimeout(() => e.say("Weatherman: 'The atmosphere never stops spinning, Dave! Even if you do!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else if (idx === 1) {
+                                e.saySequence([
+                                    "Dave: 'Let's analyze Cloud Microphysics and Phase Changes.'",
+                                    "Weatherman: 'MICROPHYSICS! The secret life of a droplet! We're talking about nucleation, accretion, and the complex geometry of dendrites! From the molecular scale to the convective scale!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Explain the Bergeron-Findeisen Process.",
+                                        "What is Collisional Coalescence?",
+                                        "Tell me about the Latent Heat of Deposition.",
+                                        "How do Cloud Condensation Nuclei (CCN) work?",
+                                        "Back.",
+                                        "[Leave] 'My interest is evaporating. Goodbye.'"
+                                    ], (idx3) => {
+                                        if (idx3 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Explain the Bergeron-Findeisen Process.'",
+                                                "Weatherman: 'Ice crystals have a lower saturation vapor pressure than liquid water at the same temperature! So the crystals grow by vapor deposition while the droplets evaporate! It's how we get snowflakes in the clouds, even in summer!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx3 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'What exactly is Collisional Coalescence?'",
+                                                "Weatherman: 'Larger droplets fall faster, smashing into smaller ones and merging! It's the dominant process in warm tropical clouds where ice doesn't form! A violent, wet chain reaction that produces heavy rain in minutes!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx3 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about the Latent Heat of Deposition.'",
+                                                "Weatherman: 'When water vapor goes straight to ice, bypassing the liquid phase! It releases 2834 kJ/kg of energy! That energy fuels the updraft, making the storm more intense! It's a self-sustaining engine of thermal power!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx3 === 3) {
+                                            e.saySequence([
+                                                "Dave: 'How do Cloud Condensation Nuclei work?'",
+                                                "Weatherman: 'Aerosols! Dust, salt, smoke! Water needs a surface to condense on, or it requires huge supersaturation! Without CCN, the atmosphere would be 400% humidity and we still wouldn't have clouds!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx3 === 4) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'My interest is evaporating. Goodbye.'");
+                                            setTimeout(() => e.say("Weatherman: 'Keep an eye on the dew point, Dave!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else if (idx === 2) {
+                                e.saySequence([
+                                    "Dave: 'Can we debate the Thermodynamics of Convection?'",
+                                    "Weatherman: 'THERMODYNAMICS! Let's plot our path on a Skew-T Log-P diagram! We're looking at stability, buoyancy, and the Lifted Condensation Level! Entropy and enthalpy in action!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Can you explain CAPE vs CIN?",
+                                        "What is the Dry Adiabatic Lapse Rate?",
+                                        "What is the Level of Free Convection?",
+                                        "Explain Equivalent Potential Temperature (Theta-e).",
+                                        "Back.",
+                                        "[Leave] 'I'm reaching my thermal limit. Bye.'"
+                                    ], (idx4) => {
+                                        if (idx4 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Can you explain the difference between CAPE and CIN?'",
+                                                "Weatherman: 'CAPE is the Convective Available Potential Energy—the fuel! CIN is the Convective Inhibition—the lid on the pot! When the rising parcel overcomes the CIN... BOOM! The CAPE is released as vertical velocity! Thunderstorms!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx4 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'What exactly is the Dry Adiabatic Lapse Rate?'",
+                                                "Weatherman: '9.8°C per kilometer! It's how much an unsaturated parcel cools as it rises due to expansion! Once it hits saturation at the LCL, it switches to the Moist rate, around 6°C/km! The latent heat release slows the cooling!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx4 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'What is the Level of Free Convection?'",
+                                                "Weatherman: 'The altitude where a rising air parcel becomes warmer and less dense than its surroundings! From there, it rises on its own buoyancy! It's the launchpad for a cumulonimbus, Dave!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx4 === 3) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Equivalent Potential Temperature (Theta-e).'",
+                                                "Weatherman: 'Theta-e! The temperature a parcel would have if it were lifted to the top of the atmosphere, all its moisture were condensed out, and then it was brought back to 1000hPa! It's the ultimate measure of the air mass's energy content!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx4 === 4) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'I'm reaching my thermal limit. Bye.'");
+                                            setTimeout(() => e.say("Weatherman: 'May your entropy always be descending, Dave!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else if (idx === 3) {
+                                e.saySequence([
+                                    "Dave: 'I'm curious about Synoptic-Scale Systems.'",
+                                    "Weatherman: 'SYNOPTIC METEOROLOGY! The big picture! Rossby waves, baroclinic instability, and the great conveyor belts of the atmosphere! Thousands of kilometers of fluid motion!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "What is Baroclinic Instability?",
+                                        "How does the Warm Conveyor Belt work?",
+                                        "Explain Teleconnections like ENSO.",
+                                        "What are the Semi-Permanent Pressure Cells?",
+                                        "Back.",
+                                        "[Leave] 'I can't handle the scale of this. See ya.'"
+                                    ], (idx5) => {
+                                        if (idx5 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'What exactly is Baroclinic Instability?'",
+                                                "Weatherman: 'When huge horizontal temperature gradients exist, the atmosphere becomes unstable to small perturbations! This converts potential energy into the kinetic energy of mid-latitude cyclones! It's why we have seasons of storms, Dave!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx5 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'How does the Warm Conveyor Belt work?'",
+                                                "Weatherman: 'A massive stream of warm, moist air that originates in the subtropics and glides up over the warm front of a cyclone! It's the primary engine for rain and snow in Canada! It's like an atmospheric river in the sky!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx5 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Can you explain Teleconnections like ENSO?'",
+                                                "Weatherman: 'The El Niño Southern Oscillation! Periodic warming and cooling of the Pacific that shifts the global jet stream like a giant cosmic chess piece! A change in Peru causes a drought in Australia and a wet winter in California!'",
+                                                "Weatherman: 'Everything is coupled, Dave! The ocean and the air are dancing a billion-year waltz!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx5 === 3) {
+                                            e.saySequence([
+                                                "Dave: 'What are the Semi-Permanent Pressure Cells?'",
+                                                "Weatherman: 'The Azores High, the Aleutian Low, the Siberian High! They aren't fixed, but they reappear every season due to the distribution of land and sea! They direct the traffic of the entire world's weather!'",
+                                                "Weatherman: 'If the Azores High is strong, we get a ridge over the Maritimes! If it's weak, the storms come right up the coast!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx5 === 4) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'I can't handle the scale of this. See ya.'");
+                                            setTimeout(() => e.say("Weatherman: 'The atmosphere is a global conversation, Dave! Try to keep up!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else if (idx === 4) {
+                                e.saySequence([
+                                    "Dave: 'Explain the nuances of Radiative Transfer and Albedo.'",
+                                    "Weatherman: 'RADIATIVE TRANSFER! The energy bookkeeping of the planet! From shortwave solar flux to longwave terrestrial emission! It's the balance that dictates our climate!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Tell me about the Albedo Effect.",
+                                        "Explain the Stefan-Boltzmann Law.",
+                                        "What are the Greenhouse Gas Absorption Windows?",
+                                        "Explain the Solar Constant.",
+                                        "Back.",
+                                        "[Leave] 'I'm radiating out of here. Goodbye.'"
+                                    ], (idx6) => {
+                                        if (idx6 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about the Albedo Effect.'",
+                                                "Weatherman: 'Reflectivity! Fresh snow reflects 90% of incoming solar energy! The deep ocean reflects only 6%! It's a massive feedback loop: as the ice melts, the ocean absorbs MORE heat, melting MORE ice! It's a runaway train!'",
+                                                "Weatherman: 'Albedo is the first line of defense against solar heating. Every percent matters when you're talking about a planet!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx6 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Can you explain the Stefan-Boltzmann Law?'",
+                                                "Weatherman: 'P = εσAT⁴! The power radiated by a black body is proportional to the FOURTH power of its absolute temperature! Double the temperature, and you get SIXTEEN times the energy! It's why the Earth can balance the Sun's heat through infrared emission!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx6 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'What are the Greenhouse Gas Absorption Windows?'",
+                                                "Weatherman: 'Certain wavelengths of infrared radiation, the \"Atmospheric Window\", pass straight through to space! But CO2, Methane, and Water Vapor absorb in the surrounding bands! They trap the energy, re-emitting it back toward the surface!'",
+                                                "Weatherman: 'Without this 'blanket', the Earth would be -18°C! We'd be a frozen ball of ice, Dave! The problem is when we start closing the window too much!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx6 === 3) {
+                                            e.saySequence([
+                                                "Dave: 'Explain the Solar Constant.'",
+                                                "Weatherman: '1361 Watts per square meter! That's the energy hitting the top of our atmosphere! Only 1/4 of that reaches the surface on average, after geometric distribution and reflection! That's the budget we have to work with!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx6 === 4) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'I'm radiating out of here. Goodbye.'");
+                                            setTimeout(() => e.say("Weatherman: 'Don't let your shortwave radiation get blocked on the way out, Dave!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else if (idx === 5) {
+                                e.saySequence([
+                                    "Dave: 'Tell me about the Planetary Boundary Layer and Turbulence.'",
+                                    "Weatherman: 'THE PBL! The layer of the atmosphere that actually feels the Earth's surface! Where the friction happens! Where the chaos begins!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "What is the Ekman Spiral?",
+                                        "Explain Reynolds Stress.",
+                                        "Tell me about Microscale Turbulence.",
+                                        "Back.",
+                                        "[Leave] 'This conversation is too bumpy for me.'"
+                                    ], (idx7) => {
+                                        if (idx7 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'What is the Ekman Spiral?'",
+                                                "Weatherman: 'As you move away from the surface, the wind speed increases and the direction turns due to decreasing friction! It creates a spiral profile! It's why the wind at 10 meters is different from the wind at 1000 meters!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx7 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Reynolds Stress.'",
+                                                "Weatherman: 'The transport of momentum by turbulent fluctuations! We have to average the Navier-Stokes equations to handle it! It's the most difficult problem in classical physics, Dave! Heisenberg said he'd ask God about it!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx7 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about Microscale Turbulence.'",
+                                                "Weatherman: 'Eddies! From the size of a mountain to the size of a blade of grass! Energy cascades down through the scales until it's dissipated as heat! It's the final fate of every gust of wind you've ever felt!'"
+                                            ], startWeatherBranch);
+                                        } else if (idx7 === 3) {
+                                            startWeatherBranch();
+                                        } else {
+                                            e.say("Dave: 'This conversation is too bumpy for me.'");
+                                            setTimeout(() => e.say("Weatherman: 'The air is never smooth, Dave! You just have to learn to fly in it!'"), 4000);
+                                        }
+                                    });
+                                });
+                            } else {
+                                e.saySequence([
+                                    "Dave: 'I think my brain is melting, I have to go.'",
+                                    "Weatherman: 'Leaving so soon? The fog is just reaching saturation! But wait—take this FISHY TOKEN. It's awarded only to those who survive a full synoptic overview! Be well, Dave!'"
+                                ], () => {
+                                    const s = e.getRoomState('herring_club');
+                                    if (!s.gotToken) {
+                                        s.gotToken = true;
+                                        e.addItem('fishy_token', 'Fishy Token');
                                     }
                                 });
-                            };
-                            startWeatherBranch();
-                        }, 5000);
-                    }, 4000);
+                            }
+                        });
+                    };
+
+                    e.saySequence([
+                        "Dave: 'Excuse me, are you the one everyone calls the Weatherman?'",
+                        "Weatherman: 'Dave! You've arrived just as the barometric pressure is plummeting! We're seeing a textbook example of cyclogenesis right outside! The atmosphere is vibrating with potential! What shall we analyze first?'"
+                    ], startWeatherBranch);
                 } else if (v === 'Look at') {
-                    e.say("The Weatherman is practically vibrating with scientific zeal. His yellow raincoat is covered in scribbled formulas for potential vorticity and latent heat. He looks like he hasn't looked at anything besides a barometer for three weeks.");
+                    e.say("The Weatherman is practically vibrating with scientific zeal. His yellow raincoat is covered in scribbled formulas for planetary vorticity and latent heat. He looks like he hasn't looked at anything besides a barometer since the eighties.");
                 } else if (v === 'Push' || v === 'Pull') {
                     e.say("Weatherman: 'Careful, Dave! You're threatening to disrupt my laminar flow! I'm currently a stationary front; I don't suggest trying to accelerate this air mass!'");
-                } else e.say("He's far too busy plotting isentropic surfaces to notice that.");
+                } else if (v === 'Use' || v === 'Give') {
+                    e.say("He's far too busy plotting isentropic surfaces to notice that.");
+                }
             };
         }
         engine.registerRoom(r);
@@ -2494,6 +2813,20 @@ async function main() {
         buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
+    { // Mansion library balcony — Atmospheric science plaques
+        const r = buildMansionLibraryBalcony(libraryBalconyBg);
+        const cat = buildNPCActor({ room: r, id: 'cat_npc_balcony', name: 'Cat', x: 740, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
+        if (cat) {
+            cat.onInteract = (v, e) => {
+                if (v === 'Talk to' || v === 'Look at' || v === 'Use') {
+                    e.say("The cat is staring at the Thermosphere plaque. It seems particularly interested in the Ionosphere. Maybe it's trying to transmit a message back to its home planet.");
+                } else {
+                    e.say("The cat ignores me with the practiced ease of a creature that has mastered both the physical and metaphysical realms.");
+                }
+            };
+        }
+        engine.registerRoom(r);
+    }
     engine.registerRoom(buildMansionBackyard(backyardBg));
     engine.registerRoom(buildPoliceExt(policeExtBg));
 
@@ -2520,109 +2853,218 @@ async function main() {
         if (pellerin) {
             pellerin.onInteract = (v, e) => {
                 if (v === 'Talk to') {
-                    e.say("Dave: 'Excuse me, Dr. Pellerin? I'm looking for... well, I'm not sure what I'm looking for down here.'");
-                    
-                    setTimeout(() => {
-                        e.say("Dr. Pellerin: 'Dave! You've arrived just as I was documenting the rhythmic successions of the Grenville Province! Look at these silicate bands! Billions of years of history, etched in rock! What aspect of the Shield shall we dissect today?'");
-                        
-                        setTimeout(() => {
-                            const startBranch = () => {
-                                e.enterDialog([
-                                    "Tell me about these 'rhythmic successions'.",
-                                    "Wait, there were supercontinents before Pangea?",
-                                    "Is the Canadian Shield really that old?",
-                                    "Sometimes I feel small. Does this place do that to you?",
-                                    "I think my brain is lithifying. I have to go."
-                                ], (idx) => {
-                                    if (idx === 0) {
-                                        e.say("Dave: 'Tell me about these 'rhythmic successions' you're so excited about.'");
-                                        setTimeout(() => {
-                                            e.say("Dr. Pellerin: 'Oh! The STRATA! Look at these successions! These are billions of years of story told in silicate and carbonate! Each layer is a fossilized mood of the planet! It's a high-grade metamorphic belt—we're talking granulite and amphibolite facies!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "What exactly is the Grenville Province?",
-                                                    "Is it all just rock and chemistry?",
-                                                    "Back to the main lecture.",
-                                                    "I'm bored, let's go."
-                                                ], (idx2) => {
-                                                    if (idx2 === 0) {
-                                                        e.say("Dave: 'What exactly is the Grenville Province?'");
-                                                        setTimeout(() => {
-                                                            e.say("Dr. Pellerin: 'It's a high-grade metamorphic belt, Dave! It was cooked in the heart of a mountain range taller than the Himalayas! The Grenville Orogeny assembled the supercontinent Rodinia 1.1 billion years ago!'");
-                                                            setTimeout(startBranch, 5000);
-                                                        }, 2000);
-                                                    } else if (idx2 === 1) {
-                                                        e.say("Dave: 'So is it all just rock and chemistry down here?'");
-                                                        setTimeout(() => {
-                                                            e.say("Dr. Pellerin: 'JUST rock? Heavens, no! It's a chemistry set! Feldspar, mica, quartz—and look at that pink! That's Potassium Feldspar, lithified under immense pressure in a subterranean alchemical process!'");
-                                                            setTimeout(startBranch, 5000);
-                                                        }, 2000);
-                                                    } else if (idx2 === 2) {
-                                                        startBranch();
-                                                    } else {
-                                                        e.say("Dave: 'I think my brain is melting, I have to go.'");
-                                                        setTimeout(() => e.say("Dr. Pellerin: 'The rocks will still be here when you return, Dave! Watch your step—don't want to become a trace fossil just yet!'"), 2500);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 2000);
-                                    } else if (idx === 1) {
-                                        e.say("Dave: 'Wait, there were supercontinents before Pangea?'");
-                                        setTimeout(() => {
-                                            e.say("Dr. Pellerin: 'Absolutely! Rodinia was the grand-ancestor! The Grenville Orogeny was the collision that brought it together. We are standing in the deep-crustal roots of an ancient world that existed long before the first dinosaur was even a thought!'");
-                                            setTimeout(() => {
-                                                e.enterDialog([
-                                                    "How do we know any of this?",
-                                                    "What happened to Rodinia?",
-                                                    "Back to the main lecture.",
-                                                    "I have to go."
-                                                ], (idx3) => {
-                                                    if (idx3 === 0) {
-                                                        e.say("Dave: 'How do we even know all this happened?'");
-                                                        setTimeout(() => {
-                                                            e.say("Dr. Pellerin: 'Geochronology, Dave! Uranium-Lead ratios in zircon crystals! They are the time-capsules of the planet! The precision is breathtaking! We measure the daughter products to determine the crystallization age of the magma!'");
-                                                            setTimeout(startBranch, 5000);
-                                                        }, 2000);
-                                                    } else if (idx3 === 1) {
-                                                        e.say("Dave: 'What eventually happened to Rodinia?'");
-                                                        setTimeout(() => {
-                                                            e.say("Dr. Pellerin: 'It rifts apart, Dave! Continental breakup! The cycle of supercontinents is the heartbeat of the Earth. Birth, collision, erode, rift. Repeat for four billion years!'");
-                                                            setTimeout(startBranch, 5000);
-                                                        }, 2000);
-                                                    } else if (idx3 === 2) {
-                                                        startBranch();
-                                                    } else {
-                                                        e.say("Dave: 'My head is spinning. I'm leaving.'");
-                                                        setTimeout(() => e.say("Dr. Pellerin: 'Billions of years wait for no man, Dave. Keep looking at the rocks!'"), 2500);
-                                                    }
-                                                });
-                                            }, 5000);
-                                        }, 2000);
-                                    } else if (idx === 2) {
-                                        e.say("Dave: 'Is the Canadian Shield really that old?'");
-                                        setTimeout(() => {
-                                            e.say("Dr. Pellerin: 'It is the core of the continent! Some parts are 3.8 billion years old. To the Shield, a human life is just a single photon's transit across a crystal lattice! We are living on the crust of a truly ancient giant.'");
-                                            setTimeout(startBranch, 5000);
-                                        }, 2000);
-                                    } else if (idx === 3) {
-                                        e.say("Dave: 'Sometimes I feel small. Does standing on 3.8 billion years of history do that to you?'");
-                                        setTimeout(() => {
-                                            e.say("Dr. Pellerin: 'Small? No! It makes me feel IMMENSE! I am the eyes through which the Shield finally gets to see itself! What a privilege to witness the deep architecture of time!'");
-                                            setTimeout(startBranch, 5000);
-                                        }, 2000);
-                                    } else {
-                                        e.say("Dave: 'I think my brain is lithifying. I should probably head back to the surface.'");
-                                        setTimeout(() => {
-                                            e.say("Dr. Pellerin: 'The strata will wait, Dave! Don't let the surface-world erode your curiosity! Come back when you're ready for more... enlightenment!'");
-                                        }, 2500);
-                                    }
+                    const startBranch = () => {
+                        e.enterDialog([
+                            "Tell me about 'rhythmic successions' and Metamorphism.",
+                            "Explain the Supercontinent Cycle and Rodinia.",
+                            "How do you measure the age of a rock?",
+                            "Discuss the composition of the Canadian Shield.",
+                            "What are 'Geological Facies'?",
+                            "I'm feeling small standing here. Does that ever fade?",
+                            "[Leave] 'I think my brain is lithifying. I have to go.'"
+                        ], (idx) => {
+                            if (idx === 0) {
+                                e.saySequence([
+                                    "Dave: 'Tell me about these 'rhythmic successions' and Metamorphism.'",
+                                    "Dr. Pellerin: 'Metamorphism! The transformation of rock under heat and pressure! Look at these silicate successions! We're talking about high-grade metamorphism—granulite and amphibolite facies!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "What exactly is the Grenville Province?",
+                                        "Explain Recrystallization.",
+                                        "Tell me about Isostatic Rebound.",
+                                        "Back.",
+                                        "[Leave]"
+                                    ], (idx2) => {
+                                        if (idx2 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'What exactly is the Grenville Province?'",
+                                                "Dr. Pellerin: 'It's a billion-year-old mountain root! The result of the Grenville Orogeny! It was once the heart of a mountain range taller than the Himalayas, Dave! Now, it's the solid, crystalline basement of our continent!'"
+                                            ], startBranch);
+                                        } else if (idx2 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Recrystallization.'",
+                                                "Dr. Pellerin: 'Under intense pressure, minerals reorganize without melting! Atoms migrate through the crystal lattice! It's a solid-state transformation! This pink Potassium Feldspar? It's a survivor of deep-crustal cooking!'"
+                                            ], startBranch);
+                                        } else if (idx2 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about Isostatic Rebound.'",
+                                                "Dr. Pellerin: 'The Earth is elastic, Dave! During the last glaciation, the weight of the ice pushed the crust down into the mantle! Now that the ice is gone, the Shield is slowly rising back up! It's an ongoing, millimetric bounce!'"
+                                            ], startBranch);
+                                        } else if (idx2 === 3) {
+                                            startBranch();
+                                        } else {
+                                            e.say("Dave: 'I've heard enough about rocks for one day.'");
+                                        }
+                                    });
                                 });
-                            };
-                            startBranch();
-                        }, 4500);
-                    }, 3500);
+                            } else if (idx === 1) {
+                                e.saySequence([
+                                    "Dave: 'Explain the Supercontinent Cycle and Rodinia.'",
+                                    "Dr. Pellerin: 'Continental drift is just the beginning! The Supercontinent Cycle is the heartbeat of the Earth! Birth, collision, erosion, rifting! And Rodinia was the grand-ancestor of Pangea!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "What happened to Rodinia?",
+                                        "Explain Continental Rifting.",
+                                        "Was there a supercontinent before Rodinia?",
+                                        "Back.",
+                                        "[Leave]"
+                                    ], (idx3) => {
+                                        if (idx3 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'What happened to Rodinia?'",
+                                                "Dr. Pellerin: 'It rifted apart! The heat trapped beneath the massive landmass caused the mantle to bulge, eventually tearing the continent into fragments! Some of those fragments eventually became the cores of today's continents!'"
+                                            ], startBranch);
+                                        } else if (idx3 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Continental Rifting.'",
+                                                "Dr. Pellerin: 'Magma rises, the crust thins, and a new ocean basin is born! It starts with a rift valley—like the East African Rift today! Eventually, the sea rushes in! Rodinia's breakup was a global tectonic catastrophe!'"
+                                            ], startBranch);
+                                        } else if (idx3 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Was there a supercontinent before Rodinia?'",
+                                                "Dr. Pellerin: 'Oh yes! Columbia! Or even Kenorland, billions of years ago! The cycle repeats every 300 to 500 million years! We are simply witnessing one brief snapshot of a dynamic planet!'"
+                                            ], startBranch);
+                                        } else if (idx3 === 3) {
+                                            startBranch();
+                                        } else {
+                                            e.say("Dave: 'This is too much time scaling for me.'");
+                                        }
+                                    });
+                                });
+                            } else if (idx === 2) {
+                                e.saySequence([
+                                    "Dave: 'How exactly do you measure the age of a rock?'",
+                                    "Dr. Pellerin: 'Geochronology! We use the steady decay of radioactive isotopes! Uranium to Lead, Potassium to Argon! It's the ultimate clock!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Tell me about Zircon crystals.",
+                                        "What is a Half-Life?",
+                                        "Is it truly precise?",
+                                        "Back.",
+                                        "[Leave]"
+                                    ], (idx4) => {
+                                        if (idx4 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about Zircon crystals.'",
+                                                "Dr. Pellerin: 'Zircons are the time-capsules of the Earth! They are virtually indestructible! When they crystallize, they trap Uranium but reject Lead! Any Lead we find inside today *must* be the daughter product of decay!'",
+                                                "Dr. Pellerin: 'By measuring the ratio, we can date the moment that grain of sand formed 4 billion years ago!'"
+                                            ], startBranch);
+                                        } else if (idx4 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'What is a Half-Life?'",
+                                                "Dr. Pellerin: 'The time it takes for half of the parent atoms to decay! For Uranium-238, it's 4.47 billion years—almost the age of the solar system! It's the perfect ruler for measuring deep time!'"
+                                            ], startBranch);
+                                        } else if (idx4 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Is it truly precise?'",
+                                                "Dr. Pellerin: 'Current Mass Spectrometry allows us to be precise to within a few million years! On a billion-year scale? That's better than 0.1% accuracy! It's astonishing!'"
+                                            ], startBranch);
+                                        } else if (idx4 === 3) {
+                                            startBranch();
+                                        } else {
+                                            e.say("Dave: 'Time is money, and I'm out of both.'");
+                                        }
+                                    });
+                                });
+                            } else if (idx === 3) {
+                                e.saySequence([
+                                    "Dave: 'Discuss the composition of the Canadian Shield.'",
+                                    "Dr. Pellerin: 'The craton! The stable heart of North America! It's composed primarily of igneous and high-grade metamorphic rocks—gneiss and granite dominate the landscape!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "What is Gneiss?",
+                                        "Why is it called a 'Shield'?",
+                                        "Tell me about the Greenstone Belts.",
+                                        "Back.",
+                                        "[Leave]"
+                                    ], (idx5) => {
+                                        if (idx5 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'What is Gneiss?'",
+                                                "Dr. Pellerin: 'A metamorphic rock with distinct banding! It shows the extreme stress and flow the rock underwent in the lower crust! It's the signature of a continent that has been through hell and back!'"
+                                            ], startBranch);
+                                        } else if (idx5 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Why is it called a 'Shield'?'",
+                                                "Dr. Pellerin: 'Because it resembles a warrior's shield lying on its back! It's a broad, slightly convex region of exposed basement rock! It provides the foundation for the entire continent!'"
+                                            ], startBranch);
+                                        } else if (idx5 === 2) {
+                                            e.saySequence([
+                                                "Dave: 'Tell me about the Greenstone Belts.'",
+                                                "Dr. Pellerin: 'Ancient volcanic and sedimentary rocks that were trapped between colliding continental masses! They are rich in minerals—gold, copper, zinc! They are the scars of the Earth's earliest tectonic battles!'"
+                                            ], startBranch);
+                                        } else if (idx5 === 3) {
+                                            startBranch();
+                                        } else {
+                                            e.say("Dave: 'I'm more of a paper shield kind of guy.'");
+                                        }
+                                    });
+                                });
+                            } else if (idx === 4) {
+                                e.saySequence([
+                                    "Dave: 'What exactly are Geological Facies?'",
+                                    "Dr. Pellerin: 'Facies describe the characteristic appearance and composition of a rock, reflecting its original environment of formation or its metamorphic conditions!'"
+                                ], () => {
+                                    e.enterDialog([
+                                        "Explain Sedimentary Facies.",
+                                        "Explain Metamorphic Facies.",
+                                        "Back.",
+                                        "[Leave]"
+                                    ], (idx6) => {
+                                        if (idx6 === 0) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Sedimentary Facies.'",
+                                                "Dr. Pellerin: 'In a single layer of time, you might have sand near the shore and mud further out! Those different rocks are different *facies* of the same time period! They tell us where the beaches were millions of years ago!'"
+                                            ], startBranch);
+                                        } else if (idx6 === 1) {
+                                            e.saySequence([
+                                                "Dave: 'Explain Metamorphic Facies.'",
+                                                "Dr. Pellerin: 'These define the pressure and temperature a rock reached! Zeolite? Low temp. Ecologite? High pressure! It's how we map the internal plumbing of ancient mountain ranges!'"
+                                            ], startBranch);
+                                        } else if (idx6 === 2) {
+                                            startBranch();
+                                        } else {
+                                            e.say("Dave: 'My face is tired. See ya.'");
+                                        }
+                                    });
+                                });
+                            } else if (idx === 5) {
+                                e.saySequence([
+                                    "Dave: 'I'm feeling small standing here in 4 billion years of history. Does that ever fade?'",
+                                    "Dr. Pellerin: 'Small? No! It should make you feel IMMENSE! You are the eyes through which the Shield finally gets to see itself! What a privilege to witness the deep architecture of time!'"
+                                ], startBranch);
+                            } else {
+                                e.saySequence([
+                                    "Dave: 'I think my brain is lithifying. I should probably head back to the surface.'",
+                                    "Dr. Pellerin: 'The strata will wait, Dave! Don't let the surface-world erode your curiosity! Come back when you're ready for more... enlightenment!'"
+                                ]);
+                            }
+                        });
+                    };
+                    
+                    e.saySequence([
+                        "Dave: 'Excuse me, Dr. Pellerin? I'm looking for... well, I'm not sure what I'm looking for down here.'",
+                        "Dr. Pellerin: 'Dave! You've arrived just as I was documenting the successions of the Grenville Province! Look at these silicate bands! Billions of years of history, etched in rock! What aspect of the Shield shall we dissect today?'"
+                    ], startBranch);
                 } else if (v === 'Look at') {
                     e.say("Dr. Pellerin is practically vibrating with scientific excitement. Her lab coat is stained with various mineral dusts, and she looks like she hasn't slept in a geological era.");
+                } else if (v === 'Use' || v === 'Give') {
+                    const itemId = (item && (typeof item === 'string' ? item : item.id));
+                    if (itemId === 'geo_hammer') {
+                        e.saySequence([
+                            "Dave: 'I found this hammer. Looks like yours.'",
+                            "Dr. Pellerin: 'My Estwing?! Oh, Dave, you've saved my field work! I was nearly forced to use a dessert spoon to clear the overburden! This high-carbon steel is essential for getting a fresh surface on this granulite!'",
+                            "Dr. Pellerin: 'Keep it for now, Dave! You might need to... exert some physical geochronology on the obstacles ahead!'"
+                        ]);
+                    } else if (itemId === 'canadian_shield') {
+                        e.saySequence([
+                            "Dave: 'I managed to pick up... the Canadian Shield. Literally.'",
+                            "Dr. Pellerin: 'Dave! That is a 1:1,000,000 scale model of the entire craton! Careful with it! It contains the structural integrity of the entire continent!'",
+                            "Dr. Pellerin: 'It's also surprisingly good for keeping the rain off your head. Form follows function!'"
+                        ]);
+                    } else {
+                        e.say("Dr. Pellerin: 'Unless that is a rare Acasta Gneiss specimen, I'm afraid I have little use for it at the moment.'");
+                    }
                 } else {
                     e.say("She looks busy with her strata. Best not to disturb the geological peace.");
                 }

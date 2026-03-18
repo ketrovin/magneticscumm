@@ -115,7 +115,10 @@ class Engine {
 
     say(text, duration = 3500, speaker = null) {
         // Clear any previous dialogue immediately when a new one starts
-        if (this.gameState.dialogTimer > 3500) this.gameState.dialogTimer = 3500; 
+        if (this.gameState.dialogTimer > 0) {
+            this.gameState.dialogTimer = 0; // Force immediate cleanup if called again? 
+            // Actually, keep it simple: just overwrite.
+        }
 
         let actualText = text;
         let actualSpeaker = speaker;
@@ -123,13 +126,11 @@ class Engine {
         // Smart speaker detection: if text starts with "Name: ", try to find that actor
         if (!actualSpeaker) {
             const colonIndex = text.indexOf(':');
-            if (colonIndex > 0 && colonIndex < 20) { // arbitrary limit to avoid catching long sentences
+            if (colonIndex > 0 && colonIndex < 25) { 
                 const possibleName = text.substring(0, colonIndex).trim();
-                // Find actor by name (case-insensitive)
                 const found = this.actors.find(a => a.name.toLowerCase() === possibleName.toLowerCase());
                 if (found) {
                     actualSpeaker = found;
-                    // Strip the "Name: " and any surrounding quotes
                     actualText = text.substring(colonIndex + 1).trim();
                     if ((actualText.startsWith('"') && actualText.endsWith('"')) || 
                         (actualText.startsWith("'") && actualText.endsWith("'"))) {
@@ -142,6 +143,38 @@ class Engine {
         this.gameState.dialogLine = actualText;
         this.gameState.dialogTimer = duration;
         this.gameState.dialogSpeaker = actualSpeaker || this.player;
+
+        // Trigger talking animation if speaker is an actor
+        if (actualSpeaker && typeof actualSpeaker.talkAnim === 'function') {
+            actualSpeaker.talkAnim();
+        }
+    }
+
+    /** Sequence of lines. duration can be a number or an array of numbers. */
+    saySequence(lines, callback) {
+        if (!lines || lines.length === 0) {
+            if (callback) callback();
+            return;
+        }
+
+        const next = (index) => {
+            if (index >= lines.length) {
+                if (callback) callback();
+                return;
+            }
+
+            const item = lines[index];
+            const text = typeof item === 'string' ? item : item.text;
+            const dur = typeof item === 'object' && item.duration ? item.duration : 4000;
+            const speaker = typeof item === 'object' && item.speaker ? item.speaker : null;
+
+            this.say(text, dur, speaker);
+
+            // Wait for duration + small gap
+            setTimeout(() => next(index + 1), dur + 200);
+        };
+
+        next(0);
     }
 
     enterDialog(choices, callback) {
