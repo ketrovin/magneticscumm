@@ -23,7 +23,8 @@ class Engine {
             activeDialogChoices: null, // [string] or null
             onChoiceCallback: null,
             music: {
-                currentTrack: null,
+                currentTrack: null,     // The track actually playing right now
+                backgroundTrack: null,  // Selected on cell phone
                 volume: 0.5,
                 isLooping: true,
                 tracks: [] // { id, name, url }
@@ -75,11 +76,31 @@ class Engine {
             this.actors.push(...this.room.npcs);
         }
         console.log(`[Engine] → ${roomId}`);
+        
+        // Handle music transition
+        this._updateMusic();
     }
 
     loadRoom(room) {
         this.registerRoom(room);
         this.room = room;
+        this._updateMusic();
+    }
+
+    /** Choose and play the correct music (Room override vs Phone background) */
+    _updateMusic() {
+        if (!this.room) return;
+        
+        // Prioritize Room Music!
+        const targetTrackId = this.room.music || this.gameState.music.backgroundTrack;
+        
+        if (targetTrackId) {
+            if (this.gameState.music.currentTrack !== targetTrackId) {
+                this.playMusic(targetTrackId);
+            }
+        } else {
+            this.stopMusic();
+        }
     }
 
     // ── Actors ─────────────────────────────────────────────────────────────

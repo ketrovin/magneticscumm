@@ -5,13 +5,14 @@
  * Hotspots: [{ id, name, x, y, w, h, verb, action }]
  */
 class Room {
-    constructor({ id, name, background, walkbox, hotspots = [] }) {
+    constructor({ id, name, background, walkbox, hotspots = [], music = null }) {
         this.id = id;
         this.name = name;
         this.background = background; 
         this.walkbox = walkbox;       
         this.hotspots = hotspots;
         this.props = []; // Added for dynamic scene elements
+        this.music = music; // Room-specific background track
     }
 
     /** Point-in-polygon test (ray casting) */

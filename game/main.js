@@ -15,7 +15,7 @@
 const CW = 960, CH = 600, PANEL_H = 80, SCENE_H = CH - PANEL_H; // 520
 
 // ── Music Tracks ───────────────────────────────────────────────────────────────
-const MUSIC_TRACKS = [
+const PHONE_TRACKS = [
     { id: 'track1', name: "Neon Grit", url: "assets/music/game1.mp3" },
     { id: 'track2', name: "Magnetic Pulse", url: "assets/music/game2.mp3" },
     { id: 'track3', name: "Dave's Theme", url: "assets/music/game3.mp3" },
@@ -27,14 +27,20 @@ const MUSIC_TRACKS = [
     { id: 'track9', name: "Static Dream", url: "assets/music/game9.mp3" },
     { id: 'track10', name: "The Last Barometer", url: "assets/music/game10.mp3" }
 ];
+const ROOM_TRACKS = [
+    { id: 'opener', name: "Opening Theme", url: "assets/music/opener.mp3" },
+    { id: 'library', name: "The Quiet Archive", url: "assets/music/library.mp3" },
+    { id: 'weather', name: "High Pressure Front", url: "assets/music/weather.mp3" },
+    { id: 'pit', name: "The Lithic Deep", url: "assets/music/pit.mp3" }
+];
+const MUSIC_TRACKS = [...PHONE_TRACKS, ...ROOM_TRACKS];
 
 window._openPhoneMenu = (e) => {
     const s = e.getRoomState('global_phone'); // Persist phone state across rooms
     
     const showMusicMenu = () => {
-        const isPlaying = !!e.gameState.music.currentTrack;
-        const lastTrackId = s.lastTrackId || MUSIC_TRACKS[0].id;
-        const lastTrackViewName = (MUSIC_TRACKS.find(t => t.id === lastTrackId) || MUSIC_TRACKS[0]).name;
+        const isPlaying = !!e.gameState.music.backgroundTrack;
+        const lastTrackId = s.lastTrackId || PHONE_TRACKS[0].id;
 
         const mainChoices = [
             isPlaying ? "Turn Music Off" : "Turn Music On (Resume)",
@@ -45,24 +51,27 @@ window._openPhoneMenu = (e) => {
         e.enterDialog(mainChoices, (idx) => {
             if (idx === 0) {
                 if (isPlaying) {
-                    s.lastTrackId = e.gameState.music.currentTrack; // Save for resume
-                    e.stopMusic();
-                    e.say("Dave: 'The silence is deafening. I like it. Mostly.'");
+                    s.lastTrackId = e.gameState.music.backgroundTrack; // Save for resume
+                    e.gameState.music.backgroundTrack = null;
+                    e._updateMusic();
+                    e.say("Dave: 'Silence. I can hear myself breathe again.'");
                 } else {
-                    const toPlay = s.lastTrackId || MUSIC_TRACKS[0].id;
-                    const track = MUSIC_TRACKS.find(t => t.id === toPlay);
-                    e.playMusic(toPlay);
+                    const toPlay = s.lastTrackId || PHONE_TRACKS[0].id;
+                    const track = PHONE_TRACKS.find(t => t.id === toPlay);
+                    e.gameState.music.backgroundTrack = toPlay;
+                    e._updateMusic();
                     e.say(`Dave: 'Resuming ${track.name}. The loop continues.'`);
                 }
             } else if (idx === 1) {
-                const trackChoices = MUSIC_TRACKS.map(t => t.name);
+                const trackChoices = PHONE_TRACKS.map(t => t.name);
                 trackChoices.push("Back");
                 e.enterDialog(trackChoices, (tIdx) => {
-                    if (tIdx < MUSIC_TRACKS.length) {
-                        const track = MUSIC_TRACKS[tIdx];
+                    if (tIdx < PHONE_TRACKS.length) {
+                        const track = PHONE_TRACKS[tIdx];
                         s.lastTrackId = track.id;
-                        e.playMusic(track.id);
-                        e.say(`Dave: 'Playing ${track.name}. It's got a nice, predictable frequency.'`);
+                        e.gameState.music.backgroundTrack = track.id;
+                        e._updateMusic();
+                        e.say(`Dave: 'Playing ${track.name}. Perfect background frequency.'`);
                     } else {
                         showMusicMenu();
                     }
@@ -74,7 +83,7 @@ window._openPhoneMenu = (e) => {
     };
     
     e.say("I open my cracked phone. The media player's blue light glows with unearned confidence.");
-    setTimeout(showMusicMenu, 2000);
+    setTimeout(showMusicMenu, 1500);
 };
 
 // ── Asset loading ──────────────────────────────────────────────────────────────
@@ -162,43 +171,59 @@ const PELLERIN_ANIMS = {
     idle:      { row: 0, count: 1, startFrame: 0, fps: 1 },
     talk:      { row: 3, count: 4, startFrame: 5, fps: 6 }
 };
-const CHARGEN_ANIMS = {
-    walkR: {
-        fps: 8,
-        flipH: true,
-        frames: [
-            { x: 576, y: 0, w: 113, h: 210 },
-            { x: 689, y: 0, w: 113, h: 210 },
-            { x: 802, y: 0, w: 113, h: 210 },
-            { x: 915, y: 0, w: 113, h: 210 },
-        ],
-    },
-    walkL: {
-        fps: 8,
-        frames: [
-            { x: 576, y: 0, w: 113, h: 210 },
-            { x: 689, y: 0, w: 113, h: 210 },
-            { x: 802, y: 0, w: 113, h: 210 },
-            { x: 915, y: 0, w: 113, h: 210 },
-        ],
-    },
-    idle: {
-        fps: 2,
-        frames: [
-            { x: 0, y: 555, w: 80, h: 110 },
-            { x: 80, y: 555, w: 80, h: 110 },
-        ],
-    },
-    talk: {
-        fps: 6,
-        frames: [
-            { x: 160, y: 555, w: 80, h: 110 },
-            { x: 240, y: 555, w: 80, h: 110 },
-            { x: 320, y: 555, w: 80, h: 110 },
-            { x: 400, y: 555, w: 80, h: 110 },
-        ],
-    },
-};
+// ── TITLE SCREEN ─────────────────────────────────────────────────────────────
+function buildTitleScreen(bg, pressStartImg) {
+    const room = new Room({
+        id: 'title_screen', name: 'Title Screen',
+        background: bg,
+        music: 'opener',
+        walkbox: [], // No walking in title
+        hotspots: [
+            {
+                id: 'start_button', name: 'Start Game', x: 0, y: 0, w: 960, h: 520,
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use' || v === 'Open' || v === 'Push') {
+                        e.stopMusic();
+                        e.say("Here we go again. Magnetic Hill Mystery... let's see if the hill is actually magnetic this time.");
+                        setTimeout(() => e.changeRoom('bedroom', 480, 450), 2000);
+                    }
+                }
+            }
+        ]
+    });
+
+    // Add pulsing Press Start sprite
+    if (pressStartImg) {
+        const anim = new SpriteAnimator(pressStartImg, 320, 64, { idle: { row: 0, count: 1, fps: 1 } }, 'auto');
+        const pressStart = new Actor({ id: 'press_start', name: '', x: 480, y: 440, animator: anim });
+        pressStart.baseScale = 1.0;
+        pressStart.speed = 0;
+        pressStart.isVisible = true;
+
+        // Pulse logic via custom update override
+        const originalUpdate = pressStart.update;
+        pressStart.pulseTime = 0;
+        pressStart.update = (dt, r) => {
+            pressStart.pulseTime += dt;
+            const s = 1.0 + Math.sin(pressStart.pulseTime / 400) * 0.08;
+            pressStart.animator.scale = s;
+            pressStart.animator.update(dt);
+        };
+        
+        // Disable depth scaling for this actor
+        const originalDraw = pressStart.draw;
+        pressStart.draw = (ctx) => {
+            ctx.save();
+            ctx.globalAlpha = 0.7 + Math.sin(pressStart.pulseTime / 400) * 0.3;
+            pressStart.animator.draw(ctx, pressStart.x, pressStart.y);
+            ctx.restore();
+        };
+
+        room.npcs = [pressStart];
+    }
+
+    return room;
+}
 
 /**
  * Create a static NPC Actor and attach it to room.npcs.
@@ -509,6 +534,7 @@ function buildKitchen(bg) {
                     if (v === 'Sleep on' || v === 'Use') e.say("I could sleep on the couch, but the fridge mystery is haunting me.");
                     else e.say("A comfortable couch. It's seen better days. It has seen my days, which are not the best days.");
                 }
+            },
             // Bookshelf
             {
                 id: 'bookshelf', name: 'Bookshelf', x: 435, y: 235, w: 80, h: 170, walkToX: 475, walkToY: 440,
@@ -779,6 +805,7 @@ function buildWeatherStation(bg) {
     return new Room({
         id: 'weather_station', name: 'TV Weather Station',
         background: bg,
+        music: 'weather',
         walkbox: [
             { x: 100, y: 550 }, { x: 910, y: 550 },
             { x: 860, y: 400 }, { x: 600, y: 400 }, { x: 550, y: 480 }, { x: 200, y: 480 },
@@ -1585,6 +1612,7 @@ function buildMansionLibraryBalcony(bg) {
     return new Room({
         id: 'mansion_library_balcony', name: 'Library Balcony',
         background: bg,
+        music: 'library',
         walkbox: [
             { x: 60, y: 325 }, { x: 900, y: 325 }, 
             { x: 900, y: 580 }, { x: 740, y: 580 }, 
@@ -2414,6 +2442,9 @@ async function main() {
         itemIcons[id] = await loadImage(`assets/item_${id}.png`);
     }));
 
+    const pressStartImg = await loadImage('assets/press_start.png');
+    const npcSubGuy = await loadImage('assets/npc_sub_guy.png');
+
     // Herrings all use the same icon
     ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
         itemIcons[id] = itemIcons['red_herring'];
@@ -2458,10 +2489,31 @@ async function main() {
     });
     engine.registerRoom(kitchen);
 
-    { // Street — baker + poutine guy
+    { // Street — baker + poutine guy + sub guy
         const r = buildStreet(streetBg);
         buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
         buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
+        
+        const subGuy = buildNPCActor({ 
+            room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
+            sheet: npcSubGuy, color: '#00ff55', scale: 0.9, cols: 9, rows: 4 
+        });
+        if (subGuy) {
+            subGuy.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    e.saySequence([
+                        "Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'",
+                        "Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'",
+                        "Sub Guy: 'Also, if you're looking for the REAL sub... you should check the Hill. I hear there's a guy in a suit who really needs a jumpstart.'"
+                    ]);
+                } else if (v === 'Look at') {
+                    e.say("The Sub Guy is wearing a sandwich. Or a submarine. I'm not sure which one he's trying to sell, but he's very committed to the theme.");
+                } else {
+                    e.triggerQuip(v, 'Sub Guy');
+                }
+            };
+        }
+        
         r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
         engine.registerRoom(r);
     }
@@ -3103,11 +3155,11 @@ async function main() {
         r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 540, y: 290, w: 120, h: 120, isVisible(e) { return !e.hasItem('canadian_shield'); } });
         r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 780, y: 410, w: 130, h: 100, isVisible(e) { return !e.hasItem('geo_hammer'); } });
         
-        engine.registerRoom(r);
+        engine.registerRoom(buildGeoStrata(strataBg));
     }
+    engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
     engine.registerRoom(buildMagneticHill(magHillBg));
-    console.log('[Rooms] 16 rooms registered, NPCs attached.');
-
+    console.log('[Rooms] 17 rooms registered, NPCs attached.');
 
     // Dave
     const sheetImg = daveSheet ?? buildProceduralDave();
@@ -3133,8 +3185,6 @@ async function main() {
             if (phoneHotspot) {
                 phoneHotspot.onInteract('Use', e, item);
             } else {
-                // If phone hotspot isn't in this room, we need to manually trigger the menu logic
-                // or we can just define a helper in main.js
                 window._openPhoneMenu(e);
             }
         } else if (v === 'Look at') {
@@ -3146,9 +3196,9 @@ async function main() {
     // Initialize music tracks in engine
     engine.gameState.music.tracks = MUSIC_TRACKS;
 
-    // Start in bedroom with phone
+    // Start in title screen
     engine.addItem('cell_phone', 'Cell Phone');
-    engine.changeRoom('bedroom', 480, 450);
+    engine.changeRoom('title_screen', 480, 450);
     engine.start();
 
     // Console helpers
