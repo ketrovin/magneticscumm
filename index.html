@@ -24,6 +24,7 @@
 
     <div id="loading-overlay">
       <div id="loading-text">LOADING…</div>
+      <div id="start-prompt" style="display: none; color: #c8a84b; font-size: 32px; cursor: pointer; text-shadow: 2px 2px 4px #000;">CLICK TO BEGIN</div>
     </div>
   </div>
 
@@ -35,12 +36,49 @@
   <script src="engine/Engine.js"></script>
   <script src="game/main.js"></script>
   <script>
-    // Hide loading overlay once modules are ready
+    // Managed Splash Screen / Loading Sequence
     window.addEventListener('load', () => {
-      setTimeout(() => {
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) overlay.style.display = 'none';
-      }, 800);
+      const overlay = document.getElementById('loading-overlay');
+      const startPrompt = document.getElementById('start-prompt');
+      const loadingText = document.getElementById('loading-text');
+
+      // 1. Wait for engine and assets to be ready
+      const checkReady = () => {
+        if (window._engine && window._engine.rooms && window._engine.rooms['title_screen']) {
+          loadingText.style.display = 'none';
+          startPrompt.style.display = 'block';
+        } else {
+          setTimeout(checkReady, 100);
+        }
+      };
+      checkReady();
+
+      // 2. State management
+      let hasMusicStarted = false;
+
+      // 3. Handle interactions
+      overlay.addEventListener('click', () => {
+        if (!window._engine) return;
+
+        if (!hasMusicStarted) {
+          // First click: Start music and turn prompt into "Start Game" if ready
+          window._engine.playMusic('opener');
+          hasMusicStarted = true;
+          if (startPrompt.style.display === 'block') {
+             startPrompt.innerText = 'PRESS START';
+          }
+        } else if (startPrompt.style.display === 'block') {
+          // Second click: Stop music and enter Dave's bedroom
+          window._engine.stopMusic();
+          window._engine.changeRoom('bedroom', 480, 450);
+          
+          overlay.style.transition = 'opacity 0.8s ease-out';
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+          }, 800);
+        }
+      });
     });
   </script>
 </body>
