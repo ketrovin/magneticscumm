@@ -29,26 +29,52 @@ const MUSIC_TRACKS = [
 ];
 
 window._openPhoneMenu = (e) => {
+    const s = e.getRoomState('global_phone'); // Persist phone state across rooms
+    
     const showMusicMenu = () => {
-        const choices = MUSIC_TRACKS.map(t => t.name);
-        choices.push("Stop Music", "Close Phone");
+        const isPlaying = !!e.gameState.music.currentTrack;
+        const lastTrackId = s.lastTrackId || MUSIC_TRACKS[0].id;
+        const lastTrackViewName = (MUSIC_TRACKS.find(t => t.id === lastTrackId) || MUSIC_TRACKS[0]).name;
+
+        const mainChoices = [
+            isPlaying ? "Turn Music Off" : "Turn Music On (Resume)",
+            "Select New Track...",
+            "Close Phone"
+        ];
         
-        e.enterDialog(choices, (idx) => {
-            if (idx < MUSIC_TRACKS.length) {
-                const track = MUSIC_TRACKS[idx];
-                e.say(`Dave: 'Playing ${track.name} on a loop. It really sets the mood for... whatever this is.'`);
-                e.playMusic(track.id);
-            } else if (idx === MUSIC_TRACKS.length) {
-                e.stopMusic();
-                e.say("Dave: 'Silence. Finally. I can hear myself think about how much I hate these puzzles.'");
+        e.enterDialog(mainChoices, (idx) => {
+            if (idx === 0) {
+                if (isPlaying) {
+                    s.lastTrackId = e.gameState.music.currentTrack; // Save for resume
+                    e.stopMusic();
+                    e.say("Dave: 'The silence is deafening. I like it. Mostly.'");
+                } else {
+                    const toPlay = s.lastTrackId || MUSIC_TRACKS[0].id;
+                    const track = MUSIC_TRACKS.find(t => t.id === toPlay);
+                    e.playMusic(toPlay);
+                    e.say(`Dave: 'Resuming ${track.name}. The loop continues.'`);
+                }
+            } else if (idx === 1) {
+                const trackChoices = MUSIC_TRACKS.map(t => t.name);
+                trackChoices.push("Back");
+                e.enterDialog(trackChoices, (tIdx) => {
+                    if (tIdx < MUSIC_TRACKS.length) {
+                        const track = MUSIC_TRACKS[tIdx];
+                        s.lastTrackId = track.id;
+                        e.playMusic(track.id);
+                        e.say(`Dave: 'Playing ${track.name}. It's got a nice, predictable frequency.'`);
+                    } else {
+                        showMusicMenu();
+                    }
+                });
             } else {
-                e.say("Dave: 'Back to the real world.'");
+                e.say("Dave: 'Back to the Moncton air.'");
             }
         });
     };
     
-    e.say("I open my phone. The screen is cracked, but the music player still works. Miraculously.");
-    setTimeout(showMusicMenu, 2500);
+    e.say("I open my cracked phone. The media player's blue light glows with unearned confidence.");
+    setTimeout(showMusicMenu, 2000);
 };
 
 // ── Asset loading ──────────────────────────────────────────────────────────────
@@ -784,9 +810,9 @@ function buildWeatherStation(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "DOPPLER RADAR: Measures the velocity of precipitation particles.",
-                            "By tracking the change in frequency of the reflected microwave signal, meteorologists can see exactly where the rain is moving, not just where it is.",
-                            "It's our best tool for detecting the hook echo signature of a developing tornado."
+                            "By tracking the change in frequency of reflected microwave signals, meteorologists can see exactly where the rain is moving, not just where it is."
                         ]);
                     } else e.say("A glowing screen filled with colorful blobs of precipitation patterns.");
                 }
@@ -797,9 +823,9 @@ function buildWeatherStation(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "CLOUD TYPES: Based on altitude and appearance.",
                             "High clouds (>6km) are mostly ice: Cirrus, Cirrostratus, Cirrocumulus.",
-                            "Mid clouds (2-6km) are often liquid: Altostratus, Altocumulus.",
                             "Low clouds (<2km) are thick: Stratus, Stratocumulus, and the vertical giant, Cumulonimbus."
                         ]);
                     } else e.say("A screen showing different cloud formations from wispy cirrus to massive thunderheads.");
@@ -811,9 +837,9 @@ function buildWeatherStation(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "SYNOPTIC CHART: A snapshot of the atmosphere's current state.",
-                            "Isobars connect points of equal pressure. Tight gradients mean high winds. 'L' marks low-pressure cyclones, 'H' marks high-pressure anticyclones.",
-                            "The red lines with semicircles are Warm Fronts; the blue lines with triangles are Cold Fronts."
+                            "Isobars connect points of equal pressure. Tight gradients mean high winds. 'L' marks low-pressure cyclones, 'H' marks high-pressure anticyclones."
                         ]);
                     } else e.say("A complex map covered in isobars and colorful front lines.");
                 }
@@ -824,9 +850,9 @@ function buildWeatherStation(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "RELATIVE HUMIDITY & DEW POINT: Humidity is the percentage of moisture the air *can* hold at its current temperature.",
-                            "Dew Point is the actual temperature the air must cool to for saturation and condensation to occur.",
-                            "When the temp reaches the dew point, you get fog, dew, or clouds. The closer they are, the muggier it feels."
+                            "Dew Point is the actual temperature the air must cool to for saturation and condensation to occur."
                         ]);
                     } else e.say("An instrument panel tracking moisture and temperature in the studio.");
                 }
@@ -1587,9 +1613,9 @@ function buildMansionLibraryBalcony(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "TROPOSPHERE: From the surface to ~12km. This is the 'Weather Sphere'.",
-                            "The air here is thickest and most turbulent. As the sun warms the Earth, the air rises and cools, creating the convection currents that drive our storms and winds.",
-                            "The 'Tropopause' at the top acts as a ceiling, stopping most weather from rising higher into the atmosphere."
+                            "The air here is thickest and most turbulent. As the sun warms the Earth, the air rises and cools, creating the convection currents that drive our storms and winds."
                         ]);
                     } else e.say("An ornate brass plaque with diagrams of storm clouds and rising heat arrows.");
                 }
@@ -1600,9 +1626,9 @@ function buildMansionLibraryBalcony(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "STRATOSPHERE: 12km to 50km. The 'Shielding Sphere'.",
-                            "The Ozone Layer lives here, absorbing 97-99% of the Sun's high-frequency ultraviolet light. Without this layer, life on the surface would be nearly impossible.",
-                            "Unlike the layer below, it's very stable. Commercial jets fly here to avoid the turbulence of the troposphere."
+                            "The Ozone Layer lives here, absorbing 97-99% of the Sun's high-frequency ultraviolet light. Without this layer, life on the surface would be nearly impossible."
                         ]);
                     } else e.say("A brass plaque showing a protective layer being struck by golden solar rays.");
                 }
@@ -1613,9 +1639,9 @@ function buildMansionLibraryBalcony(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "MESOSPHERE: 50km to 85km. The 'Cold Sphere'.",
-                            "It is the coldest place in the Earth's system, reaching -130°F (-90°C). Yet, it's just thick enough to cause friction for incoming meteors.",
-                            "Meteors burn up here, turning into 'shooting stars'. They are compressed so hard by the air that they reach incandescence before they can hit the ground."
+                            "It is the coldest place in the Earth's system, reaching -130°F (-90°C). Yet, it's just thick enough to cause friction for incoming meteors."
                         ]);
                     } else e.say("A plaque depicting a meteor disintegrating into a streak of fire.");
                 }
@@ -1626,9 +1652,9 @@ function buildMansionLibraryBalcony(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "THERMOSPHERE: 85km to 600km. The 'Heat Sphere'.",
-                            "Though the temperature can reach 4,500°F (2,500°C), the air is so sparse you wouldn't feel warm. This layer also contains the IONOSPHERE.",
-                            "The Ionosphere reflects radio waves, allowing long-distance communication across the globe. It also hosts the Aurora Borealis as solar particles collide with atmospheric gasses."
+                            "Though the temperature can reach 4,500°F (2,500°C), the air is so sparse you wouldn't feel warm. This layer also contains the IONOSPHERE."
                         ]);
                     } else e.say("A plaque showing swirling green lights and radio waves bouncing off the sky.");
                 }
@@ -1639,9 +1665,9 @@ function buildMansionLibraryBalcony(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "EXOSPHERE: Above 600km. The 'Exit Sphere'.",
-                            "The final frontier before the vacuum of space. Molecules here are so far apart they can escape Earth's gravity entirely and drift into the cosmos.",
-                            "Most satellites orbit within this layer where drag is almost nonexistent, yet still present enough to cause orbit decay over decades."
+                            "The final frontier before the vacuum of space. Molecules here are so far apart they can escape Earth's gravity entirely and drift into the cosmos."
                         ]);
                     } else e.say("A plaque showing a lonely satellite drifting above the curve of the Earth.");
                 }
@@ -2081,6 +2107,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "UPPER LAYER: Carboniferous sandstone and shale (~300-360 million years old).",
                             "During this period, New Brunswick was a tropical swamp near the equator. This layer formed from the silt and mud of that ancient world."
                         ]);
@@ -2093,6 +2120,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "EVAPORITE BAND: Windsor Group gypsum and rock salt (~340 million years old).",
                             "These minerals were deposited when an ancient inland sea repeatedly evaporated. It's why the ground in the Maritimes is so rich in salt and gypsum."
                         ]);
@@ -2105,6 +2133,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "GRENVILLE BAND: 1.0-1.3 billion year old metamorphic rock.",
                             "Pre-existing granite crushed and recrystallized under extreme heat and pressure. The distinctive pink color comes from feldspar minerals undergoing solid-state transformation."
                         ]);
@@ -2117,6 +2146,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                         e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "PRECAMBRIAN SHIELD: The stable heart of North America, 2.5 to 4 billion years old.",
                             "Some of the oldest rock on the planet. It forms the foundation that all the other layers rest upon. It is billions of years of silent, crystalline history."
                         ]);
@@ -2129,6 +2159,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
                          e.saySequence([
+                            "Dave: 'Holy cow! Educational content!'",
                             "THRUST FAULT: A diagonal crack from the Acadian Orogeny (~360 million years ago).",
                             "Immense compressive forces shoved older rocks up over younger ones. It's a scar from when continents collided to build mountains."
                         ]);
