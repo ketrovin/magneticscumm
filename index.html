@@ -24,7 +24,10 @@
 
     <div id="loading-overlay">
       <div id="loading-text">LOADING…</div>
-      <div id="start-prompt" style="display: none; color: #c8a84b; font-size: 32px; cursor: pointer; text-shadow: 2px 2px 4px #000;">CLICK TO BEGIN</div>
+      <!-- Phase 1: Sound Initiation -->
+      <button id="btn-sound" style="display: none;">CLICK FOR SOUND</button>
+      <!-- Phase 2: Game Initiation -->
+      <button id="btn-start" style="display: none;">PRESS START</button>
     </div>
   </div>
 
@@ -36,43 +39,41 @@
   <script src="engine/Engine.js"></script>
   <script src="game/main.js"></script>
   <script>
-    // Managed Splash Screen / Loading Sequence
+    // Managed Triple-Phase Splash Screen
     window.addEventListener('load', () => {
       const overlay = document.getElementById('loading-overlay');
-      const startPrompt = document.getElementById('start-prompt');
       const loadingText = document.getElementById('loading-text');
+      const btnSound = document.getElementById('btn-sound');
+      const btnStart = document.getElementById('btn-start');
 
-      // 1. Wait for engine and assets to be ready
+      // 1. Wait for engine/assets
       const checkReady = () => {
         if (window._engine && window._engine.rooms && window._engine.rooms['title_screen']) {
           loadingText.style.display = 'none';
-          startPrompt.style.display = 'block';
+          btnSound.style.display = 'block';
         } else {
           setTimeout(checkReady, 100);
         }
       };
       checkReady();
 
-      // 2. State management
-      let hasMusicStarted = false;
-
-      // 3. Handle interactions
-      overlay.addEventListener('click', () => {
-        if (!window._engine) return;
-
-        if (!hasMusicStarted) {
-          // First click: Start music and turn prompt into "Start Game" if ready
+      // 2. Phase 1: Enable Audio
+      btnSound.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window._engine) {
           window._engine.playMusic('opener');
-          hasMusicStarted = true;
-          if (startPrompt.style.display === 'block') {
-             startPrompt.innerText = 'PRESS START';
-          }
-        } else if (startPrompt.style.display === 'block') {
-          // Second click: Stop music and enter Dave's bedroom
+          btnSound.style.display = 'none';
+          btnStart.style.display = 'block';
+        }
+      });
+
+      // 3. Phase 2: Enter Game
+      btnStart.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window._engine) {
           window._engine.stopMusic();
           window._engine.changeRoom('bedroom', 480, 450);
           
-          overlay.style.transition = 'opacity 0.8s ease-out';
           overlay.style.opacity = '0';
           setTimeout(() => {
             overlay.style.display = 'none';
