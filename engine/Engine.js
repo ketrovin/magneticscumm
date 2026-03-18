@@ -281,6 +281,11 @@ class Engine {
         });
 
         this.input.onClick((mx, my) => {
+            // Unblock audio on first click
+            if (this.currentAudio && this.currentAudio.paused) {
+                this.currentAudio.play().catch(() => {});
+            }
+            
             const verbClicked = this.ui.onClick(mx, my);
             if (verbClicked) return;
             if (!this.room) return;

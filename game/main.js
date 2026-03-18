@@ -12,7 +12,7 @@
  */
 
 // ── Canvas / scene dims ────────────────────────────────────────────────────────
-const CW = 960, CH = 600, PANEL_H = 80, SCENE_H = CH - PANEL_H; // 520
+const CW = 960, CH = 600, PANEL_H = 140, SCENE_H = CH - PANEL_H; // 460
 
 // ── Music Tracks ───────────────────────────────────────────────────────────────
 const PHONE_TRACKS = [
@@ -180,7 +180,7 @@ function buildTitleScreen(bg, pressStartImg) {
         walkbox: [], // No walking in title
         hotspots: [
             {
-                id: 'start_button', name: 'Start Game', x: 0, y: 0, w: 960, h: 520,
+                id: 'start_button', name: 'Start Game', x: 280, y: 350, w: 400, h: 100,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use' || v === 'Open' || v === 'Push') {
                         e.stopMusic();
