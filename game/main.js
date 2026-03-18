@@ -2390,7 +2390,7 @@ async function main() {
     const assets = await Promise.all([
             loadImage('assets/bedroom_bg.png'),
             loadImage('assets/kitchen_bg.jpg'),
-            loadImage('assets/street_bg.jpg'),
+            loadImage('assets/street_bg.png'),
             loadImage('assets/alley_bg.jpg'),
             loadImage('assets/secret_bg.jpg'),
             loadImage('assets/gate_bg.jpg'),
@@ -2404,6 +2404,7 @@ async function main() {
             loadImage('assets/mag_entrance_bg.jpg'),
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
+            loadImage('assets/title_screen_bg.png'),
             loadImage('assets/herring_club_bg.png'),
             loadImage('assets/weather_station_bg.png'),
             loadImage('assets/library_balcony_bg.png'),
@@ -2425,7 +2426,7 @@ async function main() {
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
+        magEntranceBg, geoStrataBg, magHillBg, titleBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
         npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
         npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
 
@@ -2435,7 +2436,7 @@ async function main() {
         'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone', 
         'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine', 
         'battle_bread', 'mansion_key', 'remote_control', 'red_herring', 
-        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza',
+        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza_slice',
         'club_key', 'red_herring_key', 'fishy_token'
     ];
     await Promise.all(itemsToLoad.map(async id => {
@@ -2451,7 +2452,7 @@ async function main() {
     });
 
     // Map pizza specifically
-    itemIcons['pizza'] = pizzaImg;
+    itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
     const bedroom = buildBedroom(bedroomBg);
@@ -2491,8 +2492,8 @@ async function main() {
 
     { // Street — baker + poutine guy + sub guy
         const r = buildStreet(streetBg);
-        buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
-        buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
+        const baker = buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
+        const poutine = buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
         
         const subGuy = buildNPCActor({ 
             room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
@@ -2514,14 +2515,17 @@ async function main() {
             };
         }
         
-        r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
+        if (poutine) {
+            r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
+        }
         engine.registerRoom(r);
     }
     { // Alley — club doorman
         const r = buildAlley(alleyBg);
         const bouncer = buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff', cols: 9, rows: 4 });
         
-        bouncer.onInteract = (v, e, item) => {
+        if (bouncer) {
+            bouncer.onInteract = (v, e, item) => {
             const s = e.getRoomState('alley');
             const itemId = (item && (typeof item === 'string' ? item : item.id));
             if (v === 'Use' && itemId === 'battle_bread') {
@@ -2545,12 +2549,12 @@ async function main() {
                 } else {
                     e.say("He won't let me in. He's firmly convinced I'm not here. It's an existential crisis in a cyan suit.");
                 }
-            }
-        };
+            };
+        }
 
         // Ensure bouncer hides if already knocked out on room entry
         r.onEnter = (e) => {
-            if (e.getRoomState('alley').bouncerKnockedOut) {
+            if (e.getRoomState('alley').bouncerKnockedOut && bouncer) {
                 bouncer.isVisible = false;
             }
         };
@@ -2864,7 +2868,11 @@ async function main() {
 
     { // Pawn shop — pawnbroker
         const r = buildPawnShop(pawnBg);
-        buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff', cols: 9, rows: 4 });
+        const pawnbroker = buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff', cols: 9, rows: 4 });
+        
+        if (pawnbroker) {
+            // Optional: add pawnbroker-specific logic here if needed beyond buildPawnShop
+        }
         
         // Add item props to shelves
         r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 230, y: 200, w: 50, h: 50, isVisible(e) { return !e.hasItem('camera'); } });
@@ -2880,17 +2888,20 @@ async function main() {
     }
     { // Mansion courtyard — raccoon family in garden
         const r = buildMansionCourtyard(courtyardBg);
-        buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon, color: '#aaaaaa', cols: 9, rows: 4 });
+        const raccoon = buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon, color: '#aaaaaa', cols: 9, rows: 4 });
+        if (raccoon) {
+             // Raccoon logic
+        }
         engine.registerRoom(r);
     }
     { // Mansion foyer — cat on a pedestal
         const r = buildMansionFoyer(foyerBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
+        const cat1 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
     { // Mansion library — cat reappears upstairs (same sheet)
         const r = buildMansionLibrary(libraryBg);
-        buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
+        const cat2 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
     { // Mansion library balcony — Atmospheric science plaques
@@ -2912,7 +2923,10 @@ async function main() {
 
     { // Police station interior — Officer Savoie at desk
         const r = buildPoliceInt(policeIntBg);
-        buildNPCActor({ room: r, id: 'savoie_npc', name: 'Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff', cols: 9, rows: 4 });
+        const savoie = buildNPCActor({ room: r, id: 'savoie_npc', name: 'Savoie', x: 545, y: 420, sheet: npcSavoie, color: '#5555ff', cols: 9, rows: 4 });
+        if (savoie) {
+            // Savoie logic
+        }
         engine.registerRoom(r);
     }
     { // Mag entrance — signage props
@@ -3155,7 +3169,7 @@ async function main() {
         r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 540, y: 290, w: 120, h: 120, isVisible(e) { return !e.hasItem('canadian_shield'); } });
         r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 780, y: 410, w: 130, h: 100, isVisible(e) { return !e.hasItem('geo_hammer'); } });
         
-        engine.registerRoom(buildGeoStrata(strataBg));
+        engine.registerRoom(r);
     }
     engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
     engine.registerRoom(buildMagneticHill(magHillBg));
