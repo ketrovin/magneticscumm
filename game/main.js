@@ -509,12 +509,11 @@ function buildKitchen(bg) {
                     if (v === 'Sleep on' || v === 'Use') e.say("I could sleep on the couch, but the fridge mystery is haunting me.");
                     else e.say("A comfortable couch. It's seen better days. It has seen my days, which are not the best days.");
                 }
-            },
             // Bookshelf
             {
                 id: 'bookshelf', name: 'Bookshelf', x: 435, y: 235, w: 80, h: 170, walkToX: 475, walkToY: 440,
                 onInteract(v, e) {
-                    e.say("Books. I should read more. The titles are all 'HOW TO' something I should already know.");
+                    e.say("Books. I should read more. The titles are all 'HOW To' something I should already know.");
                 }
             },
             // Sink
@@ -535,13 +534,13 @@ function buildStreet(bg) {
         id: 'street', name: 'The Street Outside',
         background: bg,
         walkbox: [
-            { x: 0, y: 510 }, { x: 960, y: 510 },
-            { x: 880, y: 370 }, { x: 80, y: 370 },
+            { x: 0, y: 550 }, { x: 960, y: 550 },
+            { x: 920, y: 440 }, { x: 40, y: 440 },
         ],
         hotspots: [
             // Apt 2B door — back to kitchen
             {
-                id: 'apt_door', name: 'Apt 2B Door', x: 22, y: 260, w: 90, h: 250, walkToX: 80, walkToY: 460,
+                id: 'apt_door', name: 'Apt 2B Door', x: 35, y: 520, w: 85, h: 240, walkToX: 75, walkToY: 535,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') e.changeRoom('kitchen', 870, 440);
                     else e.say("My apartment door. Home sweet suspiciously-keyed-up home.");
@@ -549,10 +548,10 @@ function buildStreet(bg) {
             },
             // Apt 2B window — mysterious occupant
             {
-                id: 'apt_window', name: 'Apartment Window', x: 110, y: 230, w: 145, h: 180, walkToX: 180, walkToY: 440,
+                id: 'apt_window', name: 'Apartment Window', x: 155, y: 535, w: 125, h: 160, walkToX: 215, walkToY: 535,
                 onInteract(v, e) {
-                    if (v === 'Look at') {
-                        e.say("I look into my own window and... wait. The furniture is different. The layout is backwards. And I'm pretty sure I don't own a velvet bust of a penguin. This is deeply confusing.");
+                    if (v === 'Look at' || v === 'Read') {
+                        e.say("I look into my own window and... wait. The furniture is different. This is deeply confusing.");
                     } else {
                         e.say("That's my room. But I'M out here. I hope whoever's in there is at least charging their phone correctly.");
                     }
@@ -560,52 +559,48 @@ function buildStreet(bg) {
             },
             // Moncton Bakery — Baker NPC (prime suspect)
             {
-                id: 'bakery', name: 'Moncton Bakery', x: 295, y: 215, w: 185, h: 315, walkToX: 388, walkToY: 470,
+                id: 'bakery', name: 'Moncton Bakery', x: 340, y: 385, w: 200, h: 215, walkToX: 440, walkToY: 520,
                 onInteract(v, e) {
                     const s = e.getRoomState('street');
                     if (v === 'Talk to') {
                         s.bakerTalks = (s.bakerTalks || 0) + 1;
                         const lines = [
-                            "Baker: 'I know nothing about any mansion! NOTHING! You want bread? BUY BREAD!",
-                            "Baker: 'Van Horne? Pfff. He complained about MY baguette being too hard. TOO HARD! It is PERFECT!'",
-                            "Baker: 'I was HERE. All night. Baking. Do not look at me like that. EVERYONE looks at me like that.'",
-                            "Baker: 'My baguette is not a weapon. It is ARTISANAL. The fact that it COULD be a weapon is a matter of QUALITY, not CHARACTER!'",
+                            "Baker: 'I know nothing about any mansion! NOTHING! You want bread? BUY BREAD!'",
+                            "Baker: 'Van Horne? He complained about MY baguette being too hard. TOO HARD! It's PERFECT!'",
+                            "Baker: 'I was HERE. All night. Baking. Do not look at me like that.'",
+                            "Baker: 'My baguette is not a weapon. It is ARTISANAL. The fact that it COULD be a weapon is a matter of QUALITY!'",
                             "Baker: '...Are you still here? Non. Non non non. Au revoir, Dave.'",
                         ];
                         e.say(lines[(s.bakerTalks - 1) % lines.length]);
                     } else if (v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Open') {
                         if (e.hasItem('battle_bread')) {
-                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back. It's mine now.");
+                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back.");
                         } else {
                             s.breadGiven = true;
                             e.addItem('battle_bread', 'Battle Bread');
-                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. It's solid as iron. And surprisingly aerodynamic. This could be useful.");
+                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. This could be useful.");
                         }
                     } else {
                         e.say('Moncton Bakery. Incredible bread. Baker looks absolutely furious. Standard.');
                     }
                 }
             },
-
-            // Poutine stand
+            // Sub Shoppe
             {
-                id: 'poutine', name: 'Poutine Stand', x: 488, y: 255, w: 130, h: 255, walkToX: 553, walkToY: 470,
+                id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 375, w: 150, h: 210, walkToX: 650, walkToY: 520,
                 onInteract(v, e) {
-                    const s = e.getRoomState('street');
-                    if (v === 'Talk to' || v === 'Use' || v === 'Walk to') {
-                        if (s.poutineGiven) {
-                            e.say("The poutine stand owner gives me a sympathetic look. 'No more rapée, friend. You finish it?' I nod. I finished it. I regret nothing. Mostly.");
-                        } else {
-                            s.poutineGiven = true;
-                            e.addItem('poutine', 'Poutine Rapée');
-                            e.say("Poutine Guy: 'For you, free! Poutine rapée, best in Moncton!' I accept. It is... technically poutine. It is not what I wanted. But it's free. I eat it anyway. And now I own it. Literally.");
-                        }
-                    } else e.say("A poutine stand. The sign says 'BEST POUTINE'. It is specifically poutine rapée. The poutine guy looks friendly.");
+                    if (v === 'Talk to') {
+                        e.say("Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'");
+                    } else if (v === 'Use' || v === 'Walk to' || v === 'Open') {
+                        e.say("Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'");
+                    } else {
+                        e.say("The Sub Shoppe. The sign is made of literal wood. The 'Sub Guy' is inside, looking semi-employed.");
+                    }
                 }
             },
             // CB Phone Co.
             {
-                id: 'phone_co', name: 'CB Phone Co.', x: 625, y: 205, w: 205, h: 310, walkToX: 725, walkToY: 470,
+                id: 'phone_co', name: 'CB Phone Co.', x: 740, y: 380, w: 160, h: 200, walkToX: 820, walkToY: 520,
                 onInteract(v, e) {
                     e.say("I'm not going in there! My phone bill is... outstanding. As in, the amount is outstanding. As in astronomical.");
                 }
