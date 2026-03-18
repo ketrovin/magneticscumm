@@ -759,8 +759,8 @@ function buildWeatherStation(bg) {
         id: 'weather_station', name: 'TV Weather Station',
         background: bg,
         walkbox: [
-            { x: 50, y: 510 }, { x: 910, y: 510 },
-            { x: 800, y: 350 }, { x: 150, y: 350 },
+            { x: 100, y: 550 }, { x: 910, y: 550 },
+            { x: 860, y: 400 }, { x: 600, y: 400 }, { x: 550, y: 480 }, { x: 200, y: 480 },
         ],
         hotspots: [
             // Back to Herring Club
@@ -1565,8 +1565,10 @@ function buildMansionLibraryBalcony(bg) {
         id: 'mansion_library_balcony', name: 'Library Balcony',
         background: bg,
         walkbox: [
-            { x: 100, y: 510 }, { x: 860, y: 510 },
-            { x: 750, y: 315 }, { x: 160, y: 315 },
+            { x: 60, y: 325 }, { x: 900, y: 325 }, 
+            { x: 900, y: 580 }, { x: 740, y: 580 }, 
+            { x: 740, y: 460 }, { x: 380, y: 460 }, 
+            { x: 380, y: 580 }, { x: 60, y: 580 }
         ],
         hotspots: [
             // Spiral staircase (Return Path)
