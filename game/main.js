@@ -2472,17 +2472,17 @@ async function main() {
     );
     animator.play('idle');
 
-    const dave = new Actor({ 
-        id: 'dave', 
-        name: 'Dave', 
-        x: 480, 
-        y: 450, 
-        animator, 
+    const dave = new Actor({
+        id: 'dave',
+        name: 'Dave',
+        x: 480,
+        y: 450,
+        animator,
         scale: 1.5,
         canWalk: true,
         z: 450
     });
-    
+
     dave.onInteract = (v, e, item) => {
         const itemId = (item && (typeof item === 'string' ? item : item.id));
         if (v === 'Use' && itemId === 'cell_phone') {
@@ -2504,7 +2504,7 @@ async function main() {
             e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
         }
     };
-    
+
     engine.setPlayer(dave);
 
     // Preload item images for props and inventory
@@ -2524,6 +2524,9 @@ async function main() {
     ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
         itemIcons[id] = itemIcons['red_herring'];
     });
+
+    // CRITICAL: Attach preloaded icons to engine UI so they appear in inventory
+    Object.assign(engine.ui.loadedItemImages, itemIcons);
 
     // Map pizza specifically
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
