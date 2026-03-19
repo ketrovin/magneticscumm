@@ -182,12 +182,6 @@ function buildTitleScreen(bg, pressStartImg) {
             {
                 id: 'start_button', name: 'Title Screen', x: 0, y: 0, w: 960, h: 600,
                 onInteract(v, e) {
-                    const s = e.getRoomState('title_screen');
-                    if (!s.musicStarted) {
-                        s.musicStarted = true;
-                        // Engine unblocks the music on this click automatically
-                        return;
-                    }
                     // Transition to game
                     e.stopMusic();
                     // Set a default background track for the player's phone
