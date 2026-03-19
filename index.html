@@ -63,10 +63,23 @@
           // Phase 1: Unblock sound and switch prompt
           window._engine.playMusic('opener');
           phase = 'playing';
-          clickPrompt.innerText = 'CLICK TO START';
-          clickPrompt.classList.add('pulse');
+          
+          const waitReady = () => {
+             if (window._engine.rooms['bedroom']) {
+               clickPrompt.innerText = 'CLICK TO START';
+               clickPrompt.classList.add('pulse');
+             } else {
+               clickPrompt.innerText = 'PREPARING GAME…';
+               clickPrompt.classList.remove('pulse');
+               setTimeout(waitReady, 200);
+             }
+          };
+          waitReady();
+
         } else if (phase === 'playing') {
           // Phase 2: Trigger the engine's start logic and hide the overlay
+          if (!window._engine.rooms['bedroom']) return; // Still loading
+
           const titleRoom = window._engine.rooms['title_screen'];
           if (titleRoom && titleRoom.hotspots) {
             const btn = titleRoom.hotspots.find(h => h.id === 'start_button');

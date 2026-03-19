@@ -2405,6 +2405,8 @@ async function main() {
 
     // Register title screen immediately so splash screen overlay knows it's ready
     engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
+    engine.changeRoom('title_screen', 480, 450);
+    engine.start();
 
     // PHASE 2: Load everything else
     const assetsProgress = Promise.all([
