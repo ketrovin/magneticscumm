@@ -784,9 +784,9 @@ function buildHerringClub(bg) {
                 id: 'red_herring_key', name: 'Red Herring Key', x: 235, y: 355, w: 60, h: 60, walkToX: 265, walkToY: 430,
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
-                        if (e.hasItem('red_herring_key')) e.say("I already have the Red Herring Key. It's suspiciously bright.");
+                        if (e.hasItem('rh_key_3')) e.say("I already have the Red Herring Key. It's suspiciously bright.");
                         else {
-                            e.addItem('red_herring_key', 'Red Herring Key');
+                            e.addItem('rh_key_3', 'Red Herring Key');
                             e.say("I pick up the Red Herring Key. It's literally shaped like a fish and painted bright red. This is getting ridiculous.");
                         }
                     } else e.say("A bright red key on a velvet cushion. It looks important. Which probably means it's a distraction.");
@@ -1338,10 +1338,15 @@ function buildMansionFoyer(bg) {
                     else e.say('The way out. The responsible choice. I came in here anyway, so clearly I\'m not making responsible choices today.');
                 }
             },
-            // Dark doorway center-right (leads somewhere dark — not built yet)
+            // Dark doorway center-right (leads to backyard)
             {
                 id: 'dark_doorway', name: 'Dark Doorway', x: 510, y: 220, w: 140, h: 280, walkToX: 580, walkToY: 460,
-                onInteract(v, e) { e.say('A doorway into darkness. Whatever is in there is not lit. I have a feeling it should stay that way for now.'); }
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use' || v === 'Open') {
+                        e.say("A cold breeze blows from the doorway. I step into the backyard.");
+                        setTimeout(() => e.changeRoom('mansion_backyard', 850, 460), 1600);
+                    } else e.say('A doorway into darkness. Looking closely, I can see the outline of a garden path. This must be the back exit.');
+                }
             },
             // Right door (locked with padlock)
             {
@@ -2445,14 +2450,16 @@ async function main() {
             loadImage('assets/npc_raccoon.png'),
             loadImage('assets/trapdoor_patch.png'),
             loadImage('assets/rug_rolled_up.png'),
-            loadImage('assets/item_pizza_slice.png')
+            loadImage('assets/item_pizza_slice.png'),
+            loadImage('assets/sub_guy.png'),
+            loadImage('assets/npc_murder_suspect.png')
         ]);
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
         magEntranceBg, geoStrataBg, magHillBg, titleBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
         npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
-        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
+        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, subGuyHillSheet, npcSuspect] = assets;
 
     // Preload item images for props and inventory
     const itemIcons = {};
@@ -2517,11 +2524,33 @@ async function main() {
     { // Street — baker + poutine guy + sub guy
         const r = buildStreet(streetBg);
         const baker = buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
+        if (baker) {
+            baker.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    if (e.hasItem('battle_bread')) {
+                        e.say("Baker: 'You still have that loaf? Careful, it's registered as a lethal weapon in three provinces.'");
+                    } else {
+                        e.saySequence([
+                            "Dave: 'Excuse me, do you have any... fresh... bread?'",
+                            "Baker: 'Fresh? No. But I have the MONCTON SPECIAL. We call it Battle Bread.'",
+                            "Baker: 'We leave it in the sun for three days and then use it to shore up the foundation of the bakery. Here, take a baguette. It's on the house.'",
+                            "Dave: 'This is... surprisingly heavy. And cold. And I think it just made a metallic CLANG when I moved it.'"
+                        ], () => {
+                            e.addItem('battle_bread', 'Battle Bread');
+                        });
+                    }
+                } else if (v === 'Look at') {
+                   e.say("A man who looks like he's been wrestling dough for forty years. He's winning, but the dough is putting up a fight.");
+                } else {
+                    e.triggerQuip(v, 'Baker');
+                }
+            };
+        }
         const poutine = buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
         
         const subGuy = buildNPCActor({ 
             room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
-            sheet: npcSubGuy, color: '#00ff55', scale: 0.9, cols: 9, rows: 4 
+            sheet: subGuyHillSheet, color: '#00ff55', scale: 1.1, cols: 9, rows: 4 
         });
         if (subGuy) {
             subGuy.onInteract = (v, e) => {
@@ -2531,8 +2560,21 @@ async function main() {
                         "Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'",
                         "Sub Guy: 'Also, if you're looking for the REAL sub... you should check the Hill. I hear there's a guy in a suit who really needs a jumpstart.'"
                     ]);
+                    
+                    // Secret Red Herring Key #2
+                    if (!e.hasItem('rh_key_2')) {
+                        setTimeout(() => {
+                            e.saySequence([
+                                "Sub Guy: 'Wait! Since you look like the type to appreciate a good mystery... here, take this. It's on the house.'",
+                                "Dave: 'A Red Herring? Is this part of the sub?'",
+                                "Sub Guy: 'It's a metaphor, Dave. A lean, business-class metaphor.'"
+                            ], () => {
+                                e.addItem('rh_key_2', 'Red Herring Key');
+                            });
+                        }, 8000);
+                    }
                 } else if (v === 'Look at') {
-                    e.say("The Sub Guy is wearing a sandwich. Or a submarine. I'm not sure which one he's trying to sell, but he's very committed to the theme.");
+                     e.say("The Sub Guy is wearing what appears to be a submarine with legs. It's surprisingly aerodynamic for a sandwich shop employee.");
                 } else {
                     e.triggerQuip(v, 'Sub Guy');
                 }
@@ -2883,6 +2925,24 @@ async function main() {
         engine.registerRoom(r);
     }
     const secret = buildSecretRoom(secretBg);
+    secret.hotspots.push({
+        id: 'meta_herring_spot', name: 'Literal Red Herring', x: 450, y: 150, w: 100, h: 50,
+        onInteract(v, e) {
+            if (v === 'Look at' || v === 'Pick up' || v === 'Use') {
+                 if (e.hasItem('rh_key_3')) {
+                     e.say("Just an empty spot where a very literal red herring used to be.");
+                 } else {
+                     e.saySequence([
+                         "Dave: 'Is that... another one?'",
+                         "I reach behind the support beam and find a small, fish-shaped brass key.",
+                         "Dave: 'A FOURTH Red Herring Key?! This is breaking the laws of both nature and game design!'"
+                     ], () => {
+                         e.addItem('rh_key_4', 'Red Herring Key');
+                     });
+                 }
+            }
+        }
+    });
     secret.props.push({ id: 'p_herring_L1', image: itemIcons['red_herring'], x: 70, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L1'); } });
     secret.props.push({ id: 'p_herring_L2', image: itemIcons['red_herring'], x: 70, y: 340, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L2'); } });
     secret.props.push({ id: 'p_herring_R1', image: itemIcons['red_herring'], x: 840, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_R1'); } });
@@ -2929,7 +2989,7 @@ async function main() {
         const cat2 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
-    { // Mansion library balcony — Atmospheric science plaques
+    { // Mansion library balcony — Atmospheric science plaques + Murder Suspect
         const r = buildMansionLibraryBalcony(libraryBalconyBg);
         const cat = buildNPCActor({ room: r, id: 'cat_npc_balcony', name: 'Cat', x: 740, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         if (cat) {
@@ -2938,6 +2998,33 @@ async function main() {
                     e.say("The cat is staring at the Thermosphere plaque. It seems particularly interested in the Ionosphere. Maybe it's trying to transmit a message back to its home planet.");
                 } else {
                     e.say("The cat ignores me with the practiced ease of a creature that has mastered both the physical and metaphysical realms.");
+                }
+            };
+        }
+        
+        // Add the mysterious suspect as a meta-joke or actual suspect
+        const suspect = buildNPCActor({ 
+            room: r, id: 'suspect_npc', name: 'Shadowy Figure', x: 500, y: 450, 
+            sheet: npcSuspect, color: '#ff3333', scale: 1.0, cols: 9, rows: 4 
+        });
+        if (suspect) {
+            suspect.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    e.saySequence([
+                        "Shadowy Figure: 'I was just... checking the physics of the mesosphere.'",
+                        "Dave: 'At midnight? In the dark? At a crime scene?'",
+                        "Shadowy Figure: 'Is there a better time to study the cold sphere, Dave?'",
+                        "Shadowy Figure: 'Wait! Don't look at my shoes! There's no blood on them! I mean— there's no red paint on them!'",
+                        "Dave: 'Red paint? The victim wasn't painted, he was—'",
+                        "Shadowy Figure: 'I have to go! Physics calls!'"
+                    ], () => {
+                         // He "disappears" (metaphorically, or just stops talking)
+                         e.say("The figure turns back to the plaque with suspicious intensity.");
+                    });
+                } else if (v === 'Look at') {
+                    e.say("A shadowy figure standing on the balcony. He looks exactly like someone who shouldn't be here, but his raincoat is very convincing.");
+                } else {
+                    e.triggerQuip(v, 'Shadowy Figure');
                 }
             };
         }
@@ -3198,7 +3285,50 @@ async function main() {
     }
     engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
     engine.registerRoom(buildMagneticHill(magHillBg));
-    console.log('[Rooms] 17 rooms registered, NPCs attached.');
+    
+    { // Magnetic Hill — the REAL sub guy
+        const r = engine.rooms.get('magnetic_hill');
+        if (r) {
+            const subHill = buildNPCActor({ 
+                room: r, id: 'sub_guy_hill_npc', name: 'Mysterious Suit', x: 120, y: 470, 
+                sheet: subGuyHillSheet, color: '#ffff55', scale: 1.1, cols: 9, rows: 4 
+            });
+            if (subHill) {
+                subHill.onInteract = (v, e, item) => {
+                    const s = e.getRoomState('magnetic_hill');
+                    const itemId = (item && (typeof item === 'string' ? item : item.id));
+
+                    if (v === 'Talk to') {
+                        if (s.jumpstarted) {
+                            e.say("Mysterious Suit: 'I'm feeling much better now. The current is flowin'. The hill is pullin'. Life is... magnetic.'");
+                        } else {
+                            e.say("I try to speak to the figure in the suit. All I hear is a faint, rhythmic *buzzing* and a sound like a failing hard drive.");
+                        }
+                    } else if (v === 'Use' && itemId === 'battery') {
+                        e.saySequence([
+                            "Dave: 'I suppose if I ever need to jump-start a submarine... wait, this is it!'",
+                            "I jam the fire-hydrant-sized battery into the port on the back of the heavy suit.",
+                            "There is a shower of sparks. The magnet monument behind us hums in sympathy.",
+                            "Mysterious Suit: 'ZZZZ-POP! SYSTEMS ONLINE! CALIBRATING... AH! HEL-LO, DA-VE!'",
+                            "Dave: 'You know my name?'",
+                            "Mysterious Suit: 'EVERYONE KNOWS THE ONE WHO CARRIES THE BATTERY. I AM THE SUB. THE REAL ONE. NOT THE SANDWICH ONE AT THE BOTTOM OF THE HILL.'",
+                            "The figure stands up straighter. He looks slightly more buoyant now."
+                        ], () => {
+                            s.jumpstarted = true;
+                            e.say("He hands me a small, fish-shaped key. 'YOU MAY NEED THIS AT THE CLUB. OR JUST TO LOOK AT. IT IS QUITE SHINY.'");
+                            e.addItem('rh_key_1', 'Red Herring Key');
+                        });
+                    } else if (v === 'Look at') {
+                        e.say("A figure wearing what looks like a Victorian deep-sea diving suit, or perhaps a very small submarine with legs. He's leaning against a rock, looking extremely powered-down.");
+                    } else {
+                        e.triggerQuip(v, 'Mysterious Suit');
+                    }
+                };
+            }
+        }
+    }
+
+    console.log(`[Rooms] ${Object.keys(engine.rooms).length} rooms registered, NPCs attached.`);
 
     // Dave
     const sheetImg = daveSheet ?? buildProceduralDave();
@@ -3246,6 +3376,29 @@ async function main() {
     window._goto = (id, x = 480, y = 450) => engine.changeRoom(id, x, y);
 
     // Start in title screen
+    // Wrapper for Red Herring sub-quest counting
+    const originalAddItem = engine.addItem.bind(engine);
+    engine.addItem = (id, displayName) => {
+        originalAddItem(id, displayName);
+        
+        // Ensure the unique IDs use the correct icon
+        if (id.startsWith('rh_key_')) {
+            engine.ui.loadedItemImages[id] = engine.ui.loadedItemImages['red_herring_key'];
+        }
+
+        const inv = engine.gameState.inventory;
+        const rhCount = inv.filter(i => i.startsWith('rh_key_')).length;
+        if (rhCount === 3 && id === 'rh_key_3') {
+            setTimeout(() => {
+                engine.say("Dave: 'Wait... why was I supposed to have three of these? The dev wouldn't tell me.'");
+            }, 3000);
+        } else if (rhCount === 4 && id === 'rh_key_4') {
+            setTimeout(() => {
+                engine.say("Dave: 'Four. Four Red Herring keys. This has to be some kind of world record for pointless collecting.'");
+            }, 3000);
+        }
+    };
+
     engine.addItem('cell_phone', 'Cell Phone');
     engine.changeRoom('title_screen', 480, 450);
     engine.start();
