@@ -63,7 +63,7 @@
           // Phase 1: Unblock sound and switch prompt
           window._engine.playMusic('opener');
           phase = 'playing';
-          clickPrompt.innerText = 'PRESS ANYWHERE TO START';
+          clickPrompt.innerText = 'CLICK TO START';
           clickPrompt.classList.add('pulse');
         } else if (phase === 'playing') {
           // Phase 2: Trigger the engine's start logic and hide the overlay

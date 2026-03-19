@@ -2396,7 +2396,18 @@ async function main() {
     engine.debug = false; // set true to see walkboxes
 
     // Load all backgrounds (null-safe — gradient fallback used if file missing)
-    const assets = await Promise.all([
+    // PHASE 1: Load title screen assets first
+    const titleAssets = await Promise.all([
+        loadImage('assets/title_screen_bg.png'),
+        loadImage('assets/press_start.png')
+    ]);
+    const [titleBg, pressStartImg] = titleAssets;
+
+    // Register title screen immediately so splash screen overlay knows it's ready
+    engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
+
+    // PHASE 2: Load everything else
+    const assetsProgress = Promise.all([
             loadImage('assets/bedroom_bg.png'),
             loadImage('assets/kitchen_bg.jpg'),
             loadImage('assets/street_bg.png'),
@@ -2413,7 +2424,6 @@ async function main() {
             loadImage('assets/mag_entrance_bg.jpg'),
             loadImage('assets/geo_strata_bg.jpg'),
             loadImage('assets/magnetic_hill_bg.jpg'),
-            loadImage('assets/title_screen_bg.png'),
             loadImage('assets/herring_club_bg.png'),
             loadImage('assets/weather_station_bg.png'),
             loadImage('assets/library_balcony_bg.png'),
@@ -2434,10 +2444,13 @@ async function main() {
             loadImage('assets/sub_guy.png'),
             loadImage('assets/npc_murder_suspect.png')
         ]);
+    
+    // We can continue initializing while items load, but Promise.all needs to finish for room builds
+    const assets = await assetsProgress;
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, titleBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
+        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
         npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
         npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, subGuyHillSheet, npcSuspect] = assets;
 
@@ -2453,9 +2466,6 @@ async function main() {
     await Promise.all(itemsToLoad.map(async id => {
         itemIcons[id] = await loadImage(`assets/item_${id}.png`);
     }));
-
-    const pressStartImg = await loadImage('assets/press_start.png');
-    const npcSubGuy = await loadImage('assets/npc_sub_guy.png');
 
     // Herrings all use the same icon
     ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
@@ -3259,7 +3269,6 @@ async function main() {
         
         engine.registerRoom(r);
     }
-    engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
     engine.registerRoom(buildMagneticHill(magHillBg));
     
     { // Magnetic Hill — the REAL sub guy
@@ -3267,7 +3276,7 @@ async function main() {
         if (r) {
             const subHill = buildNPCActor({ 
                 room: r, id: 'sub_guy_hill_npc', name: 'Mysterious Suit', x: 120, y: 470, 
-                sheet: npcSubGuy, color: '#ffff55', scale: 1.1, cols: 9, rows: 4 
+                sheet: subGuyHillSheet, color: '#ffff55', scale: 1.1, cols: 9, rows: 4 
             });
             if (subHill) {
                 subHill.onInteract = (v, e, item) => {
