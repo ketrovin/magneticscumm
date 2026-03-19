@@ -2411,7 +2411,42 @@ async function main() {
     engine.gameState.music.tracks = MUSIC_TRACKS;
     engine.debug = false; // set true to see walkboxes
 
-    // Load all backgrounds (null-safe — gradient fallback used if file missing)
+    let dave, bedroom; // Shared variables for async loading
+    let loadedCount = 0;
+    const assetsToLoad = [
+        'assets/bedroom_bg.png', 'assets/kitchen_bg.jpg', 'assets/street_bg.png',
+        'assets/alley_bg.jpg', 'assets/secret_bg.jpg', 'assets/gate_bg.jpg',
+        'assets/pawn_bg.jpg', 'assets/courtyard_bg.jpg', 'assets/foyer_bg.jpg',
+        'assets/library_bg.jpg', 'assets/backyard_bg.jpg', 'assets/police_ext_bg.jpg',
+        'assets/police_int_bg.jpg', 'assets/mag_entrance_bg.jpg', 'assets/geo_strata_bg.jpg',
+        'assets/magnetic_hill_bg.jpg', 'assets/herring_club_bg.png', 'assets/weather_station_bg.png',
+        'assets/library_balcony_bg.png', 'assets/Dave3.png', 'assets/npc_baker.png',
+        'assets/npc_bouncer.png', 'assets/npc_pawnbroker.png', 'assets/npc_officer.png',
+        'assets/cat.png', 'assets/npc_woman_scientist.png', 'assets/npc_weather_scientist.png',
+        'assets/npc_raccoon.png', 'assets/trapdoor_patch.png', 'assets/rug_rolled_up.png',
+        'assets/item_pizza_slice.png', 'assets/npc_sub_guy.png', 'assets/sub_guy.png',
+        'assets/npc_murder_suspect.png'
+    ];
+    const itemsToLoad = [
+        'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone',
+        'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine',
+        'battle_bread', 'mansion_key', 'remote_control', 'red_herring',
+        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza_slice',
+        'club_key', 'red_herring_key', 'fishy_token'
+    ];
+    engine.assetStatus = { loaded: 0, total: assetsToLoad.length + itemsToLoad.length };
+
+    const safeLoad = (src) => loadImage(src).then(img => {
+        loadedCount++;
+        engine.assetStatus.loaded = loadedCount;
+        return img;
+    }).catch(err => {
+        loadedCount++;
+        engine.assetStatus.loaded = loadedCount;
+        console.warn(`[Loader] Skipping missing file: ${src}`);
+        return null;
+    });
+
     // PHASE 1: Load title screen assets first
     const titleAssets = await Promise.all([
         loadImage('assets/title_screen_bg.png'),
@@ -2424,52 +2459,33 @@ async function main() {
     engine.changeRoom('title_screen', 480, 450);
     engine.start();
 
+    // INTERMEDIATE: Setup Dave and Bedroom in background so Title is interactive ASAP
+    (async () => {
+        // Quick-load essential Dave/Bedroom assets or use fallbacks
+        const [essentialSheet, essentialBedroomBg] = await Promise.all([
+            safeLoad('assets/Dave3.png'),
+            safeLoad('assets/bedroom_bg.png')
+        ]);
+        
+        const initialAnimator = new SpriteAnimator(
+            essentialSheet || buildProceduralDave(),
+            FRAME_W, FRAME_H,
+            DAVE_ANIMS,
+            null
+        );
+        initialAnimator.play('idle');
+        dave = new Actor({
+            id: 'dave', name: 'Dave', x: 480, y: 450,
+            animator: initialAnimator, scale: 1.5, canWalk: true, z: 450
+        });
+        engine.setPlayer(dave);
+
+        bedroom = buildBedroom(essentialBedroomBg);
+        engine.registerRoom(bedroom);
+    })();
+
     // PHASE 2: Load everything else with fault-tolerance
-    const safeLoad = (src) => loadImage(src).catch(err => {
-        console.warn(`[Loader] Skipping missing file: ${src}`);
-        return null;
-    });
-
-    const assetsProgress = Promise.all([
-        safeLoad('assets/bedroom_bg.png'),
-        safeLoad('assets/kitchen_bg.jpg'),
-        safeLoad('assets/street_bg.png'),
-        safeLoad('assets/alley_bg.jpg'),
-        safeLoad('assets/secret_bg.jpg'),
-        safeLoad('assets/gate_bg.jpg'),
-        safeLoad('assets/pawn_bg.jpg'),
-        safeLoad('assets/courtyard_bg.jpg'),
-        safeLoad('assets/foyer_bg.jpg'),
-        safeLoad('assets/library_bg.jpg'),
-        safeLoad('assets/backyard_bg.jpg'),
-        safeLoad('assets/police_ext_bg.jpg'),
-        safeLoad('assets/police_int_bg.jpg'),
-        safeLoad('assets/mag_entrance_bg.jpg'),
-        safeLoad('assets/geo_strata_bg.jpg'),
-        safeLoad('assets/magnetic_hill_bg.jpg'),
-        safeLoad('assets/herring_club_bg.png'),
-        safeLoad('assets/weather_station_bg.png'),
-        safeLoad('assets/library_balcony_bg.png'),
-        safeLoad('assets/Dave3.png'),
-        // NPC sprite sheets
-        safeLoad('assets/npc_baker.png'),
-        safeLoad('assets/npc_bouncer.png'),
-        safeLoad('assets/npc_pawnbroker.png'),
-        safeLoad('assets/npc_officer.png'),
-        safeLoad('assets/cat.png'),
-        safeLoad('assets/npc_woman_scientist.png'),
-        safeLoad('assets/npc_weather_scientist.png'),
-        safeLoad('assets/npc_raccoon.png'),
-        safeLoad('assets/trapdoor_patch.png'),
-        safeLoad('assets/rug_rolled_up.png'),
-        safeLoad('assets/item_pizza_slice.png'),
-        safeLoad('assets/npc_sub_guy.png'),
-        safeLoad('assets/sub_guy.png'),
-        safeLoad('assets/npc_murder_suspect.png')
-    ]);
-
-    // We can continue initializing while items load, but Promise.all needs to finish for room builds
-    const assets = await assetsProgress;
+    const assets = await Promise.all(assetsToLoad.map(src => safeLoad(src)));
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
@@ -2493,39 +2509,50 @@ async function main() {
     );
     animator.play('idle');
 
-    const dave = new Actor({
-        id: 'dave',
-        name: 'Dave',
-        x: 480,
-        y: 450,
-        animator,
-        scale: 1.5,
-        canWalk: true,
-        z: 450
-    });
+    // Upgrade Dave's animator or create him if missing
+    if (dave) {
+        dave.animator = animator;
+    } else {
+        dave = new Actor({
+            id: 'dave',
+            name: 'Dave',
+            x: 480,
+            y: 450,
+            animator,
+            scale: 1.5,
+            canWalk: true,
+            z: 450
+        });
+        dave.onInteract = (v, e, item) => {
+            const itemId = (item && (typeof item === 'string' ? item : item.id));
+            if (v === 'Use' && itemId === 'cell_phone') {
+                window._openPhoneMenu(e);
+            } else if (v === 'Look at') {
+                e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
+            }
+        };
+        engine.setPlayer(dave);
+    }
 
-    dave.onInteract = (v, e, item) => {
-        const itemId = (item && (typeof item === 'string' ? item : item.id));
-        if (v === 'Use' && itemId === 'cell_phone') {
-            window._openPhoneMenu(e);
-        } else if (v === 'Look at') {
-            e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
+    // Upgrade Bedroom background and add remaining props early
+    const existingBedroom = engine.rooms['bedroom'];
+    if (existingBedroom) {
+        existingBedroom.background = bedroomBg;
+        if (!existingBedroom.props.find(p => p.id === 'trapdoor_prop')) {
+            existingBedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
+            existingBedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
         }
-    };
-
-    engine.setPlayer(dave);
+    } else {
+        bedroom = buildBedroom(bedroomBg);
+        bedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
+        bedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
+        engine.registerRoom(bedroom);
+    }
 
     // Preload item images for props and inventory
     const itemIcons = {};
-    const itemsToLoad = [
-        'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone',
-        'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine',
-        'battle_bread', 'mansion_key', 'remote_control', 'red_herring',
-        'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza_slice',
-        'club_key', 'red_herring_key', 'fishy_token'
-    ];
     await Promise.all(itemsToLoad.map(async id => {
-        itemIcons[id] = await loadImage(`assets/item_${id}.png`);
+        itemIcons[id] = await safeLoad(`assets/item_${id}.png`);
     }));
 
     // Herrings all use the same icon
@@ -2543,17 +2570,6 @@ async function main() {
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
-    const bedroom = buildBedroom(bedroomBg);
-    bedroom.props.push({
-        id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100,
-        isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; }
-    });
-    bedroom.props.push({
-        id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120,
-        isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; }
-    });
-
-    engine.registerRoom(bedroom);
 
     const kitchen = buildKitchen(kitchenBg);
     kitchen.props.push({

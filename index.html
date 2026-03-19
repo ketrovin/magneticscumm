@@ -42,17 +42,37 @@
       const loadingText = document.getElementById('loading-text');
       const clickPrompt = document.getElementById('click-prompt');
       
-      let phase = 'loading'; // loading -> ready -> playing
+      // Phase logic: loading -> ready (sound) -> playing (waiting for start)
+      let phase = 'loading'; 
 
       const checkReady = () => {
-        if (window._engine && window._engine.rooms && window._engine.rooms['title_screen']) {
+        // Initial readiness: Title screen is enough to show "Click for Sound"
+        if (phase === 'loading' && window._engine && window._engine.rooms && window._engine.rooms['title_screen']) {
           phase = 'ready';
           loadingText.style.display = 'none';
           clickPrompt.style.display = 'block';
           clickPrompt.innerText = 'CLICK FOR SOUND';
-        } else {
-          setTimeout(checkReady, 100);
         }
+        
+        // Secondary readiness: If we are in 'playing' phase, check if game is ready to start
+        if (phase === 'playing') {
+          const isGameReady = window._engine.rooms['bedroom'] && window._engine.player;
+          if (isGameReady) {
+            clickPrompt.innerText = 'CLICK TO START';
+            clickPrompt.classList.add('pulse');
+          } else {
+            const status = window._engine.assetStatus;
+            if (status && status.total > 0) {
+              const pct = Math.floor((status.loaded / status.total) * 100);
+              clickPrompt.innerText = `LOADING ASSETS (${pct}%)...`;
+            } else {
+              clickPrompt.innerText = 'LOADING ASSETS...';
+            }
+            clickPrompt.classList.remove('pulse');
+          }
+        }
+        
+        setTimeout(checkReady, 100);
       };
       checkReady();
 
@@ -60,18 +80,19 @@
         if (!window._engine) return;
 
         if (phase === 'ready') {
-          // Phase 1: Unblock sound and switch prompt
+          // Phase 1: Unblock sound and move to waiting for start
           window._engine.playMusic('opener');
           phase = 'playing';
           
-          // Show start immediately
-          clickPrompt.innerText = 'CLICK TO START';
-          clickPrompt.classList.add('pulse');
-
+          // Feedback will be handled by checkReady() loop
         } else if (phase === 'playing') {
           // Phase 2: Trigger the engine's start logic and hide the overlay
-          if (!window._engine.rooms['bedroom']) return; // Still loading
+          if (!window._engine.rooms['bedroom'] || !window._engine.player) {
+            console.log("Game not ready yet...");
+            return; 
+          }
 
+          // Trigger the 'start_button' interact in title screen
           const titleRoom = window._engine.rooms['title_screen'];
           if (titleRoom && titleRoom.hotspots) {
             const btn = titleRoom.hotspots.find(h => h.id === 'start_button');
@@ -79,7 +100,8 @@
               btn.onInteract('Use', window._engine);
             }
           }
-          overlay.style.opacity = '0';
+
+          overlay.classList.add('hidden');
           setTimeout(() => {
             overlay.style.display = 'none';
           }, 800);
