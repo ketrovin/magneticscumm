@@ -24,10 +24,7 @@
 
     <div id="loading-overlay">
       <div id="loading-text">LOADING…</div>
-      <!-- Phase 1: Sound Initiation -->
-      <button id="btn-sound" style="display: none;">CLICK FOR SOUND</button>
-      <!-- Phase 2: Game Initiation -->
-      <button id="btn-start" style="display: none;">PRESS START</button>
+      <div id="click-prompt" style="display: none;">CLICK ANYWHERE TO START</div>
     </div>
   </div>
 
@@ -43,36 +40,35 @@
     window.addEventListener('load', () => {
       const overlay = document.getElementById('loading-overlay');
       const loadingText = document.getElementById('loading-text');
-      const btnSound = document.getElementById('btn-sound');
-      const btnStart = document.getElementById('btn-start');
+      const clickPrompt = document.getElementById('click-prompt');
+      
+      let phase = 'loading'; // loading -> ready -> playing
 
-      // 1. Wait for engine/assets
       const checkReady = () => {
         if (window._engine && window._engine.rooms && window._engine.rooms['title_screen']) {
+          phase = 'ready';
           loadingText.style.display = 'none';
-          btnSound.style.display = 'block';
+          clickPrompt.style.display = 'block';
+          clickPrompt.innerText = 'CLICK ANYWHERE TO START';
         } else {
           setTimeout(checkReady, 100);
         }
       };
       checkReady();
 
-      // 2. Phase 1: Enable Audio
-      btnSound.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (window._engine) {
-          window._engine.playMusic('opener');
-          btnSound.style.display = 'none';
-          btnStart.style.display = 'block';
-        }
-      });
+      overlay.addEventListener('click', (e) => {
+        if (!window._engine) return;
 
-      // 3. Phase 2: Enter Game
-      btnStart.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (window._engine) {
+        if (phase === 'ready') {
+          // Phase 1: Start music
+          window._engine.playMusic('opener');
+          phase = 'playing';
+          clickPrompt.innerText = 'PRESS ANYWHERE TO PLAY';
+          clickPrompt.classList.add('pulse');
+        } else if (phase === 'playing') {
+          // Phase 2: Start game
           window._engine.stopMusic();
-          // Start the normal playlist
+          // Ensure only one music ever plays
           window._engine.gameState.music.backgroundTrack = 'track1';
           window._engine.changeRoom('bedroom', 480, 450);
           

@@ -2445,7 +2445,7 @@ async function main() {
             loadImage('assets/npc_raccoon.png'),
             loadImage('assets/trapdoor_patch.png'),
             loadImage('assets/rug_rolled_up.png'),
-            loadImage('assets/item_pizza.png')
+            loadImage('assets/item_pizza_slice.png')
         ]);
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
@@ -3231,18 +3231,17 @@ async function main() {
         }
     };
     engine.setPlayer(dave);
-
-    // Initialize music tracks in engine
     engine.gameState.music.tracks = MUSIC_TRACKS;
+
+    // Console helpers
+    window._engine = engine;
+    window._goto = (id, x = 480, y = 450) => engine.changeRoom(id, x, y);
 
     // Start in title screen
     engine.addItem('cell_phone', 'Cell Phone');
     engine.changeRoom('title_screen', 480, 450);
     engine.start();
 
-    // Console helpers
-    window._engine = engine;
-    window._goto = (id, x = 480, y = 450) => engine.changeRoom(id, x, y);
     console.log("Dave's adventure started. window._goto('kitchen') to warp.");
 }
 
