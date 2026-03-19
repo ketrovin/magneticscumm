@@ -2391,6 +2391,8 @@ function pickUpHerring(v, e, id) {
 // ══════════════════════════════════════════════════════════════════════════════
 async function main() {
     const engine = new Engine('game');
+    window._engine = engine; 
+    engine.gameState.music.tracks = MUSIC_TRACKS;
     engine.debug = false; // set true to see walkboxes
 
     // Load all backgrounds (null-safe — gradient fallback used if file missing)
@@ -3261,7 +3263,7 @@ async function main() {
     engine.registerRoom(buildMagneticHill(magHillBg));
     
     { // Magnetic Hill — the REAL sub guy
-        const r = engine.rooms.get('magnetic_hill');
+        const r = engine.rooms['magnetic_hill'];
         if (r) {
             const subHill = buildNPCActor({ 
                 room: r, id: 'sub_guy_hill_npc', name: 'Mysterious Suit', x: 120, y: 470, 
@@ -3343,10 +3345,8 @@ async function main() {
         }
     };
     engine.setPlayer(dave);
-    engine.gameState.music.tracks = MUSIC_TRACKS;
 
     // Console helpers
-    window._engine = engine;
     window._goto = (id, x = 480, y = 450) => engine.changeRoom(id, x, y);
 
     // Start in title screen
