@@ -429,7 +429,7 @@ function buildKitchen(bg) {
                 id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 900, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                        if (e.hasItem('house_key') || true) { // door is always unlockable for now
+                        if (e.hasItem('house_key')) {
                             e.changeRoom('street', 110, 440);
                         } else { e.say("The door is locked. I need my house key..."); }
                     } else { e.say("The front door. Beyond it: the street, the night, and my choices."); }
@@ -442,7 +442,7 @@ function buildKitchen(bg) {
                     if (v === 'Open') {
                         const rs = e.getRoomState('kitchen');
                         rs.windowOpen = !rs.windowOpen;
-                        e.say(rs.windowOpen ? "A cool night breeze drifts in. I can hear the poutine stand from here." : "I close the window. The poutine smell goes away.");
+                        e.say(rs.windowOpen ? "A cool night breeze drifts in. I can hear the Sub Shoppe from here." : "I close the window. The smell of submarine sandwiches goes away.");
                     } else e.say("The window overlooks the street. Same street as always.");
                 }
             },
@@ -2437,7 +2437,6 @@ async function main() {
         safeLoad('assets/Dave3.png'),
         // NPC sprite sheets
         safeLoad('assets/npc_baker.png'),
-        safeLoad('assets/poutine_guy.png'),
         safeLoad('assets/npc_bouncer.png'),
         safeLoad('assets/npc_pawnbroker.png'),
         safeLoad('assets/npc_officer.png'),
@@ -2448,6 +2447,7 @@ async function main() {
         safeLoad('assets/trapdoor_patch.png'),
         safeLoad('assets/rug_rolled_up.png'),
         safeLoad('assets/item_pizza_slice.png'),
+        safeLoad('assets/npc_sub_guy.png'),
         safeLoad('assets/sub_guy.png'),
         safeLoad('assets/npc_murder_suspect.png')
     ]);
@@ -2458,8 +2458,8 @@ async function main() {
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
         magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
-        npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
-        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, subGuyHillSheet, npcSuspect] = assets;
+        npcBaker, npcDoorman, npcPawnbroker, npcSavoie,
+        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, npcSubGuy, subGuyHillSheet, npcSuspect] = assets;
 
     // INTERMEDIATE: Dave should be ready as soon as the sheet loads
     const sheetImg = daveSheet ?? buildProceduralDave();
@@ -2491,21 +2491,8 @@ async function main() {
     dave.onInteract = (v, e, item) => {
         const itemId = (item && (typeof item === 'string' ? item : item.id));
         if (v === 'Use' && itemId === 'cell_phone') {
-            const isPlaying = !!e.gameState.music.backgroundTrack;
-            const s = e.getRoomState('global_phone');
-            if (isPlaying) {
-                s.lastTrackId = e.gameState.music.backgroundTrack;
-                e.gameState.music.backgroundTrack = null;
-                e._updateMusic();
-                e.say("Dave: 'Silence. The Moncton winds are enough for now.'");
-            } else {
-                const toPlay = s.lastTrackId || 'track1';
-                e.gameState.music.backgroundTrack = toPlay;
-                e._updateMusic();
-                const track = MUSIC_TRACKS.find(t => t.id === toPlay);
-                e.say(`Dave: 'Resuming ${track ? track.name : "the music"}. Back into the groove.'`);
-            }
-        } else if (v === 'Look at' || (v === 'Use' && itemId === 'cell_phone' && false)) {
+            window._openPhoneMenu(e);
+        } else if (v === 'Look at') {
             e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
         }
     };
