@@ -49,7 +49,7 @@
           phase = 'ready';
           loadingText.style.display = 'none';
           clickPrompt.style.display = 'block';
-          clickPrompt.innerText = 'CLICK ANYWHERE TO START';
+          clickPrompt.innerText = 'CLICK FOR SOUND';
         } else {
           setTimeout(checkReady, 100);
         }
@@ -60,18 +60,25 @@
         if (!window._engine) return;
 
         if (phase === 'ready') {
-          // Phase 1: Start music
+          // Phase 1: Unblock sound and switch prompt
           window._engine.playMusic('opener');
           phase = 'playing';
-          clickPrompt.innerText = 'PRESS ANYWHERE TO PLAY';
-          clickPrompt.classList.add('pulse');
-        } else if (phase === 'playing') {
-          // Phase 2: Start game
-          window._engine.stopMusic();
-          // Ensure only one music ever plays
-          window._engine.gameState.music.backgroundTrack = 'track1';
-          window._engine.changeRoom('bedroom', 480, 450);
           
+          // Show start immediately
+          clickPrompt.innerText = 'CLICK TO START';
+          clickPrompt.classList.add('pulse');
+
+        } else if (phase === 'playing') {
+          // Phase 2: Trigger the engine's start logic and hide the overlay
+          if (!window._engine.rooms['bedroom']) return; // Still loading
+
+          const titleRoom = window._engine.rooms['title_screen'];
+          if (titleRoom && titleRoom.hotspots) {
+            const btn = titleRoom.hotspots.find(h => h.id === 'start_button');
+            if (btn && btn.onInteract) {
+              btn.onInteract('Use', window._engine);
+            }
+          }
           overlay.style.opacity = '0';
           setTimeout(() => {
             overlay.style.display = 'none';

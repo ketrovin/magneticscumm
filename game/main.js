@@ -37,7 +37,7 @@ const MUSIC_TRACKS = [...PHONE_TRACKS, ...ROOM_TRACKS];
 
 window._openPhoneMenu = (e) => {
     const s = e.getRoomState('global_phone'); // Persist phone state across rooms
-    
+
     const showMusicMenu = () => {
         const isPlaying = !!e.gameState.music.backgroundTrack;
         const lastTrackId = s.lastTrackId || PHONE_TRACKS[0].id;
@@ -47,7 +47,7 @@ window._openPhoneMenu = (e) => {
             "Select New Track...",
             "Close Phone"
         ];
-        
+
         e.enterDialog(mainChoices, (idx) => {
             if (idx === 0) {
                 if (isPlaying) {
@@ -81,7 +81,7 @@ window._openPhoneMenu = (e) => {
             }
         });
     };
-    
+
     e.say("I open my cracked phone. The media player's blue light glows with unearned confidence.");
     setTimeout(showMusicMenu, 1500);
 };
@@ -165,11 +165,11 @@ const FRAME_W = 59, FRAME_H = 163; // Updated fallback
 // All coords are ESTIMATES — tweak if sprites appear offset.
 const PELLERIN_ANIMS = {
     walkFront: { row: 0, count: 4, startFrame: 0, fps: 8 },
-    walkR:     { row: 0, count: 4, startFrame: 5, fps: 8, flipH: true },
-    walkBack:  { row: 1, count: 4, startFrame: 0, fps: 8 },
-    walkL:     { row: 1, count: 4, startFrame: 5, fps: 8 },
-    idle:      { row: 0, count: 1, startFrame: 0, fps: 1 },
-    talk:      { row: 3, count: 4, startFrame: 5, fps: 6 }
+    walkR: { row: 0, count: 4, startFrame: 5, fps: 8, flipH: true },
+    walkBack: { row: 1, count: 4, startFrame: 0, fps: 8 },
+    walkL: { row: 1, count: 4, startFrame: 5, fps: 8 },
+    idle: { row: 0, count: 1, startFrame: 0, fps: 1 },
+    talk: { row: 3, count: 4, startFrame: 5, fps: 6 }
 };
 // ── TITLE SCREEN ─────────────────────────────────────────────────────────────
 function buildTitleScreen(bg, pressStartImg) {
@@ -182,16 +182,10 @@ function buildTitleScreen(bg, pressStartImg) {
             {
                 id: 'start_button', name: 'Title Screen', x: 0, y: 0, w: 960, h: 600,
                 onInteract(v, e) {
-                    const s = e.getRoomState('title_screen');
-                    if (!s.musicStarted) {
-                        s.musicStarted = true;
-                        // Engine unblocks the music on this click automatically
-                        return;
-                    }
                     // Transition to game
                     e.stopMusic();
                     // Set a default background track for the player's phone
-                    e.gameState.music.backgroundTrack = 'track1'; 
+                    e.gameState.music.backgroundTrack = 'track1';
                     e.say("Dave: 'Here we go again. Magnetic Hill Mystery... let's see if the hill is actually magnetic this time.'");
                     setTimeout(() => e.changeRoom('bedroom', 480, 450), 2000);
                 }
@@ -216,7 +210,7 @@ function buildTitleScreen(bg, pressStartImg) {
             pressStart.animator.scale = s;
             pressStart.animator.update(dt);
         };
-        
+
         // Disable depth scaling for this actor
         const originalDraw = pressStart.draw;
         pressStart.draw = (ctx) => {
@@ -242,7 +236,7 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
 
     const w = sheet.naturalWidth || sheet.width;
     const h = sheet.naturalHeight || sheet.height;
-    
+
     // Explicit grid dimensions are now required for reliability. 
     // Fallback to 9x4 if not specified (standard for current AI assets).
     const frameW = w / (cols || 9);
@@ -261,14 +255,14 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     anim.play('idle');
     const actor = new Actor({ id, name, x, y, animator: anim });
     actor.baseScale = scale; // Set base scale on actor
-    actor.speed = 0; 
+    actor.speed = 0;
     actor.color = color;
 
     // Talking animation
     actor.talkAnim = () => {
         if (customAnims.talk) anim.play('talk');
         else if (customAnims.walkFront) anim.play('walkFront');
-        
+
         setTimeout(() => anim.play('idle'), 2500);
     };
 
@@ -418,8 +412,8 @@ function buildKitchen(bg) {
         id: 'kitchen', name: "Dave's Kitchen",
         background: bg,
         walkbox: [
-            { x: 60, y: 510 }, { x: 920, y: 510 },
-            { x: 820, y: 295 }, { x: 140, y: 295 },
+            { x: 0, y: 550 }, { x: 960, y: 550 },
+            { x: 960, y: 280 }, { x: 0, y: 280 },
         ],
         hotspots: [
             // Bedroom door (left, shown open in art)
@@ -432,10 +426,10 @@ function buildKitchen(bg) {
             },
             // Street / front door (right)
             {
-                id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 875, walkToY: 450,
+                id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 900, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                        if (e.hasItem('house_key') || true) { // door is always unlockable for now
+                        if (e.hasItem('house_key')) {
                             e.changeRoom('street', 110, 440);
                         } else { e.say("The door is locked. I need my house key..."); }
                     } else { e.say("The front door. Beyond it: the street, the night, and my choices."); }
@@ -448,7 +442,7 @@ function buildKitchen(bg) {
                     if (v === 'Open') {
                         const rs = e.getRoomState('kitchen');
                         rs.windowOpen = !rs.windowOpen;
-                        e.say(rs.windowOpen ? "A cool night breeze drifts in. I can hear the poutine stand from here." : "I close the window. The poutine smell goes away.");
+                        e.say(rs.windowOpen ? "A cool night breeze drifts in. I can hear the Sub Shoppe from here." : "I close the window. The smell of submarine sandwiches goes away.");
                     } else e.say("The window overlooks the street. Same street as always.");
                 }
             },
@@ -591,15 +585,41 @@ function buildStreet(bg) {
             {
                 id: 'bakery', name: 'Moncton Bakery', x: 340, y: 385, w: 200, h: 215, walkToX: 440, walkToY: 520,
                 onInteract(v, e) {
-                    if (v === 'Talk to' || v === 'Look at') e.say("Moncton Bakery. The windows are fogged with artisanal ambition. The Baker is usually out front making sure the baguettes are properly hardened.");
-                    else e.say("It's locked. The Baker prefers doing business directly on the sidewalk.");
+                    const s = e.getRoomState('street');
+                    if (v === 'Talk to') {
+                        s.bakerTalks = (s.bakerTalks || 0) + 1;
+                        const lines = [
+                            "Baker: 'I know nothing about any mansion! NOTHING! You want bread? BUY BREAD!'",
+                            "Baker: 'Van Horne? He complained about MY baguette being too hard. TOO HARD! It's PERFECT!'",
+                            "Baker: 'I was HERE. All night. Baking. Do not look at me like that.'",
+                            "Baker: 'My baguette is not a weapon. It is ARTISANAL. The fact that it COULD be a weapon is a matter of QUALITY!'",
+                            "Baker: '...Are you still here? Non. Non non non. Au revoir, Dave.'",
+                        ];
+                        e.say(lines[(s.bakerTalks - 1) % lines.length]);
+                    } else if (v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Open') {
+                        if (e.hasItem('battle_bread')) {
+                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back.");
+                        } else {
+                            s.breadGiven = true;
+                            e.addItem('battle_bread', 'Battle Bread');
+                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. This could be useful.");
+                        }
+                    } else {
+                        e.say('Moncton Bakery. Incredible bread. Baker looks absolutely furious. Standard.');
+                    }
                 }
             },
             // Sub Shoppe
             {
                 id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 375, w: 150, h: 210, walkToX: 650, walkToY: 520,
                 onInteract(v, e) {
-                    e.say("The Sub Shoppe. Famous for its window-service and the guy wearing a sandwich. I suspect the health inspector wasn't a fan of the indoor plumbing.");
+                    if (v === 'Talk to') {
+                        e.say("Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'");
+                    } else if (v === 'Use' || v === 'Walk to' || v === 'Open') {
+                        e.say("Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'");
+                    } else {
+                        e.say("The Sub Shoppe. The sign is made of literal wood. The 'Sub Guy' is inside, looking semi-employed.");
+                    }
                 }
             },
             // CB Phone Co.
@@ -758,9 +778,9 @@ function buildHerringClub(bg) {
                 id: 'red_herring_key', name: 'Red Herring Key', x: 235, y: 355, w: 60, h: 60, walkToX: 265, walkToY: 430,
                 onInteract(v, e) {
                     if (v === 'Pick up' || v === 'Use') {
-                        if (e.hasItem('red_herring_key')) e.say("I already have the Red Herring Key. It's suspiciously bright.");
+                        if (e.hasItem('rh_key_3')) e.say("I already have the Red Herring Key. It's suspiciously bright.");
                         else {
-                            e.addItem('red_herring_key', 'Red Herring Key');
+                            e.addItem('rh_key_3', 'Red Herring Key');
                             e.say("I pick up the Red Herring Key. It's literally shaped like a fish and painted bright red. This is getting ridiculous.");
                         }
                     } else e.say("A bright red key on a velvet cushion. It looks important. Which probably means it's a distraction.");
@@ -1037,7 +1057,7 @@ function tryBuyItem(v, item, e) {
         e.say((item.desc || `It's a ${item.name}. Priced at $${item.price}.`) + priceSuffix);
         return;
     }
-    
+
     if (v === 'Buy' || v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Give') {
         if (e.hasItem(item.id)) { e.say(`I already have the ${item.name}. One is sufficient.`); return; }
         if (!e.hasItem('cash_card')) {
@@ -1312,10 +1332,15 @@ function buildMansionFoyer(bg) {
                     else e.say('The way out. The responsible choice. I came in here anyway, so clearly I\'m not making responsible choices today.');
                 }
             },
-            // Dark doorway center-right (leads somewhere dark — not built yet)
+            // Dark doorway center-right (leads to backyard)
             {
                 id: 'dark_doorway', name: 'Dark Doorway', x: 510, y: 220, w: 140, h: 280, walkToX: 580, walkToY: 460,
-                onInteract(v, e) { e.say('A doorway into darkness. Whatever is in there is not lit. I have a feeling it should stay that way for now.'); }
+                onInteract(v, e) {
+                    if (v === 'Walk to' || v === 'Use' || v === 'Open') {
+                        e.say("A cold breeze blows from the doorway. I step into the backyard.");
+                        setTimeout(() => e.changeRoom('mansion_backyard', 850, 460), 1600);
+                    } else e.say('A doorway into darkness. Looking closely, I can see the outline of a garden path. This must be the back exit.');
+                }
             },
             // Right door (locked with padlock)
             {
@@ -1602,9 +1627,9 @@ function buildMansionLibraryBalcony(bg) {
         background: bg,
         music: 'library',
         walkbox: [
-            { x: 60, y: 325 }, { x: 900, y: 325 }, 
-            { x: 900, y: 580 }, { x: 740, y: 580 }, 
-            { x: 740, y: 460 }, { x: 380, y: 460 }, 
+            { x: 60, y: 325 }, { x: 900, y: 325 },
+            { x: 900, y: 580 }, { x: 740, y: 580 },
+            { x: 740, y: 460 }, { x: 380, y: 460 },
             { x: 380, y: 580 }, { x: 60, y: 580 }
         ],
         hotspots: [
@@ -2170,7 +2195,7 @@ function buildGeoStrata(bg) {
                 id: 'strata_fault', name: 'Thrust Fault', x: 660, y: 300, w: 300, h: 100, walkToX: 750, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Read' || v === 'Look at' || v === 'Use') {
-                         e.saySequence([
+                        e.saySequence([
                             "Dave: 'Holy cow! Educational content!'",
                             "THRUST FAULT: A diagonal crack from the Acadian Orogeny (~360 million years ago).",
                             "Immense compressive forces shoved older rocks up over younger ones. It's a scar from when continents collided to build mountains."
@@ -2228,7 +2253,7 @@ function buildGeoStrata(bg) {
             {
                 id: 'hammer_geo', name: 'Geological Hammer', x: 780, y: 410, w: 130, h: 100, walkToX: 840, walkToY: 455,
                 onInteract(v, e) {
-                    if (v === 'Pick up') { 
+                    if (v === 'Pick up') {
                         if (e.hasItem('geo_hammer')) e.say("I already have the geo hammer.");
                         else { e.addItem('geo_hammer', 'Geological Hammer'); e.say('I pick up the geological hammer. For science. And also self-defense if the candle-lighter meets me down here.'); }
                     } else e.say('A geological hammer, for breaking rock samples. Standard field equipment. In a strange underground room under a haunted attraction. Sure.');
@@ -2382,58 +2407,120 @@ function pickUpHerring(v, e, id) {
 // ══════════════════════════════════════════════════════════════════════════════
 async function main() {
     const engine = new Engine('game');
+    window._engine = engine;
+    engine.gameState.music.tracks = MUSIC_TRACKS;
     engine.debug = false; // set true to see walkboxes
 
     // Load all backgrounds (null-safe — gradient fallback used if file missing)
-    const assets = await Promise.all([
-            loadImage('assets/bedroom_bg.png'),
-            loadImage('assets/kitchen_bg.jpg'),
-            loadImage('assets/street_bg.png'),
-            loadImage('assets/alley_bg.jpg'),
-            loadImage('assets/secret_bg.jpg'),
-            loadImage('assets/gate_bg.jpg'),
-            loadImage('assets/pawn_bg.jpg'),
-            loadImage('assets/courtyard_bg.jpg'),
-            loadImage('assets/foyer_bg.jpg'),
-            loadImage('assets/library_bg.jpg'),
-            loadImage('assets/backyard_bg.jpg'),
-            loadImage('assets/police_ext_bg.jpg'),
-            loadImage('assets/police_int_bg.jpg'),
-            loadImage('assets/mag_entrance_bg.jpg'),
-            loadImage('assets/geo_strata_bg.jpg'),
-            loadImage('assets/magnetic_hill_bg.jpg'),
-            loadImage('assets/title_screen_bg.png'),
-            loadImage('assets/herring_club_bg.png'),
-            loadImage('assets/weather_station_bg.png'),
-            loadImage('assets/library_balcony_bg.png'),
-            loadImage('assets/Dave3.png'),
-            // NPC sprite sheets
-            loadImage('assets/npc_baker.png'),
-            loadImage('assets/poutine_guy.png'),
-            loadImage('assets/npc_bouncer.png'),
-            loadImage('assets/npc_pawnbroker.png'),
-            loadImage('assets/npc_officer.png'),
-            loadImage('assets/cat.png'),
-            loadImage('assets/npc_woman_scientist.png'),
-            loadImage('assets/npc_weather_scientist.png'),
-            loadImage('assets/npc_raccoon.png'),
-            loadImage('assets/trapdoor_patch.png'),
-            loadImage('assets/rug_rolled_up.png'),
-            loadImage('assets/item_pizza_slice.png')
-        ]);
+    // PHASE 1: Load title screen assets first
+    const titleAssets = await Promise.all([
+        loadImage('assets/title_screen_bg.png'),
+        loadImage('assets/press_start.png')
+    ]);
+    const [titleBg, pressStartImg] = titleAssets;
+
+    // Register title screen immediately so splash screen overlay knows it's ready
+    engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
+    engine.changeRoom('title_screen', 480, 450);
+    engine.start();
+
+    // PHASE 2: Load everything else with fault-tolerance
+    const safeLoad = (src) => loadImage(src).catch(err => {
+        console.warn(`[Loader] Skipping missing file: ${src}`);
+        return null;
+    });
+
+    const assetsProgress = Promise.all([
+        safeLoad('assets/bedroom_bg.png'),
+        safeLoad('assets/kitchen_bg.jpg'),
+        safeLoad('assets/street_bg.png'),
+        safeLoad('assets/alley_bg.jpg'),
+        safeLoad('assets/secret_bg.jpg'),
+        safeLoad('assets/gate_bg.jpg'),
+        safeLoad('assets/pawn_bg.jpg'),
+        safeLoad('assets/courtyard_bg.jpg'),
+        safeLoad('assets/foyer_bg.jpg'),
+        safeLoad('assets/library_bg.jpg'),
+        safeLoad('assets/backyard_bg.jpg'),
+        safeLoad('assets/police_ext_bg.jpg'),
+        safeLoad('assets/police_int_bg.jpg'),
+        safeLoad('assets/mag_entrance_bg.jpg'),
+        safeLoad('assets/geo_strata_bg.jpg'),
+        safeLoad('assets/magnetic_hill_bg.jpg'),
+        safeLoad('assets/herring_club_bg.png'),
+        safeLoad('assets/weather_station_bg.png'),
+        safeLoad('assets/library_balcony_bg.png'),
+        safeLoad('assets/Dave3.png'),
+        // NPC sprite sheets
+        safeLoad('assets/npc_baker.png'),
+        safeLoad('assets/npc_bouncer.png'),
+        safeLoad('assets/npc_pawnbroker.png'),
+        safeLoad('assets/npc_officer.png'),
+        safeLoad('assets/cat.png'),
+        safeLoad('assets/npc_woman_scientist.png'),
+        safeLoad('assets/npc_weather_scientist.png'),
+        safeLoad('assets/npc_raccoon.png'),
+        safeLoad('assets/trapdoor_patch.png'),
+        safeLoad('assets/rug_rolled_up.png'),
+        safeLoad('assets/item_pizza_slice.png'),
+        safeLoad('assets/npc_sub_guy.png'),
+        safeLoad('assets/sub_guy.png'),
+        safeLoad('assets/npc_murder_suspect.png')
+    ]);
+
+    // We can continue initializing while items load, but Promise.all needs to finish for room builds
+    const assets = await assetsProgress;
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
-        magEntranceBg, geoStrataBg, magHillBg, titleBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
-        npcBaker, npcPoutine, npcDoorman, npcPawnbroker, npcSavoie,
-        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg] = assets;
+        magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
+        npcBaker, npcDoorman, npcPawnbroker, npcSavoie,
+        npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, npcSubGuy, subGuyHillSheet, npcSuspect] = assets;
+
+    // INTERMEDIATE: Dave should be ready as soon as the sheet loads
+    const sheetImg = daveSheet ?? buildProceduralDave();
+    const useRealSheet = !!daveSheet;
+    const animator = new SpriteAnimator(
+        sheetImg,
+        useRealSheet ? FRAME_W : 48,
+        useRealSheet ? FRAME_H : 64,
+        useRealSheet ? DAVE_ANIMS : {
+            idle: { row: 3, count: 1, fps: 3 },
+            walkR: { row: 0, count: 6, fps: 8 },
+            walkL: { row: 0, count: 6, fps: 8, flipH: true },
+        },
+        null // Background already removed in Dave3.png
+    );
+    animator.play('idle');
+
+    const dave = new Actor({
+        id: 'dave',
+        name: 'Dave',
+        x: 480,
+        y: 450,
+        animator,
+        scale: 1.5,
+        canWalk: true,
+        z: 450
+    });
+
+    dave.onInteract = (v, e, item) => {
+        const itemId = (item && (typeof item === 'string' ? item : item.id));
+        if (v === 'Use' && itemId === 'cell_phone') {
+            window._openPhoneMenu(e);
+        } else if (v === 'Look at') {
+            e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
+        }
+    };
+
+    engine.setPlayer(dave);
 
     // Preload item images for props and inventory
     const itemIcons = {};
     const itemsToLoad = [
-        'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone', 
-        'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine', 
-        'battle_bread', 'mansion_key', 'remote_control', 'red_herring', 
+        'spoon', 'bent_knife', 'camera', 'radio', 'binoculars', 'cell_phone',
+        'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine',
+        'battle_bread', 'mansion_key', 'remote_control', 'red_herring',
         'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza_slice',
         'club_key', 'red_herring_key', 'fishy_token'
     ];
@@ -2441,13 +2528,16 @@ async function main() {
         itemIcons[id] = await loadImage(`assets/item_${id}.png`);
     }));
 
-    const pressStartImg = await loadImage('assets/press_start.png');
-    const npcSubGuy = await loadImage('assets/npc_sub_guy.png');
-
     // Herrings all use the same icon
     ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
         itemIcons[id] = itemIcons['red_herring'];
     });
+
+    // CRITICAL: Attach preloaded icons to engine UI so they appear in inventory
+    Object.assign(engine.ui.loadedItemImages, itemIcons);
+
+    // Start Dave with his phone now that icons are ready
+    engine.addItem('cell_phone', 'Cell Phone');
 
     // Map pizza specifically
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
@@ -2482,7 +2572,7 @@ async function main() {
         id: 'key_prop', image: itemIcons['house_key'], x: 640, y: 330, w: 30, h: 30,
         isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('house_key'); }
     });
-     kitchen.props.push({
+    kitchen.props.push({
         id: 'pizza_prop', image: itemIcons['pizza'], x: 380, y: 340, w: 40, h: 30,
         isVisible(e) { return !e.hasItem('pizza'); }
     });
@@ -2491,11 +2581,32 @@ async function main() {
     { // Street — baker + poutine guy + sub guy
         const r = buildStreet(streetBg);
         const baker = buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
-        const poutine = buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
-        
-        const subGuy = buildNPCActor({ 
-            room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
-            sheet: npcSubGuy, color: '#00ff55', scale: 0.9, cols: 9, rows: 4 
+        if (baker) {
+            baker.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    if (e.hasItem('battle_bread')) {
+                        e.say("Baker: 'You still have that loaf? Careful, it's registered as a lethal weapon in three provinces.'");
+                    } else {
+                        e.saySequence([
+                            "Dave: 'Excuse me, do you have any... fresh... bread?'",
+                            "Baker: 'Fresh? No. But I have the MONCTON SPECIAL. We call it Battle Bread.'",
+                            "Baker: 'We leave it in the sun for three days and then use it to shore up the foundation of the bakery. Here, take a baguette. It's on the house.'",
+                            "Dave: 'This is... surprisingly heavy. And cold. And I think it just made a metallic CLANG when I moved it.'"
+                        ], () => {
+                            e.addItem('battle_bread', 'Battle Bread');
+                        });
+                    }
+                } else if (v === 'Look at') {
+                    e.say("A man who looks like he's been wrestling dough for forty years. He's winning, but the dough is putting up a fight.");
+                } else {
+                    e.triggerQuip(v, 'Baker');
+                }
+            };
+        }
+
+        const subGuy = buildNPCActor({
+            room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460,
+            sheet: npcSubGuy, color: '#00ff55', scale: 1.1, cols: 9, rows: 4
         });
 
         if (baker) {
@@ -2551,51 +2662,61 @@ async function main() {
                         "Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'",
                         "Sub Guy: 'Also, if you're looking for the REAL sub... you should check the Hill. I hear there's a guy in a suit who really needs a jumpstart.'"
                     ]);
+
+                    // Secret Red Herring Key #2
+                    if (!e.hasItem('rh_key_2')) {
+                        setTimeout(() => {
+                            e.saySequence([
+                                "Sub Guy: 'Wait! Since you look like the type to appreciate a good mystery... here, take this. It's on the house.'",
+                                "Dave: 'A Red Herring? Is this part of the sub?'",
+                                "Sub Guy: 'It's a metaphor, Dave. A lean, business-class metaphor.'"
+                            ], () => {
+                                e.addItem('rh_key_2', 'Red Herring Key');
+                            });
+                        }, 8000);
+                    }
                 } else if (v === 'Look at') {
-                    e.say("The Sub Guy is wearing a sandwich. Or a submarine. I'm not sure which one he's trying to sell, but he's very committed to the theme.");
+                    e.say("The Sub Guy is wearing what appears to be a submarine with legs. It's surprisingly aerodynamic for a sandwich shop employee.");
                 } else {
                     e.triggerQuip(v, 'Sub Guy');
                 }
             };
         }
-        
-        if (poutine) {
-            r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
-        }
+
         engine.registerRoom(r);
     }
     { // Alley — club doorman
         const r = buildAlley(alleyBg);
         const bouncer = buildNPCActor({ room: r, id: 'doorman_npc', name: 'Doorman', x: 655, y: 455, sheet: npcDoorman, color: '#55ffff', cols: 9, rows: 4 });
-        
+
         if (bouncer) {
             bouncer.onInteract = (v, e, item) => {
-            const s = e.getRoomState('alley');
-            const itemId = (item && (typeof item === 'string' ? item : item.id));
-            if (v === 'Use' && itemId === 'battle_bread') {
-                e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
-                s.bouncerKnockedOut = true;
-                bouncer.isVisible = false;
-                e.addItem('club_key', 'Herring Club Key');
-                e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
-                return;
-            }
-
-            // Dave's Not Here joke logic
-            if (v === 'Talk to' || v === 'Knock' || v === 'Use' || v === 'Open') {
-                s.daveCount = (s.daveCount || 0) + 1;
-                if (s.daveCount === 1) {
-                    e.say("I knock on the doorman's resolve. Voice from inside: 'Who's there?' Me: 'Dave.' Voice: 'Dave's not here, man.'");
-                } else if (s.daveCount === 2) {
-                    e.say("I try again. 'DAVE IS RIGHT HERE.' Bouncer: 'Dave's not here, man.' He seems committed to the bit.");
-                } else if (s.daveCount === 3) {
-                    e.say("Third time's a charm? 'I AM DAVE.' Bouncer: 'Dave's not here, man.' ...I'm starting to believe him.");
-                } else {
-                    e.say("He won't let me in. He's firmly convinced I'm not here. It's an existential crisis in a cyan suit.");
+                const s = e.getRoomState('alley');
+                const itemId = (item && (typeof item === 'string' ? item : item.id));
+                if (v === 'Use' && itemId === 'battle_bread') {
+                    e.say("Dave's BATTLE BREAD technique: I swing the iron-hard baguette with all my might. THWACK! The doorman doesn't even have time to say 'Dave's not here'. He slumps to the ground, out cold.");
+                    s.bouncerKnockedOut = true;
+                    bouncer.isVisible = false;
+                    e.addItem('club_key', 'Herring Club Key');
+                    e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
+                    return;
                 }
-            }
-        };
-    }
+
+                // Dave's Not Here joke logic
+                if (v === 'Talk to' || v === 'Knock' || v === 'Use' || v === 'Open') {
+                    s.daveCount = (s.daveCount || 0) + 1;
+                    if (s.daveCount === 1) {
+                        e.say("I knock on the doorman's resolve. Voice from inside: 'Who's there?' Me: 'Dave.' Voice: 'Dave's not here, man.'");
+                    } else if (s.daveCount === 2) {
+                        e.say("I try again. 'DAVE IS RIGHT HERE.' Bouncer: 'Dave's not here, man.' He seems committed to the bit.");
+                    } else if (s.daveCount === 3) {
+                        e.say("Third time's a charm? 'I AM DAVE.' Bouncer: 'Dave's not here, man.' ...I'm starting to believe him.");
+                    } else {
+                        e.say("He won't let me in. He's firmly convinced I'm not here. It's an existential crisis in a cyan suit.");
+                    }
+                }
+            };
+        }
 
         // Ensure bouncer hides if already knocked out on room entry
         r.onEnter = (e) => {
@@ -2613,7 +2734,7 @@ async function main() {
     { // TV Weather Station — Weatherman (Enthusiastic Meteorological Observer)
         const r = buildWeatherStation(weatherStationBg);
         const weatherman = buildNPCActor({ room: r, id: 'weather_npc', name: 'Weatherman', x: 650, y: 460, sheet: npcWeatherSheet, color: '#ffff55', cols: 9, rows: 4 });
-        
+
         if (weatherman) {
             weatherman.onInteract = (v, e) => {
                 if (v === 'Talk to') {
@@ -2903,22 +3024,40 @@ async function main() {
         engine.registerRoom(r);
     }
     const secret = buildSecretRoom(secretBg);
+    secret.hotspots.push({
+        id: 'meta_herring_spot', name: 'Literal Red Herring', x: 450, y: 150, w: 100, h: 50,
+        onInteract(v, e) {
+            if (v === 'Look at' || v === 'Pick up' || v === 'Use') {
+                if (e.hasItem('rh_key_3')) {
+                    e.say("Just an empty spot where a very literal red herring used to be.");
+                } else {
+                    e.saySequence([
+                        "Dave: 'Is that... another one?'",
+                        "I reach behind the support beam and find a small, fish-shaped brass key.",
+                        "Dave: 'A FOURTH Red Herring Key?! This is breaking the laws of both nature and game design!'"
+                    ], () => {
+                        e.addItem('rh_key_4', 'Red Herring Key');
+                    });
+                }
+            }
+        }
+    });
     secret.props.push({ id: 'p_herring_L1', image: itemIcons['red_herring'], x: 70, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L1'); } });
     secret.props.push({ id: 'p_herring_L2', image: itemIcons['red_herring'], x: 70, y: 340, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_L2'); } });
     secret.props.push({ id: 'p_herring_R1', image: itemIcons['red_herring'], x: 840, y: 215, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_R1'); } });
     secret.props.push({ id: 'p_herring_R2', image: itemIcons['red_herring'], x: 840, y: 340, w: 50, h: 30, isVisible(e) { return !e.hasItem('herring_R2'); } });
     engine.registerRoom(secret);
-    
+
     engine.registerRoom(buildGateArea(gateBg));
 
     { // Pawn shop — pawnbroker
         const r = buildPawnShop(pawnBg);
         const pawnbroker = buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff', cols: 9, rows: 4 });
-        
+
         if (pawnbroker) {
             // Optional: add pawnbroker-specific logic here if needed beyond buildPawnShop
         }
-        
+
         // Add item props to shelves
         r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 230, y: 200, w: 50, h: 50, isVisible(e) { return !e.hasItem('camera'); } });
         r.props.push({ id: 'p_radio', image: itemIcons['radio'], x: 340, y: 200, w: 60, h: 50, isVisible(e) { return !e.hasItem('radio'); } });
@@ -2928,14 +3067,14 @@ async function main() {
         r.props.push({ id: 'p_mansion_key', image: itemIcons['mansion_key'], x: 705, y: 360, w: 50, h: 50, isVisible(e) { return !e.hasItem('mansion_key'); } });
         r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 385, y: 235, w: 50, h: 40, isVisible(e) { return !e.hasItem('remote_control'); } });
         r.props.push({ id: 'p_bread', image: itemIcons['battle_bread'], x: 185, y: 230, w: 70, h: 50, isVisible(e) { return !e.hasItem('battle_bread'); } });
-        
+
         engine.registerRoom(r);
     }
     { // Mansion courtyard — raccoon family in garden
         const r = buildMansionCourtyard(courtyardBg);
         const raccoon = buildNPCActor({ room: r, id: 'raccoon_npc', name: 'Raccoon', x: 210, y: 455, sheet: npcRaccoon, color: '#aaaaaa', cols: 9, rows: 4 });
         if (raccoon) {
-             // Raccoon logic
+            // Raccoon logic
         }
         engine.registerRoom(r);
     }
@@ -2949,7 +3088,7 @@ async function main() {
         const cat2 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
-    { // Mansion library balcony — Atmospheric science plaques
+    { // Mansion library balcony — Atmospheric science plaques + Murder Suspect
         const r = buildMansionLibraryBalcony(libraryBalconyBg);
         const cat = buildNPCActor({ room: r, id: 'cat_npc_balcony', name: 'Cat', x: 740, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         if (cat) {
@@ -2958,6 +3097,33 @@ async function main() {
                     e.say("The cat is staring at the Thermosphere plaque. It seems particularly interested in the Ionosphere. Maybe it's trying to transmit a message back to its home planet.");
                 } else {
                     e.say("The cat ignores me with the practiced ease of a creature that has mastered both the physical and metaphysical realms.");
+                }
+            };
+        }
+
+        // Add the mysterious suspect as a meta-joke or actual suspect
+        const suspect = buildNPCActor({
+            room: r, id: 'suspect_npc', name: 'Shadowy Figure', x: 500, y: 450,
+            sheet: npcSuspect, color: '#ff3333', scale: 1.0, cols: 9, rows: 4
+        });
+        if (suspect) {
+            suspect.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    e.saySequence([
+                        "Shadowy Figure: 'I was just... checking the physics of the mesosphere.'",
+                        "Dave: 'At midnight? In the dark? At a crime scene?'",
+                        "Shadowy Figure: 'Is there a better time to study the cold sphere, Dave?'",
+                        "Shadowy Figure: 'Wait! Don't look at my shoes! There's no blood on them! I mean— there's no red paint on them!'",
+                        "Dave: 'Red paint? The victim wasn't painted, he was—'",
+                        "Shadowy Figure: 'I have to go! Physics calls!'"
+                    ], () => {
+                        // He "disappears" (metaphorically, or just stops talking)
+                        e.say("The figure turns back to the plaque with suspicious intensity.");
+                    });
+                } else if (v === 'Look at') {
+                    e.say("A shadowy figure standing on the balcony. He looks exactly like someone who shouldn't be here, but his raincoat is very convincing.");
+                } else {
+                    e.triggerQuip(v, 'Shadowy Figure');
                 }
             };
         }
@@ -2983,12 +3149,12 @@ async function main() {
 
     { // Geo strata — Dr. Pellerin (been here since 1987)
         const r = buildGeoStrata(geoStrataBg);
-        const pellerin = buildNPCActor({ 
-            room: r, id: 'pellerin_npc', name: 'Dr. Pellerin', 
-            x: 175, y: 450, sheet: npcPellerin, 
-            color: '#ffcc00', scale: 1.3, anims: PELLERIN_ANIMS 
+        const pellerin = buildNPCActor({
+            room: r, id: 'pellerin_npc', name: 'Dr. Pellerin',
+            x: 175, y: 450, sheet: npcPellerin,
+            color: '#ffcc00', scale: 1.3, anims: PELLERIN_ANIMS
         });
-        
+
         if (pellerin) {
             pellerin.onInteract = (v, e) => {
                 if (v === 'Talk to') {
@@ -3180,7 +3346,7 @@ async function main() {
                             }
                         });
                     };
-                    
+
                     e.saySequence([
                         "Dave: 'Excuse me, Dr. Pellerin? I'm looking for... well, I'm not sure what I'm looking for down here.'",
                         "Dr. Pellerin: 'Dave! You've arrived just as I was documenting the successions of the Grenville Province! Look at these silicate bands! Billions of years of history, etched in rock! What aspect of the Shield shall we dissect today?'"
@@ -3209,66 +3375,86 @@ async function main() {
                 }
             };
         }
-        
+
         // Add geological items
         r.props.push({ id: 'p_shield', image: itemIcons['canadian_shield'], x: 540, y: 290, w: 120, h: 120, isVisible(e) { return !e.hasItem('canadian_shield'); } });
         r.props.push({ id: 'p_hammer', image: itemIcons['geo_hammer'], x: 780, y: 410, w: 130, h: 100, isVisible(e) { return !e.hasItem('geo_hammer'); } });
-        
+
         engine.registerRoom(r);
     }
-    engine.registerRoom(buildTitleScreen(titleBg, pressStartImg));
     engine.registerRoom(buildMagneticHill(magHillBg));
-    console.log('[Rooms] 17 rooms registered, NPCs attached.');
 
-    // Dave
-    const sheetImg = daveSheet ?? buildProceduralDave();
-    const useRealSheet = !!daveSheet;
-    const animator = new SpriteAnimator(
-        sheetImg,
-        useRealSheet ? FRAME_W : 48,
-        useRealSheet ? FRAME_H : 64,
-        useRealSheet ? DAVE_ANIMS : {
-            idle: { row: 3, count: 1, fps: 3 },
-            walkR: { row: 0, count: 6, fps: 8 },
-            walkL: { row: 0, count: 6, fps: 8, flipH: true },
-        },
-        null // Background already removed in Dave3.png
-    );
-    animator.play('idle');
+    { // Magnetic Hill — the REAL sub guy
+        const r = engine.rooms['magnetic_hill'];
+        if (r) {
+            const subHill = buildNPCActor({
+                room: r, id: 'sub_guy_hill_npc', name: 'Mysterious Suit', x: 120, y: 470,
+                sheet: subGuyHillSheet, color: '#ffff55', scale: 1.1, cols: 9, rows: 4
+            });
+            if (subHill) {
+                subHill.onInteract = (v, e, item) => {
+                    const s = e.getRoomState('magnetic_hill');
+                    const itemId = (item && (typeof item === 'string' ? item : item.id));
 
-    const dave = new Actor({ id: 'dave', name: 'Dave', x: 480, y: 450, animator });
-    dave.onInteract = (v, e, item) => {
-        const itemId = (item && (typeof item === 'string' ? item : item.id));
-        if (v === 'Use' && itemId === 'cell_phone') {
-            const isPlaying = !!e.gameState.music.backgroundTrack;
-            const s = e.getRoomState('global_phone');
-            if (isPlaying) {
-                s.lastTrackId = e.gameState.music.backgroundTrack;
-                e.gameState.music.backgroundTrack = null;
-                e._updateMusic();
-                e.say("Dave: 'Silence. The Moncton winds are enough for now.'");
-            } else {
-                const toPlay = s.lastTrackId || 'track1';
-                e.gameState.music.backgroundTrack = toPlay;
-                e._updateMusic();
-                const track = MUSIC_TRACKS.find(t => t.id === toPlay);
-                e.say(`Dave: 'Resuming ${track ? track.name : "the music"}. Back into the groove.'`);
+                    if (v === 'Talk to') {
+                        if (s.jumpstarted) {
+                            e.say("Mysterious Suit: 'I'm feeling much better now. The current is flowin'. The hill is pullin'. Life is... magnetic.'");
+                        } else {
+                            e.say("I try to speak to the figure in the suit. All I hear is a faint, rhythmic *buzzing* and a sound like a failing hard drive.");
+                        }
+                    } else if (v === 'Use' && itemId === 'battery') {
+                        e.saySequence([
+                            "Dave: 'I suppose if I ever need to jump-start a submarine... wait, this is it!'",
+                            "I jam the fire-hydrant-sized battery into the port on the back of the heavy suit.",
+                            "There is a shower of sparks. The magnet monument behind us hums in sympathy.",
+                            "Mysterious Suit: 'ZZZZ-POP! SYSTEMS ONLINE! CALIBRATING... AH! HEL-LO, DA-VE!'",
+                            "Dave: 'You know my name?'",
+                            "Mysterious Suit: 'EVERYONE KNOWS THE ONE WHO CARRIES THE BATTERY. I AM THE SUB. THE REAL ONE. NOT THE SANDWICH ONE AT THE BOTTOM OF THE HILL.'",
+                            "The figure stands up straighter. He looks slightly more buoyant now."
+                        ], () => {
+                            s.jumpstarted = true;
+                            e.say("He hands me a small, fish-shaped key. 'YOU MAY NEED THIS AT THE CLUB. OR JUST TO LOOK AT. IT IS QUITE SHINY.'");
+                            e.addItem('rh_key_1', 'Red Herring Key');
+                        });
+                    } else if (v === 'Look at') {
+                        e.say("A figure wearing what looks like a Victorian deep-sea diving suit, or perhaps a very small submarine with legs. He's leaning against a rock, looking extremely powered-down.");
+                    } else {
+                        e.triggerQuip(v, 'Mysterious Suit');
+                    }
+                };
             }
-        } else if (v === 'Look at' || (v === 'Use' && itemId === 'cell_phone' && false)) { 
-             e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
         }
-    };
-    engine.setPlayer(dave);
-    engine.gameState.music.tracks = MUSIC_TRACKS;
+    }
+
+    console.log(`[Rooms] ${Object.keys(engine.rooms).length} rooms registered, NPCs attached.`);
 
     // Console helpers
-    window._engine = engine;
     window._goto = (id, x = 480, y = 450) => engine.changeRoom(id, x, y);
 
-    // Start in title screen
+    // Wrapper for Red Herring sub-quest counting
+    const originalAddItem = engine.addItem.bind(engine);
+    engine.addItem = (id, displayName) => {
+        originalAddItem(id, displayName);
+
+        // Ensure the unique IDs use the correct icon
+        if (id.startsWith('rh_key_')) {
+            engine.ui.loadedItemImages[id] = engine.ui.loadedItemImages['red_herring_key'];
+        }
+
+        const inv = engine.gameState.inventory;
+        const rhCount = inv.filter(i => i.startsWith('rh_key_')).length;
+        if (rhCount === 3 && id === 'rh_key_3') {
+            setTimeout(() => {
+                engine.say("Dave: 'Wait... why was I supposed to have three of these? The dev wouldn't tell me.'");
+            }, 3000);
+        } else if (rhCount === 4 && id === 'rh_key_4') {
+            setTimeout(() => {
+                engine.say("Dave: 'Four. Four Red Herring keys. This has to be some kind of world record for pointless collecting.'");
+            }, 3000);
+        }
+    };
+
     engine.addItem('cell_phone', 'Cell Phone');
-    engine.changeRoom('title_screen', 480, 450);
-    engine.start();
 
     console.log("Dave's adventure started. window._goto('kitchen') to warp.");
 }
