@@ -58,7 +58,7 @@
         if (phase === 'playing') {
           const isGameReady = window._engine.rooms['bedroom'] && window._engine.player;
           if (isGameReady) {
-            clickPrompt.innerText = 'CLICK TO START';
+            clickPrompt.innerText = 'PRESS TO START';
             clickPrompt.classList.add('pulse');
           } else {
             const status = window._engine.assetStatus;

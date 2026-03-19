@@ -33,14 +33,16 @@ class Engine {
         };
 
         this.quips = {
-            'Look at': ["It's just a {T}.", "I've seen better {T}s.", "Not much to say about this {T}.", "Standard issue {T}."],
+            'Look at': ["I see nothing special.", "Just an ordinary object.", "It looks... like itself."],
             'Pick up': ["I can't carry a {T}!", "It's bolted down.", "My pockets aren't that big.", "I don't think that's portable."],
-            'Talk to': ["It doesn't seem to want to talk to me.", "I'm talking to a {T}. I need a vacation.", "No response.", "It's giving me the silent treatment."],
+            'Talk to': ["No response.", "I'm talking to myself again.", "Silence is golden. This is very golden."],
             'Use': ["Use it how? I'm not a magician.", "I can't figure out how to use it.", "That doesn't seem to do anything."],
-            'Push': ["It won't budge.", "It's heavier than it looks.", "I'm not strong enough to move that."],
-            'Pull': ["It's stuck.", "I'm pulling, but nothing's happening.", "It seems firmly attached."],
-            'Nothing': ["Nothing there.", "I'm staring at the scenery.", "Just empty space.", "Yep, that's part of the background."],
-            'Default': ["I can't do that.", "No.", "Doesn't work.", "Maybe later."],
+            'Open': ["It's either already open or I'm not strong enough to force it.", "I can't open that.", "It won't budge."],
+            'Close': ["It's already closed or it's not meant to be shut.", "I can't close that.", "It's stuck open."],
+            'Push': ["It won't budge. I should have gone to the gym. Once. Ever.", "I'm not strong enough.", "It's firmly in place."],
+            'Pull': ["I'm pulling, but nothing is happening.", "I can't move it.", "It's anchored."],
+            'Give': ["I'm keeping it.", "They don't want it.", "I'd rather not."],
+            'Default': ["I can't do that.", "No.", "Doesn't work.", "Not right now."],
             'Item': ["Using {I} on {T}... nope.", "That doesn't fit.", "I don't think {I} works with {T}.", "Unlikely."]
         };
 
@@ -49,8 +51,35 @@ class Engine {
         this._lastTime = null;
         this._rafId = null;
         this.debug = false;
+        this.assetStatus = { loaded: 0, total: 0 };
 
         this._wireInput();
+    }
+
+    /** Preload a list of image URLs. Updates this.assetStatus. */
+    loadAssets(urls) {
+        this.assetStatus.total = urls.length;
+        this.assetStatus.loaded = 0;
+
+        if (urls.length === 0) return Promise.resolve();
+
+        const promises = urls.map(url => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => {
+                    this.assetStatus.loaded++;
+                    resolve(img);
+                };
+                img.onerror = () => {
+                    console.error(`Failed to load asset: ${url}`);
+                    this.assetStatus.loaded++; // Count it anyway to avoid hang
+                    resolve(null);
+                };
+                img.src = url;
+            });
+        });
+
+        return Promise.all(promises);
     }
 
     // ── Room registry ──────────────────────────────────────────────────────

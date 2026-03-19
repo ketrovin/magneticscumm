@@ -678,7 +678,7 @@ function buildAlley(bg) {
             },
             // Dumpster
             {
-                id: 'dumpster', name: 'Dumpster', x: 265, y: 330, w: 165, h: 150, walkToX: 350, walkToY: 470,
+                id: 'dumpster', name: 'Dumpster', x: 265, y: 330, w: 165, h: 150, walkToX: 350, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Look at') e.say("A treasure trove of Moncton's secrets. Mostly pizza boxes. Some are from MY building.");
                     else if (v === 'Open' || v === 'Use') e.say("I open the dumpster. Something in there has EYES. We make eye contact. I close the dumpster.");
@@ -687,25 +687,25 @@ function buildAlley(bg) {
             },
             // Trash cans
             {
-                id: 'trash', name: 'Trash Cans', x: 100, y: 380, w: 155, h: 150, walkToX: 175, walkToY: 470,
+                id: 'trash', name: 'Trash Cans', x: 100, y: 380, w: 155, h: 150, walkToX: 175, walkToY: 440,
                 onInteract(v, e) { e.say("Trash cans. I'm not looking in there. I have some standards left. About three percent of my standards, but they're firmly in place."); }
             },
             // The Herring Club door + doorman
             {
-                id: 'club_door', name: 'Herring Club Door', x: 590, y: 220, w: 200, h: 310, walkToX: 660, walkToY: 470,
+                id: 'club_door', name: 'Herring Club Door', x: 590, y: 220, w: 200, h: 310, walkToX: 660, walkToY: 440,
                 onInteract(v, e, item) {
                     const s = e.getRoomState('alley');
                     if (s.bouncerKnockedOut) {
-                        if (v === 'Open' || (v === 'Use' && item && (item === 'club_key' || (item.id && item.id === 'club_key')))) {
+                        if (v === 'Open' || (v === 'Use' && item && item.id === 'club_key')) {
                             if (e.hasItem('club_key')) {
                                 e.say("The door is locked, but the club key fits perfectly. I step over the snoring doorman and enter the Herring Club. It smells like exclusivity and tartar sauce.");
-                                setTimeout(() => e.changeRoom('herring_club', 100, 450), 2000);
+                                setTimeout(() => e.changeRoom('herring_club', 100, 440), 2000);
                             } else {
                                 e.say("The doorman is out cold, but he must have locked the door behind him. It's solid. I need a key.");
                             }
                         } else if (v === 'Walk to') {
                             if (e.hasItem('club_key')) {
-                                e.changeRoom('herring_club', 100, 450);
+                                e.changeRoom('herring_club', 100, 440);
                             } else {
                                 e.say("I can't just walk in. The door is locked tight.");
                             }
@@ -741,7 +741,7 @@ function buildAlley(bg) {
             },
             // Club sign / plaque
             {
-                id: 'club_sign', name: 'Members Plaque', x: 575, y: 345, w: 110, h: 95, walkToX: 620, walkToY: 470,
+                id: 'club_sign', name: 'Members Plaque', x: 575, y: 345, w: 110, h: 95, walkToX: 620, walkToY: 440,
                 onInteract(v, e) {
                     e.say("'PRIVATE MEMBERS ONLY.' And a smaller sign below it: 'If you have to ask, you're not a member. If you were a member, you would know not to ask.'");
                 }
@@ -767,9 +767,9 @@ function buildHerringClub(bg) {
         hotspots: [
             // Exit back to alley
             {
-                id: 'to_alley', name: 'Exit', x: 0, y: 350, w: 80, h: 170, walkToX: 60, walkToY: 460,
+                id: 'to_alley', name: 'Exit', x: 0, y: 350, w: 80, h: 170, walkToX: 60, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 660, 460);
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 660, 440);
                     else e.say("Back to the reality of the alley. I'm not ready to leave the neon fish quite yet.");
                 }
             },
@@ -788,9 +788,9 @@ function buildHerringClub(bg) {
             },
             // Exit to TV Weather Station
             {
-                id: 'to_weather_station', name: 'Studio Door', x: 880, y: 340, w: 80, h: 180, walkToX: 900, walkToY: 460,
+                id: 'to_weather_station', name: 'Studio Door', x: 880, y: 340, w: 80, h: 180, walkToX: 900, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('weather_station', 120, 460);
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('weather_station', 120, 440);
                     else e.say("A sound-proofed door with a red 'ON AIR' sign. It leads to the studio where they film the local weather.");
                 }
             },
@@ -811,15 +811,15 @@ function buildWeatherStation(bg) {
         hotspots: [
             // Back to Herring Club
             {
-                id: 'to_herring', name: 'Studio Exit', x: 0, y: 340, w: 100, h: 180, walkToX: 80, walkToY: 460,
+                id: 'to_herring', name: 'Studio Exit', x: 0, y: 340, w: 100, h: 180, walkToX: 80, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use') e.changeRoom('herring_club', 860, 460);
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('herring_club', 860, 440);
                     else e.say("The exit to the studio. It leads back to the neon lights of the Herring Club.");
                 }
             },
             // Green Screen
             {
-                id: 'green_screen', name: 'Green Screen', x: 740, y: 150, w: 220, h: 360, walkToX: 800, walkToY: 470,
+                id: 'green_screen', name: 'Green Screen', x: 740, y: 150, w: 220, h: 360, walkToX: 800, walkToY: 440,
                 onInteract(v, e) {
                     e.say("A massive green wall. I look at it and see potential. Also, chromakeying errors on the edge of my jacket.");
                 }
@@ -879,7 +879,7 @@ function buildWeatherStation(bg) {
             },
             // Weather Scientist Hotspot (Proxy)
             {
-                id: 'weather_scientist_hotspot', name: 'Weather Scientist', x: 440, y: 330, w: 90, h: 180, walkToX: 430, walkToY: 460,
+                id: 'weather_scientist_hotspot', name: 'Weather Scientist', x: 440, y: 330, w: 90, h: 180, walkToX: 430, walkToY: 440,
                 onInteract(v, e) {
                     const ws = e.actors.find(a => a.id === 'weather_npc');
                     if (ws) ws.onInteract(v, e);
@@ -903,7 +903,7 @@ function buildSecretRoom(bg) {
         hotspots: [
             // Ladder back up to bedroom
             {
-                id: 'ladder_up', name: 'Ladder', x: 620, y: 75, w: 145, h: 450, walkToX: 692, walkToY: 480,
+                id: 'ladder_up', name: 'Ladder', x: 620, y: 75, w: 145, h: 450, walkToX: 692, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Climb' || v === 'Use' || v === 'Walk to') {
                         e.say("I climb back up. The trapdoor is still open, thankfully.");
@@ -913,20 +913,20 @@ function buildSecretRoom(bg) {
             },
             // Red herrings — left shelves
             {
-                id: 'herring_L1', name: 'Red Herring', x: 65, y: 210, w: 60, h: 40, walkToX: 120, walkToY: 460,
+                id: 'herring_L1', name: 'Red Herring', x: 65, y: 210, w: 60, h: 40, walkToX: 120, walkToY: 440,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_L1'); }
             },
             {
-                id: 'herring_L2', name: 'Red Herring', x: 65, y: 335, w: 60, h: 40, walkToX: 120, walkToY: 460,
+                id: 'herring_L2', name: 'Red Herring', x: 65, y: 335, w: 60, h: 40, walkToX: 120, walkToY: 440,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_L2'); }
             },
             // Red herrings — right shelves
             {
-                id: 'herring_R1', name: 'Red Herring', x: 835, y: 210, w: 60, h: 40, walkToX: 840, walkToY: 460,
+                id: 'herring_R1', name: 'Red Herring', x: 835, y: 210, w: 60, h: 40, walkToX: 840, walkToY: 440,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_R1'); }
             },
             {
-                id: 'herring_R2', name: 'Red Herring', x: 835, y: 335, w: 60, h: 40, walkToX: 840, walkToY: 460,
+                id: 'herring_R2', name: 'Red Herring', x: 835, y: 335, w: 60, h: 40, walkToX: 840, walkToY: 440,
                 onInteract(v, e) { pickUpHerring(v, e, 'herring_R2'); }
             },
             // The altar stone
@@ -945,11 +945,11 @@ function buildSecretRoom(bg) {
             },
             // Stone pedestals with mysterious items
             {
-                id: 'pedestal_L', name: 'Stone Pedestal', x: 155, y: 285, w: 80, h: 165, walkToX: 195, walkToY: 470,
+                id: 'pedestal_L', name: 'Stone Pedestal', x: 155, y: 285, w: 80, h: 165, walkToX: 195, walkToY: 440,
                 onInteract(v, e) { e.say("A small stone object. It hums faintly. Or maybe that's the pipes."); }
             },
             {
-                id: 'pedestal_R', name: 'Vase', x: 700, y: 280, w: 80, h: 155, walkToX: 740, walkToY: 470,
+                id: 'pedestal_R', name: 'Vase', x: 700, y: 280, w: 80, h: 155, walkToX: 740, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Pick up') e.say("I don't touch mysterious vases in secret underground rooms. I've learned that much.");
                     else e.say("A clay vase. It's beautiful. It's also definitely a red herring.");
@@ -976,38 +976,38 @@ function buildGateArea(bg) {
         hotspots: [
             // Back to alley (far left)
             {
-                id: 'to_alley', name: 'Alley', x: 0, y: 300, w: 60, h: 220, walkToX: 60, walkToY: 460,
+                id: 'to_alley', name: 'Alley', x: 0, y: 300, w: 60, h: 220, walkToX: 60, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 120, 450);
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 120, 440);
                     else e.say('The alley I came from. Somehow. Via that ladder.');
                 }
             },
             // Pawn shop door (left building)
             {
-                id: 'pawn_door', name: 'Moncton Pawn', x: 55, y: 165, w: 380, h: 360, walkToX: 240, walkToY: 470,
+                id: 'pawn_door', name: 'Moncton Pawn', x: 55, y: 165, w: 380, h: 360, walkToX: 240, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('pawn_shop', 105, 450);
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('pawn_shop', 105, 440);
                     else e.say('Moncton Pawn. The window is full of cameras, radios, binoculars... and is that a mannequin head? Yes it is.');
                 }
             },
             // Pawn window display
             {
-                id: 'pawn_window', name: 'Pawn Shop Window', x: 80, y: 270, w: 330, h: 190, walkToX: 240, walkToY: 470,
+                id: 'pawn_window', name: 'Pawn Shop Window', x: 80, y: 270, w: 330, h: 190, walkToX: 240, walkToY: 440,
                 onInteract(v, e) {
                     e.say('I can see cameras, a vintage radio, binoculars, and a mannequin head in the display. Classic pawn shop energy.');
                 }
             },
             // Van Horne Mansion gate — locked until Dave has the mansion key
             {
-                id: 'mansion_gate', name: 'Van Horne Mansion Gate', x: 510, y: 100, w: 450, h: 440, walkToX: 700, walkToY: 470,
+                id: 'mansion_gate', name: 'Van Horne Mansion Gate', x: 510, y: 100, w: 450, h: 440, walkToX: 700, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Use' || v === 'Walk to') {
                         if (e.hasItem('mansion_key')) {
                             e.say('I fit the raccoon-bow skeleton key into the lock. It turns with a deeply satisfying CLUNK. The Van Horne gate swings open, yielding to the power of high-end pawn shop shopping.');
-                            setTimeout(() => e.changeRoom('mansion_courtyard', 480, 460), 1800);
+                            setTimeout(() => e.changeRoom('mansion_courtyard', 480, 440), 1800);
                         } else if (e.hasItem('house_key')) {
                             e.say("For no reason at all, I try my house key. The one I found in the fridge. It fits perfectly. It turns. The gate opens. I'm not going to think about the security implications or why my fridge key can unlock a millionaire's mansion. I'm just going in.");
-                            setTimeout(() => e.changeRoom('mansion_courtyard', 480, 460), 2000);
+                            setTimeout(() => e.changeRoom('mansion_courtyard', 480, 440), 2000);
                         } else {
                             e.say("The gate is locked with a heavy padlock. It has a raccoon-shaped keyhole, because of course it does. I need a key that matches this level of commitment to woodland-themed security.");
                         }
@@ -1018,7 +1018,7 @@ function buildGateArea(bg) {
             },
             // Mansion sign
             {
-                id: 'mansion_sign', name: 'Van Horne Mansion Sign', x: 518, y: 65, w: 350, h: 85, walkToX: 700, walkToY: 470,
+                id: 'mansion_sign', name: 'Van Horne Mansion Sign', x: 518, y: 65, w: 350, h: 85, walkToX: 700, walkToY: 440,
                 onInteract(v, e) { e.say('"VAN HORNE MANSION." The letters are engraved VERY deeply. Whoever made this sign wanted it to be permanent. Ominously permanent.'); }
             },
         ]
@@ -1082,15 +1082,15 @@ function buildPawnShop(bg) {
         hotspots: [
             // Exit back to gate area
             {
-                id: 'exit', name: 'Exit', x: 40, y: 140, w: 140, h: 380, walkToX: 135, walkToY: 460,
+                id: 'exit', name: 'Exit', x: 40, y: 140, w: 140, h: 380, walkToX: 135, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('gate', 240, 460);
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('gate', 240, 440);
                     else e.say('The door back to the street. Or the gate. Or the alley. Geography is fuzzy today.');
                 }
             },
             // Store room door (right)
             {
-                id: 'storeroom', name: 'Store Room Door', x: 865, y: 145, w: 100, h: 330, walkToX: 855, walkToY: 460,
+                id: 'storeroom', name: 'Store Room Door', x: 865, y: 145, w: 100, h: 330, walkToX: 855, walkToY: 440,
                 onInteract(v, e) {
                     e.say('"STORE ROOM" — the door is locked. The pawnbroker watches me with one eyebrow raised. I back away.');
                 }
@@ -1114,12 +1114,12 @@ function buildPawnShop(bg) {
             },
             // Van Horne Mansion Key — in the display case
             {
-                id: 'mansion_key', name: 'Van Horne Mansion Key', x: 705, y: 360, w: 50, h: 50, walkToX: 720, walkToY: 470,
+                id: 'mansion_key', name: 'Van Horne Mansion Key', x: 705, y: 360, w: 50, h: 50, walkToX: 720, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[7], e); }
             },
             // Spoon (in display case — ask shopkeeper)
             {
-                id: 'spoon', name: 'Spoon', x: 645, y: 375, w: 50, h: 50, walkToX: 660, walkToY: 470,
+                id: 'spoon', name: 'Spoon', x: 645, y: 375, w: 50, h: 50, walkToX: 660, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[0], e); }
             },
             // Bent butter knife — on plaque, prominent on the wall or shelf
@@ -1191,7 +1191,7 @@ function buildMansionCourtyard(bg) {
             },
             // Raccoons in the garden bushes (left)
             {
-                id: 'raccoons_L', name: 'Raccoons', x: 230, y: 340, w: 230, h: 150, walkToX: 345, walkToY: 470,
+                id: 'raccoons_L', name: 'Raccoons', x: 230, y: 340, w: 230, h: 150, walkToX: 345, walkToY: 440,
                 onInteract(v, e) {
                     const s = e.getRoomState('mansion_courtyard');
                     s.raccoonTalks = (s.raccoonTalks || 0) + 1;
@@ -1218,7 +1218,7 @@ function buildMansionCourtyard(bg) {
             },
             // Raccoon right side (in the bush by the wall)
             {
-                id: 'raccoon_R', name: 'Raccoon', x: 830, y: 390, w: 110, h: 100, walkToX: 840, walkToY: 470,
+                id: 'raccoon_R', name: 'Raccoon', x: 830, y: 390, w: 110, h: 100, walkToX: 840, walkToY: 440,
                 onInteract(v, e) {
                     const lines = [
                         'This raccoon is alone. A loner raccoon. Very dramatic.',
@@ -1232,7 +1232,7 @@ function buildMansionCourtyard(bg) {
             },
             // Stone fountain (center)
             {
-                id: 'fountain', name: 'Fountain', x: 395, y: 360, w: 210, h: 145, walkToX: 500, walkToY: 480,
+                id: 'fountain', name: 'Fountain', x: 395, y: 360, w: 210, h: 145, walkToX: 500, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Look at') {
                         e.say('A stone fountain. The water is running. It has been running for a very long time. The stone cherub at the top looks deeply tired of this assignment.');
@@ -1283,7 +1283,7 @@ function buildMansionCourtyard(bg) {
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') {
                         e.say('I follow the garden path around the side of the mansion. The raccoons watch me go.');
-                        setTimeout(() => e.changeRoom('mansion_backyard', 80, 460), 1600);
+                        setTimeout(() => e.changeRoom('mansion_backyard', 80, 440), 1600);
                     } else {
                         e.say('A garden path that curves around to the back of the mansion. The raccoons use it as their primary commute.');
                     }
@@ -1291,7 +1291,7 @@ function buildMansionCourtyard(bg) {
             },
             // Front garden description
             {
-                id: 'garden_front', name: 'Garden', x: 500, y: 380, w: 295, h: 130, walkToX: 640, walkToY: 470,
+                id: 'garden_front', name: 'Garden', x: 500, y: 380, w: 295, h: 130, walkToX: 640, walkToY: 440,
                 onInteract(v, e) { e.say('The garden is immaculately maintained. Someone tends to this. Probably not the raccoons, though they\'re clearly invested in the property.'); }
             },
             // VAN HORNE MANSION sign on gate
@@ -1334,11 +1334,11 @@ function buildMansionFoyer(bg) {
             },
             // Dark doorway center-right (leads to backyard)
             {
-                id: 'dark_doorway', name: 'Dark Doorway', x: 510, y: 220, w: 140, h: 280, walkToX: 580, walkToY: 460,
+                id: 'dark_doorway', name: 'Dark Doorway', x: 510, y: 220, w: 140, h: 280, walkToX: 580, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use' || v === 'Open') {
                         e.say("A cold breeze blows from the doorway. I step into the backyard.");
-                        setTimeout(() => e.changeRoom('mansion_backyard', 850, 460), 1600);
+                        setTimeout(() => e.changeRoom('mansion_backyard', 850, 440), 1600);
                     } else e.say('A doorway into darkness. Looking closely, I can see the outline of a garden path. This must be the back exit.');
                 }
             },
@@ -1389,7 +1389,7 @@ function buildMansionFoyer(bg) {
             },
             // THE CHALK OUTLINE — Dave reacts to arriving late
             {
-                id: 'chalk_outline', name: 'Chalk Outline', x: 240, y: 395, w: 400, h: 120, walkToX: 440, walkToY: 470,
+                id: 'chalk_outline', name: 'Chalk Outline', x: 240, y: 395, w: 400, h: 120, walkToX: 440, walkToY: 440,
                 onInteract(v, e) {
                     const s = e.getRoomState('mansion_foyer');
                     if (!s.firstLook) {
@@ -1405,37 +1405,37 @@ function buildMansionFoyer(bg) {
             },
             // Blood stain near body
             {
-                id: 'bloodstain', name: 'Bloodstain', x: 390, y: 430, w: 100, h: 65, walkToX: 440, walkToY: 480,
+                id: 'bloodstain', name: 'Bloodstain', x: 390, y: 430, w: 100, h: 65, walkToX: 440, walkToY: 440,
                 onInteract(v, e) { e.say('I don\'t touch the bloodstain. I have limits. Also hands. I\'m keeping both.'); }
             },
             // Evidence marker 1
             {
-                id: 'evidence_1', name: 'Evidence ①', x: 480, y: 395, w: 45, h: 45, walkToX: 480, walkToY: 465,
+                id: 'evidence_1', name: 'Evidence ①', x: 480, y: 395, w: 45, h: 45, walkToX: 480, walkToY: 440,
                 onInteract(v, e) { examineEvidence(1, v, e); }
             },
             // Evidence marker 2
             {
-                id: 'evidence_2', name: 'Evidence ②', x: 590, y: 420, w: 45, h: 45, walkToX: 600, walkToY: 470,
+                id: 'evidence_2', name: 'Evidence ②', x: 590, y: 420, w: 45, h: 45, walkToX: 600, walkToY: 440,
                 onInteract(v, e) { examineEvidence(2, v, e); }
             },
             // Evidence marker 3
             {
-                id: 'evidence_3', name: 'Evidence ③', x: 245, y: 415, w: 45, h: 45, walkToX: 280, walkToY: 470,
+                id: 'evidence_3', name: 'Evidence ③', x: 245, y: 415, w: 45, h: 45, walkToX: 280, walkToY: 440,
                 onInteract(v, e) { examineEvidence(3, v, e); }
             },
             // Evidence marker 4
             {
-                id: 'evidence_4', name: 'Evidence ④', x: 355, y: 450, w: 45, h: 45, walkToX: 380, walkToY: 475,
+                id: 'evidence_4', name: 'Evidence ④', x: 355, y: 450, w: 45, h: 45, walkToX: 380, walkToY: 440,
                 onInteract(v, e) { examineEvidence(4, v, e); }
             },
             // Evidence marker 5
             {
-                id: 'evidence_5', name: 'Evidence ⑤', x: 545, y: 450, w: 45, h: 45, walkToX: 570, walkToY: 475,
+                id: 'evidence_5', name: 'Evidence ⑤', x: 545, y: 450, w: 45, h: 45, walkToX: 570, walkToY: 440,
                 onInteract(v, e) { examineEvidence(5, v, e); }
             },
             // Evidence marker 6
             {
-                id: 'evidence_6', name: 'Evidence ⑥', x: 285, y: 395, w: 45, h: 45, walkToX: 310, walkToY: 460,
+                id: 'evidence_6', name: 'Evidence ⑥', x: 285, y: 395, w: 45, h: 45, walkToX: 310, walkToY: 440,
                 onInteract(v, e) { examineEvidence(6, v, e); }
             },
             // Wall sconces / ambience
@@ -1514,9 +1514,9 @@ function buildMansionLibrary(bg) {
         hotspots: [
             // Exit back to foyer (through right door labelled Library)
             {
-                id: 'library_exit', name: 'Library Door', x: 820, y: 175, w: 145, h: 350, walkToX: 860, walkToY: 470,
+                id: 'library_exit', name: 'Library Door', x: 820, y: 175, w: 145, h: 350, walkToX: 860, walkToY: 440,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('mansion_foyer', 520, 460);
+                    if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('mansion_foyer', 520, 440);
                     else e.say('The door back to the foyer. Back to the chalk outline and the crushing weight of unsolved mystery. I am really missing my fridge battery right now.');
                 }
             },
@@ -1635,11 +1635,11 @@ function buildMansionLibraryBalcony(bg) {
         hotspots: [
             // Spiral staircase (Return Path)
             {
-                id: 'to_library', name: 'Spiral Staircase (Return)', x: 185, y: 140, w: 200, h: 365, walkToX: 250, walkToY: 460,
+                id: 'to_library', name: 'Spiral Staircase (Return)', x: 185, y: 140, w: 200, h: 365, walkToX: 250, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use' || v === 'Climb' || v === 'Open') {
                         e.say("I head back down the spiral staircase. The main library floor is calling me back to the mystery.");
-                        setTimeout(() => e.changeRoom('mansion_library', 285, 460), 1000);
+                        setTimeout(() => e.changeRoom('mansion_library', 285, 440), 1000);
                     } else e.say('The spiral staircase leading down to the main floor. The wrought iron is beautifully crafted.');
                 }
             },
@@ -1774,20 +1774,20 @@ function buildMansionBackyard(bg) {
             // SHORTCUT TO MAGNETIC HILL sign (the important one)
             {
                 id: 'shortcut_sign', name: 'SHORTCUT TO MAGNETIC HILL →',
-                x: 550, y: 295, w: 260, h: 130, walkToX: 680, walkToY: 470,
+                x: 550, y: 295, w: 260, h: 130, walkToX: 680, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') {
                         e.say("I follow the shortcut. The woods are dark, the atmosphere is heavy, and I'm fairly certain a raccoon is mocking my choice of footwear.");
-                        setTimeout(() => e.changeRoom('police_station_ext', 160, 460), 2000);
+                        setTimeout(() => e.changeRoom('police_station_ext', 160, 440), 2000);
                     } else e.say("A shortcut to Magnetic Hill. Usually, shortcuts in these games lead to death, but this is Moncton, so it probably just leads to more poutine.");
                 }
             },
             // The path through the gap
             {
-                id: 'shortcut_path', name: 'Shortcut Path', x: 430, y: 350, w: 340, h: 175, walkToX: 600, walkToY: 470,
+                id: 'shortcut_path', name: 'Shortcut Path', x: 430, y: 350, w: 340, h: 175, walkToX: 600, walkToY: 440,
                 onInteract(v, e) {
                     e.say('I follow the shortcut. The path curves through the trees. Eyes watch from the dark. I pretend not to notice.');
-                    setTimeout(() => e.changeRoom('police_station_ext', 160, 460), 2000);
+                    setTimeout(() => e.changeRoom('police_station_ext', 160, 440), 2000);
                 }
             },
             // Eyes in the forest
@@ -1806,7 +1806,7 @@ function buildMansionBackyard(bg) {
             },
             // Can on the ground
             {
-                id: 'can', name: 'Empty Can', x: 155, y: 455, w: 60, h: 40, walkToX: 185, walkToY: 475,
+                id: 'can', name: 'Empty Can', x: 155, y: 455, w: 60, h: 40, walkToX: 185, walkToY: 440,
                 onInteract(v, e) { e.say('An empty can on the ground. It has been here a while. It is coping.'); }
             },
         ]
@@ -1865,10 +1865,10 @@ function buildPoliceExt(bg) {
             },
             // Road to Magnetic Hill
             {
-                id: 'to_mag_hill', name: 'Road to Attraction', x: 880, y: 360, w: 80, h: 200, walkToX: 920, walkToY: 460,
+                id: 'to_mag_hill', name: 'Road to Attraction', x: 880, y: 360, w: 80, h: 200, walkToX: 920, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') {
-                        e.changeRoom('mag_entrance', 100, 450);
+                        e.changeRoom('mag_entrance', 100, 440);
                     } else {
                         e.say("The road leads toward Magnetic Hill. The attraction of the century, according to the signs I saw earlier.");
                     }
@@ -1908,7 +1908,7 @@ function buildPoliceInt(bg) {
             },
             // Jail cell (left, "WAITING AREA" sign)
             {
-                id: 'jail_cell', name: 'Waiting Area', x: 238, y: 60, w: 260, h: 450, walkToX: 340, walkToY: 465,
+                id: 'jail_cell', name: 'Waiting Area', x: 238, y: 60, w: 260, h: 450, walkToX: 340, walkToY: 440,
                 onInteract(v, e) {
                     const s = e.getRoomState('police_station_int');
                     if (v === 'Use' && e.getRoomState('mansion_foyer').allSolved) {
@@ -2018,7 +2018,7 @@ function buildMagEntrance(bg) {
             {
                 id: 'to_police', name: 'Road Back', x: 0, y: 360, w: 80, h: 175,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use') e.changeRoom('police_station_ext', 860, 460);
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('police_station_ext', 860, 440);
                     else e.say('The road back. Towards the police station. And the eyes. Always the eyes.');
                 }
             },
@@ -2251,7 +2251,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) { e.say('A shovel. Dirt on the blade. Recent. I don\'t think about this too hard.'); }
             },
             {
-                id: 'hammer_geo', name: 'Geological Hammer', x: 780, y: 410, w: 130, h: 100, walkToX: 840, walkToY: 455,
+                id: 'hammer_geo', name: 'Geological Hammer', x: 780, y: 410, w: 130, h: 100, walkToX: 840, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Pick up') {
                         if (e.hasItem('geo_hammer')) e.say("I already have the geo hammer.");
@@ -2359,11 +2359,11 @@ function buildMagneticHill(bg) {
             },
             // Shack entrance in hillside
             {
-                id: 'shack_entrance', name: 'Shack Entrance', x: 385, y: 380, w: 155, h: 175, walkToX: 455, walkToY: 470,
+                id: 'shack_entrance', name: 'Shack Entrance', x: 385, y: 380, w: 155, h: 175, walkToX: 455, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
                         e.say('The shack door leads to a set of stairs going down. I\'ve already fallen through a floor tonight. Stairs are practically a luxury.');
-                        setTimeout(() => e.changeRoom('geo_strata', 800, 430), 1600);
+                        setTimeout(() => e.changeRoom('geo_strata', 800, 440), 1600);
                     } else e.say('A small, sturdy shack embedded in the hillside below the magnet. Leading underground. Obviously.');
                 }
             },
@@ -2448,9 +2448,9 @@ async function main() {
     });
 
     // PHASE 1: Load title screen assets first
-    const titleAssets = await Promise.all([
-        loadImage('assets/title_screen_bg.png'),
-        loadImage('assets/press_start.png')
+    const titleAssets = await engine.loadAssets([
+        'assets/title_screen_bg.png',
+        'assets/press_start.png'
     ]);
     const [titleBg, pressStartImg] = titleAssets;
 
@@ -2462,42 +2462,32 @@ async function main() {
     // Add cell phone immediately so it's in INV from the very first frame
     engine.addItem('cell_phone', 'Cell Phone');
 
-    // INTERMEDIATE: Setup Dave and Bedroom in background so Title is interactive ASAP
-    (async () => {
-        // Quick-load essential Dave/Bedroom assets or use fallbacks
-        const [essentialSheet, essentialBedroomBg] = await Promise.all([
-            safeLoad('assets/Dave3.png'),
-            safeLoad('assets/bedroom_bg.png')
-        ]);
-        
-        const initialAnimator = new SpriteAnimator(
-            essentialSheet || buildProceduralDave(),
-            FRAME_W, FRAME_H,
-            DAVE_ANIMS,
-            null
-        );
-        initialAnimator.play('idle');
-        dave = new Actor({
-            id: 'dave', name: 'Dave', x: 480, y: 450,
-            animator: initialAnimator, scale: 1.5, canWalk: true, z: 450
-        });
-        engine.setPlayer(dave);
+    // PHASE 2: Load everything else. We use loadAssets to handle the countdown automatically.
+    // Combine everything into one big batch for the progress bar.
+    const allOtherUrls = [
+        ...assetsToLoad,
+        ...itemsToLoad.map(id => `assets/item_${id}.png`)
+    ];
 
-        bedroom = buildBedroom(essentialBedroomBg);
-        engine.registerRoom(bedroom);
-        
-        // Ensure starting room state is initialized
-        if (!engine.gameState.roomStates['bedroom']) engine.gameState.roomStates['bedroom'] = {};
-    })();
+    const results = await engine.loadAssets(allOtherUrls);
+    
+    // Separate room/npc assets from item icons
+    const assets = results.slice(0, assetsToLoad.length);
+    const itemIconsList = results.slice(assetsToLoad.length);
 
-    // PHASE 2: Load everything else with fault-tolerance
-    const assets = await Promise.all(assetsToLoad.map(src => safeLoad(src)));
+    // Map item icons
+    const itemIcons = {};
+    itemsToLoad.forEach((id, i) => {
+        itemIcons[id] = itemIconsList[i];
+    });
 
     const [bedroomBg, kitchenBg, streetBg, alleyBg, secretBg, gateBg, pawnBg,
         courtyardBg, foyerBg, libraryBg, backyardBg, policeExtBg, policeIntBg,
         magEntranceBg, geoStrataBg, magHillBg, herringClubBg, weatherStationBg, libraryBalconyBg, daveSheet,
         npcBaker, npcDoorman, npcPawnbroker, npcSavoie,
         npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, npcSubGuy, subGuyHillSheet, npcSuspect] = assets;
+
+    // Now that everything is loaded, setup Dave and Bedroom
 
     // INTERMEDIATE: Dave should be ready as soon as the sheet loads
     const sheetImg = daveSheet ?? buildProceduralDave();
@@ -2540,39 +2530,24 @@ async function main() {
         engine.setPlayer(dave);
     }
 
-    // Upgrade Bedroom background and add remaining props early
-    const existingBedroom = engine.rooms['bedroom'];
-    if (existingBedroom) {
-        existingBedroom.background = bedroomBg;
-        if (!existingBedroom.props.find(p => p.id === 'trapdoor_prop')) {
-            existingBedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
-            existingBedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
-        }
-    } else {
-        bedroom = buildBedroom(bedroomBg);
-        bedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
-        bedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
-        engine.registerRoom(bedroom);
-    }
-
-    // Preload item images for props and inventory
-    const itemIcons = {};
-    await Promise.all(itemsToLoad.map(async id => {
-        itemIcons[id] = await safeLoad(`assets/item_${id}.png`);
-    }));
+    // herrings already assigned in itemIcons
 
     // Herrings all use the same icon
     ['herring_L1', 'herring_L2', 'herring_R1', 'herring_R2'].forEach(id => {
         itemIcons[id] = itemIcons['red_herring'];
     });
 
-    // Icons are already started loading in background, we just assign them to UI
     Object.assign(engine.ui.loadedItemImages, itemIcons);
 
     // Map pizza specifically
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
+
+    bedroom = buildBedroom(bedroomBg);
+    bedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
+    bedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
+    engine.registerRoom(bedroom);
 
     const kitchen = buildKitchen(kitchenBg);
     kitchen.props.push({
