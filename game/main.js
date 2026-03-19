@@ -3220,14 +3220,22 @@ async function main() {
     dave.onInteract = (v, e, item) => {
         const itemId = (item && (typeof item === 'string' ? item : item.id));
         if (v === 'Use' && itemId === 'cell_phone') {
-            const phoneHotspot = e.room.hotspots.find(h => h.id === 'phone');
-            if (phoneHotspot) {
-                phoneHotspot.onInteract('Use', e, item);
+            const isPlaying = !!e.gameState.music.backgroundTrack;
+            const s = e.getRoomState('global_phone');
+            if (isPlaying) {
+                s.lastTrackId = e.gameState.music.backgroundTrack;
+                e.gameState.music.backgroundTrack = null;
+                e._updateMusic();
+                e.say("Dave: 'Silence. The Moncton winds are enough for now.'");
             } else {
-                window._openPhoneMenu(e);
+                const toPlay = s.lastTrackId || 'track1';
+                e.gameState.music.backgroundTrack = toPlay;
+                e._updateMusic();
+                const track = MUSIC_TRACKS.find(t => t.id === toPlay);
+                e.say(`Dave: 'Resuming ${track ? track.name : "the music"}. Back into the groove.'`);
             }
-        } else if (v === 'Look at') {
-            e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
+        } else if (v === 'Look at' || (v === 'Use' && itemId === 'cell_phone' && false)) { 
+             e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
         }
     };
     engine.setPlayer(dave);
