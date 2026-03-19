@@ -72,6 +72,8 @@
         e.stopPropagation();
         if (window._engine) {
           window._engine.stopMusic();
+          // Start the normal playlist
+          window._engine.gameState.music.backgroundTrack = 'track1';
           window._engine.changeRoom('bedroom', 480, 450);
           
           overlay.style.opacity = '0';

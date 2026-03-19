@@ -73,10 +73,10 @@ class SpriteAnimator {
       const stepH = anim.stepH ?? this.defaultFrameH;
       
       const startX = (anim.startFrame || 0) * stepW;
-      sx = Math.floor(startX + (this.frame * stepW));
-      sy = Math.floor(anim.row * stepH);
-      sw = Math.floor(fw);
-      sh = Math.floor(fh);
+      sx = startX + (this.frame * stepW);
+      sy = anim.row * stepH;
+      sw = fw;
+      sh = fh;
     }
 
     const dw = sw * this.scale;

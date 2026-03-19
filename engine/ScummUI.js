@@ -223,9 +223,11 @@ class ScummUI {
         }
 
         if (this.hoveredHotspot) {
-            text += ' ' + this.hoveredHotspot.name;
+            const hname = this.hoveredHotspot.name || "";
+            text += ' ' + hname;
         } else if (this.hoveredInventoryItem && !this.selectedInventoryItem) {
-            text += ' ' + (typeof this.hoveredInventoryItem === 'string' ? this.hoveredInventoryItem : this.hoveredInventoryItem.name);
+            const iname = (typeof this.hoveredInventoryItem === 'string' ? this.hoveredInventoryItem : this.hoveredInventoryItem.name) || "";
+            text += ' ' + iname;
         }
 
         ctx.fillText(text, this.cw / 2, this.panelY + 15);

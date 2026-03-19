@@ -180,13 +180,20 @@ function buildTitleScreen(bg, pressStartImg) {
         walkbox: [], // No walking in title
         hotspots: [
             {
-                id: 'start_button', name: 'Start Game', x: 280, y: 350, w: 400, h: 100,
+                id: 'start_button', name: 'Title Screen', x: 0, y: 0, w: 960, h: 600,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use' || v === 'Open' || v === 'Push') {
-                        e.stopMusic();
-                        e.say("Here we go again. Magnetic Hill Mystery... let's see if the hill is actually magnetic this time.");
-                        setTimeout(() => e.changeRoom('bedroom', 480, 450), 2000);
+                    const s = e.getRoomState('title_screen');
+                    if (!s.musicStarted) {
+                        s.musicStarted = true;
+                        // Engine unblocks the music on this click automatically
+                        return;
                     }
+                    // Transition to game
+                    e.stopMusic();
+                    // Set a default background track for the player's phone
+                    e.gameState.music.backgroundTrack = 'track1'; 
+                    e.say("Dave: 'Here we go again. Magnetic Hill Mystery... let's see if the hill is actually magnetic this time.'");
+                    setTimeout(() => e.changeRoom('bedroom', 480, 450), 2000);
                 }
             }
         ]
@@ -236,13 +243,10 @@ function buildNPCActor({ room, id, name, x, y, sheet, color = '#00ff00', scale =
     const w = sheet.naturalWidth || sheet.width;
     const h = sheet.naturalHeight || sheet.height;
     
-    // Fallback logic for Dave style sheets
-    if (cols === 9 && rows === 4 && Math.abs(w - 1024) < 10 && Math.abs(h - 559) < 10) {
-        cols = 12; rows = 3;
-    }
-
-    const frameW = w / cols;
-    const frameH = h / rows;
+    // Explicit grid dimensions are now required for reliability. 
+    // Fallback to 9x4 if not specified (standard for current AI assets).
+    const frameW = w / (cols || 9);
+    const frameH = h / (rows || 4);
 
     const customAnims = anims || {
         idle: { row: 0, count: 2, fps: 1.5 }, // Subtle breathing effect
@@ -878,7 +882,17 @@ function buildWeatherStation(bg) {
                         ]);
                     } else e.say("An instrument panel tracking moisture and temperature in the studio.");
                 }
-            }
+            },
+            // Weather Scientist Hotspot (Proxy)
+            {
+                id: 'weather_scientist_hotspot', name: 'Weather Scientist', x: 440, y: 330, w: 90, h: 180, walkToX: 430, walkToY: 460,
+                onInteract(v, e) {
+                    const ws = e.actors.find(a => a.id === 'weather_npc');
+                    if (ws) ws.onInteract(v, e);
+                    else e.say("A scientist in a yellow raincoat. He's muttering about clouds.");
+                }
+            },
+
         ]
     });
 }
@@ -2094,6 +2108,7 @@ function buildGeoStrata(bg) {
     return new Room({
         id: 'geo_strata', name: 'Geo Strata Room',
         background: bg,
+        music: 'pit',
         walkbox: [
             { x: 30, y: 500 }, { x: 930, y: 500 },
             { x: 870, y: 370 }, { x: 100, y: 370 },
@@ -2249,6 +2264,15 @@ function buildGeoStrata(bg) {
             {
                 id: 'corner_eyes', name: 'Eyes', x: 0, y: 230, w: 95, h: 200,
                 onInteract(v, e) { e.say('Eyes in the dark edges of the underground room. They were here before the candles. They were here before the rock. They have opinions about me.'); }
+            },
+            // Dr. Pellerin Hotspot (Proxy)
+            {
+                id: 'pellerin_hotspot', name: 'Dr. Pellerin', x: 135, y: 320, w: 100, h: 220, walkToX: 175, walkToY: 450,
+                onInteract(v, e) {
+                    const dr = e.actors.find(a => a.id === 'pellerin_npc');
+                    if (dr) dr.onInteract(v, e);
+                    else e.say("An esteemed geologist. She seems focused on the rock layers.");
+                }
             },
         ]
     });
@@ -2549,8 +2573,9 @@ async function main() {
                 } else {
                     e.say("He won't let me in. He's firmly convinced I'm not here. It's an existential crisis in a cyan suit.");
                 }
-            };
-        }
+            }
+        };
+    }
 
         // Ensure bouncer hides if already knocked out on room entry
         r.onEnter = (e) => {
