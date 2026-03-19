@@ -587,31 +587,16 @@ function buildStreet(bg) {
                     }
                 }
             },
-            // Moncton Bakery — Baker NPC (prime suspect)
+            // Moncton Bakery
             {
                 id: 'bakery', name: 'Moncton Bakery', x: 340, y: 385, w: 200, h: 215, walkToX: 440, walkToY: 520,
                 onInteract(v, e) {
-                    const s = e.getRoomState('street');
-                    if (v === 'Talk to') {
-                        s.bakerTalks = (s.bakerTalks || 0) + 1;
-                        const lines = [
-                            "Baker: 'I know nothing about any mansion! NOTHING! You want bread? BUY BREAD!'",
-                            "Baker: 'Van Horne? He complained about MY baguette being too hard. TOO HARD! It's PERFECT!'",
-                            "Baker: 'I was HERE. All night. Baking. Do not look at me like that.'",
-                            "Baker: 'My baguette is not a weapon. It is ARTISANAL. The fact that it COULD be a weapon is a matter of QUALITY!'",
-                            "Baker: '...Are you still here? Non. Non non non. Au revoir, Dave.'",
-                        ];
-                        e.say(lines[(s.bakerTalks - 1) % lines.length]);
-                    } else if (v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Open') {
-                        if (e.hasItem('battle_bread')) {
-                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back.");
-                        } else {
-                            s.breadGiven = true;
-                            e.addItem('battle_bread', 'Battle Bread');
-                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. This could be useful.");
-                        }
+                    // Forward to actor if they click the shop
+                    const baker = e.actors.find(a => a.id === 'baker_npc');
+                    if (baker && baker.onInteract) {
+                        baker.onInteract(v, e);
                     } else {
-                        e.say('Moncton Bakery. Incredible bread. Baker looks absolutely furious. Standard.');
+                        e.say('Moncton Bakery. Standard bread-based fury.');
                     }
                 }
             },
@@ -619,12 +604,11 @@ function buildStreet(bg) {
             {
                 id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 375, w: 150, h: 210, walkToX: 650, walkToY: 520,
                 onInteract(v, e) {
-                    if (v === 'Talk to') {
-                        e.say("Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'");
-                    } else if (v === 'Use' || v === 'Walk to' || v === 'Open') {
-                        e.say("Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'");
+                    const sub = e.actors.find(a => a.id === 'sub_guy_npc');
+                    if (sub && sub.onInteract) {
+                        sub.onInteract(v, e);
                     } else {
-                        e.say("The Sub Shoppe. The sign is made of literal wood. The 'Sub Guy' is inside, looking semi-employed.");
+                        e.say("The Sub Shoppe. Under construction or under-funded.");
                     }
                 }
             },
@@ -2546,11 +2530,10 @@ async function main() {
                 }
             };
         }
-        const poutine = buildNPCActor({ room: r, id: 'poutine_npc', name: 'Poutine Guy', x: 553, y: 455, sheet: npcPoutine, color: '#ffff55', cols: 9, rows: 4 });
         
         const subGuy = buildNPCActor({ 
             room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
-            sheet: subGuyHillSheet, color: '#00ff55', scale: 1.1, cols: 9, rows: 4 
+            sheet: npcSubGuy, color: '#00ff55', scale: 1.1, cols: 9, rows: 4 
         });
         if (subGuy) {
             subGuy.onInteract = (v, e) => {
@@ -2581,9 +2564,6 @@ async function main() {
             };
         }
         
-        if (poutine) {
-            r.props.push({ id: 'p_poutine', image: itemIcons['poutine'], x: 520, y: 400, w: 60, h: 60, isVisible(e) { return !e.hasItem('poutine'); } });
-        }
         engine.registerRoom(r);
     }
     { // Alley — club doorman
@@ -3291,7 +3271,7 @@ async function main() {
         if (r) {
             const subHill = buildNPCActor({ 
                 room: r, id: 'sub_guy_hill_npc', name: 'Mysterious Suit', x: 120, y: 470, 
-                sheet: subGuyHillSheet, color: '#ffff55', scale: 1.1, cols: 9, rows: 4 
+                sheet: npcSubGuy, color: '#ffff55', scale: 1.1, cols: 9, rows: 4 
             });
             if (subHill) {
                 subHill.onInteract = (v, e, item) => {

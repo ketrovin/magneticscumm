@@ -60,17 +60,9 @@
         if (!window._engine) return;
 
         if (phase === 'ready') {
-          // Phase 1: Start music
+          // Phase 1: Start music and reveal title screen
           window._engine.playMusic('opener');
           phase = 'playing';
-          clickPrompt.innerText = 'PRESS ANYWHERE TO PLAY';
-          clickPrompt.classList.add('pulse');
-        } else if (phase === 'playing') {
-          // Phase 2: Start game
-          window._engine.stopMusic();
-          // Ensure only one music ever plays
-          window._engine.gameState.music.backgroundTrack = 'track1';
-          window._engine.changeRoom('bedroom', 480, 450);
           
           overlay.style.opacity = '0';
           setTimeout(() => {
