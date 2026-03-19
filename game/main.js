@@ -305,7 +305,7 @@ function buildBedroom(bg) {
         id: 'bedroom', name: "Dave's Bedroom",
         background: bg,
         walkbox: [
-            { x: 100, y: 510 }, { x: 860, y: 510 },
+            { x: 100, y: 450 }, { x: 860, y: 450 },
             { x: 750, y: 315 }, { x: 160, y: 315 },
         ],
         hotspots: [
@@ -412,7 +412,7 @@ function buildKitchen(bg) {
         id: 'kitchen', name: "Dave's Kitchen",
         background: bg,
         walkbox: [
-            { x: 0, y: 550 }, { x: 960, y: 550 },
+            { x: 0, y: 450 }, { x: 960, y: 450 },
             { x: 960, y: 280 }, { x: 0, y: 280 },
         ],
         hotspots: [
@@ -558,13 +558,13 @@ function buildStreet(bg) {
         id: 'street', name: 'The Street Outside',
         background: bg,
         walkbox: [
-            { x: 0, y: 550 }, { x: 960, y: 550 },
-            { x: 920, y: 440 }, { x: 40, y: 440 },
+            { x: 0, y: 450 }, { x: 960, y: 450 },
+            { x: 920, y: 320 }, { x: 40, y: 320 },
         ],
         hotspots: [
             // Apt 2B door — back to kitchen
             {
-                id: 'apt_door', name: 'Apt 2B Door', x: 35, y: 520, w: 85, h: 240, walkToX: 75, walkToY: 535,
+                id: 'apt_door', name: 'Apt 2B Door', x: 35, y: 220, w: 85, h: 230, walkToX: 75, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') e.changeRoom('kitchen', 870, 440);
                     else e.say("My apartment door. Home sweet suspiciously-keyed-up home.");
@@ -572,7 +572,7 @@ function buildStreet(bg) {
             },
             // Apt 2B window — mysterious occupant
             {
-                id: 'apt_window', name: 'Apartment Window', x: 155, y: 535, w: 125, h: 160, walkToX: 215, walkToY: 535,
+                id: 'apt_window', name: 'Apartment Window', x: 155, y: 235, w: 125, h: 160, walkToX: 215, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Look at' || v === 'Read') {
                         e.say("I look into my own window and... wait. The furniture is different. This is deeply confusing.");
@@ -583,7 +583,7 @@ function buildStreet(bg) {
             },
             // Moncton Bakery
             {
-                id: 'bakery', name: 'Moncton Bakery', x: 340, y: 385, w: 200, h: 215, walkToX: 440, walkToY: 520,
+                id: 'bakery', name: 'Moncton Bakery', x: 340, y: 185, w: 200, h: 215, walkToX: 440, walkToY: 440,
                 onInteract(v, e) {
                     const s = e.getRoomState('street');
                     if (v === 'Talk to') {
@@ -611,7 +611,7 @@ function buildStreet(bg) {
             },
             // Sub Shoppe
             {
-                id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 375, w: 150, h: 210, walkToX: 650, walkToY: 520,
+                id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 175, w: 150, h: 210, walkToX: 650, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Talk to') {
                         e.say("Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'");
@@ -624,14 +624,14 @@ function buildStreet(bg) {
             },
             // CB Phone Co.
             {
-                id: 'phone_co', name: 'CB Phone Co.', x: 740, y: 380, w: 160, h: 200, walkToX: 820, walkToY: 520,
+                id: 'phone_co', name: 'CB Phone Co.', x: 740, y: 180, w: 160, h: 200, walkToX: 820, walkToY: 440,
                 onInteract(v, e) {
                     e.say("I'm not going in there! My phone bill is... outstanding. As in, the amount is outstanding. As in astronomical.");
                 }
             },
             // Alley entrance
             {
-                id: 'to_alley', name: 'Alley', x: 870, y: 320, w: 90, h: 200, walkToX: 920, walkToY: 470,
+                id: 'to_alley', name: 'Alley', x: 870, y: 120, w: 90, h: 200, walkToX: 920, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 480, 460);
                     else e.say("A classic dark alley. Every adventure has one.");
@@ -639,7 +639,7 @@ function buildStreet(bg) {
             },
             // Left world edge
             {
-                id: 'world_end_left', name: '...', x: 0, y: 350, w: 30, h: 180,
+                id: 'world_end_left', name: '...', x: 0, y: 150, w: 30, h: 180,
                 onInteract(v, e) {
                     e.say("The world ends over there. Someone forgot to program the next screen. I respect the developer's right to take a nap, but it's physically uncomfortable to look at.");
                 }
@@ -654,7 +654,7 @@ function buildAlley(bg) {
         id: 'alley', name: 'The Alley',
         background: bg,
         walkbox: [
-            { x: 80, y: 510 }, { x: 880, y: 510 },
+            { x: 80, y: 450 }, { x: 880, y: 450 },
             { x: 820, y: 320 }, { x: 130, y: 320 },
         ],
         hotspots: [
@@ -662,7 +662,7 @@ function buildAlley(bg) {
             {
                 id: 'to_street', name: 'Street', x: 340, y: 260, w: 200, h: 180, walkToX: 440, walkToY: 430,
                 onInteract(v, e) {
-                    if (v === 'Walk to' || v === 'Use') e.changeRoom('street', 900, 460);
+                    if (v === 'Walk to' || v === 'Use') e.changeRoom('street', 900, 440);
                     else e.say("The street. Moncton at night. I should probably go back.");
                 }
             },
@@ -761,7 +761,7 @@ function buildHerringClub(bg) {
         id: 'herring_club', name: 'The Herring Club',
         background: bg,
         walkbox: [
-            { x: 50, y: 510 }, { x: 910, y: 510 },
+            { x: 50, y: 450 }, { x: 910, y: 450 },
             { x: 800, y: 340 }, { x: 150, y: 340 },
         ],
         hotspots: [
@@ -805,8 +805,8 @@ function buildWeatherStation(bg) {
         background: bg,
         music: 'weather',
         walkbox: [
-            { x: 100, y: 550 }, { x: 910, y: 550 },
-            { x: 860, y: 400 }, { x: 600, y: 400 }, { x: 550, y: 480 }, { x: 200, y: 480 },
+            { x: 100, y: 450 }, { x: 910, y: 450 },
+            { x: 860, y: 400 }, { x: 600, y: 400 }, { x: 550, y: 440 }, { x: 200, y: 440 },
         ],
         hotspots: [
             // Back to Herring Club
@@ -897,7 +897,7 @@ function buildSecretRoom(bg) {
         id: 'secret', name: 'The Secret Room',
         background: bg,
         walkbox: [
-            { x: 50, y: 510 }, { x: 910, y: 510 },
+            { x: 50, y: 450 }, { x: 910, y: 450 },
             { x: 800, y: 360 }, { x: 160, y: 360 },
         ],
         hotspots: [
@@ -970,7 +970,7 @@ function buildGateArea(bg) {
         id: 'gate', name: 'Gate Area',
         background: bg,
         walkbox: [
-            { x: 40, y: 510 }, { x: 920, y: 510 },
+            { x: 40, y: 450 }, { x: 920, y: 450 },
             { x: 840, y: 355 }, { x: 120, y: 355 },
         ],
         hotspots: [
@@ -1076,7 +1076,7 @@ function buildPawnShop(bg) {
         id: 'pawn_shop', name: 'Moncton Pawn — Interior',
         background: bg,
         walkbox: [
-            { x: 115, y: 510 }, { x: 920, y: 510 },
+            { x: 115, y: 450 }, { x: 920, y: 450 },
             { x: 880, y: 310 }, { x: 175, y: 310 },
         ],
         hotspots: [
@@ -1097,7 +1097,7 @@ function buildPawnShop(bg) {
             },
             // Counter / pawnbroker NPC
             {
-                id: 'counter', name: 'Pawnbroker', x: 185, y: 300, w: 265, h: 220, walkToX: 310, walkToY: 470,
+                id: 'counter', name: 'Pawnbroker', x: 185, y: 300, w: 265, h: 220, walkToX: 310, walkToY: 440,
                 onInteract(v, e) {
                     const s = e.getRoomState('pawn_shop');
                     s.pawnTalk = (s.pawnTalk || 0) + 1;
@@ -1107,7 +1107,7 @@ function buildPawnShop(bg) {
             },
             // Display case — spoon, plus the mansion key (the big ticket item)
             {
-                id: 'display_case', name: 'Display Case', x: 580, y: 325, w: 300, h: 180, walkToX: 720, walkToY: 470,
+                id: 'display_case', name: 'Display Case', x: 580, y: 325, w: 300, h: 180, walkToX: 720, walkToY: 440,
                 onInteract(v, e) {
                     e.say('A locked glass display case. Inside: a spoon, two pocket watches, and — behind everything — an ornate skeleton key on a tag that says V.H. MAIN GATE. $75.');
                 }
@@ -1172,13 +1172,13 @@ function buildMansionCourtyard(bg) {
         id: 'mansion_courtyard', name: 'Van Horne Mansion Courtyard',
         background: bg,
         walkbox: [
-            { x: 30, y: 510 }, { x: 930, y: 510 },
+            { x: 30, y: 450 }, { x: 930, y: 450 },
             { x: 840, y: 330 }, { x: 140, y: 330 },
         ],
         hotspots: [
             // Gate back to gate area
             {
-                id: 'gate_exit', name: 'Iron Gate', x: 0, y: 140, w: 175, h: 370, walkToX: 100, walkToY: 460,
+                id: 'gate_exit', name: 'Iron Gate', x: 0, y: 140, w: 175, h: 370, walkToX: 100, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('gate', 670, 460);
                     else e.say('The iron gate. It swings open from this side, at least. Mansions and their one-way hospitality.');
@@ -1265,7 +1265,7 @@ function buildMansionCourtyard(bg) {
             },
             // Mansion front door — now leads to foyer (crime scene)
             {
-                id: 'mansion_door', name: 'Mansion Front Door', x: 560, y: 240, w: 190, h: 270, walkToX: 655, walkToY: 470,
+                id: 'mansion_door', name: 'Mansion Front Door', x: 560, y: 240, w: 190, h: 220, walkToX: 655, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Knock') {
                         e.say('I knock. The sounds echoes through an enormous hall. No one answers, though something stirs upstairs. No one answers.');
@@ -1279,7 +1279,7 @@ function buildMansionCourtyard(bg) {
             },
             // Garden / grounds — also path around to backyard
             {
-                id: 'garden', name: 'Garden Path', x: 795, y: 340, w: 165, h: 170, walkToX: 850, walkToY: 470,
+                id: 'garden', name: 'Garden Path', x: 795, y: 340, w: 165, h: 170, walkToX: 850, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') {
                         e.say('I follow the garden path around the side of the mansion. The raccoons watch me go.');
@@ -1320,7 +1320,7 @@ function buildMansionFoyer(bg) {
         id: 'mansion_foyer', name: 'Van Horne Mansion — Foyer',
         background: bg,
         walkbox: [
-            { x: 170, y: 510 }, { x: 930, y: 510 },
+            { x: 170, y: 450 }, { x: 930, y: 450 },
             { x: 880, y: 330 }, { x: 340, y: 330 },
         ],
         hotspots: [
@@ -1508,7 +1508,7 @@ function buildMansionLibrary(bg) {
         id: 'mansion_library', name: 'Van Horne Library',
         background: bg,
         walkbox: [
-            { x: 70, y: 510 }, { x: 930, y: 510 },
+            { x: 70, y: 450 }, { x: 930, y: 450 },
             { x: 870, y: 300 }, { x: 130, y: 300 },
         ],
         hotspots: [
@@ -1628,9 +1628,9 @@ function buildMansionLibraryBalcony(bg) {
         music: 'library',
         walkbox: [
             { x: 60, y: 325 }, { x: 900, y: 325 },
-            { x: 900, y: 580 }, { x: 740, y: 580 },
-            { x: 740, y: 460 }, { x: 380, y: 460 },
-            { x: 380, y: 580 }, { x: 60, y: 580 }
+            { x: 900, y: 450 }, { x: 740, y: 450 },
+            { x: 740, y: 430 }, { x: 380, y: 430 },
+            { x: 380, y: 450 }, { x: 60, y: 450 }
         ],
         hotspots: [
             // Spiral staircase (Return Path)
@@ -1738,13 +1738,13 @@ function buildMansionBackyard(bg) {
         id: 'mansion_backyard', name: 'Van Horne Backyard',
         background: bg,
         walkbox: [
-            { x: 30, y: 510 }, { x: 930, y: 510 },
+            { x: 30, y: 450 }, { x: 930, y: 450 },
             { x: 820, y: 370 }, { x: 120, y: 370 },
         ],
         hotspots: [
             // Back door of mansion — leads to foyer
             {
-                id: 'back_door', name: 'Back Door', x: 35, y: 260, w: 80, h: 240, walkToX: 95, walkToY: 470,
+                id: 'back_door', name: 'Back Door', x: 35, y: 260, w: 80, h: 190, walkToX: 95, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') e.changeRoom('mansion_foyer', 580, 460);
                     else e.say('The back door to the mansion. Usually these are less grand than front doors. This one is still fairly grand.');
@@ -1819,7 +1819,7 @@ function buildPoliceExt(bg) {
         id: 'police_station_ext', name: 'Moncton Police Station',
         background: bg,
         walkbox: [
-            { x: 0, y: 510 }, { x: 960, y: 510 },
+            { x: 0, y: 450 }, { x: 960, y: 450 },
             { x: 870, y: 380 }, { x: 90, y: 380 },
         ],
         hotspots: [
@@ -1843,7 +1843,7 @@ function buildPoliceExt(bg) {
             },
             // Blue front door
             {
-                id: 'police_door', name: 'Police Station Door', x: 300, y: 220, w: 165, h: 300, walkToX: 385, walkToY: 475,
+                id: 'police_door', name: 'Police Station Door', x: 300, y: 220, w: 165, h: 230, walkToX: 385, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
                         e.say('I push the door open. Inside smells like old coffee and staple remover.');
@@ -1894,13 +1894,13 @@ function buildPoliceInt(bg) {
         id: 'police_station_int', name: 'Moncton Police — Reception',
         background: bg,
         walkbox: [
-            { x: 245, y: 510 }, { x: 930, y: 510 },
+            { x: 245, y: 450 }, { x: 930, y: 450 },
             { x: 880, y: 310 }, { x: 310, y: 310 },
         ],
         hotspots: [
             // Exit back to exterior
             {
-                id: 'exit', name: 'Front Door', x: 0, y: 0, w: 250, h: 520, walkToX: 290, walkToY: 465,
+                id: 'exit', name: 'Front Door', x: 0, y: 0, w: 250, h: 450, walkToX: 290, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Open' || v === 'Use') e.changeRoom('police_station_ext', 390, 460);
                     else e.say('The way out. Into the night. The eyes are still out there.');
@@ -2010,7 +2010,7 @@ function buildMagEntrance(bg) {
         id: 'mag_entrance', name: 'Magnetic Hill — Entrance',
         background: bg,
         walkbox: [
-            { x: 0, y: 510 }, { x: 960, y: 510 },
+            { x: 0, y: 450 }, { x: 960, y: 450 },
             { x: 870, y: 360 }, { x: 90, y: 360 },
         ],
         hotspots: [
@@ -2031,7 +2031,7 @@ function buildMagEntrance(bg) {
             },
             // Ticket booth (stone building, left)
             {
-                id: 'ticket_booth', name: 'Ticket Booth', x: 30, y: 195, w: 310, h: 340, walkToX: 190, walkToY: 465,
+                id: 'ticket_booth', name: 'Ticket Booth', x: 30, y: 195, w: 310, h: 250, walkToX: 190, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Open' || v === 'Use') {
                         e.say('I try the door of the ticket booth. It opens. I step inside. The floor gives way. I fall.');
@@ -2109,13 +2109,13 @@ function buildGeoStrata(bg) {
         background: bg,
         music: 'pit',
         walkbox: [
-            { x: 30, y: 500 }, { x: 930, y: 500 },
+            { x: 30, y: 450 }, { x: 930, y: 450 },
             { x: 870, y: 370 }, { x: 100, y: 370 },
         ],
         hotspots: [
             // Ladder back up
             {
-                id: 'ladder_up', name: 'Ladder', x: 210, y: 55, w: 115, h: 465, walkToX: 265, walkToY: 450,
+                id: 'ladder_up', name: 'Ladder', x: 210, y: 55, w: 115, h: 395, walkToX: 265, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Climb' || v === 'Walk to' || v === 'Use') {
                         e.say('I climb back up through the trapdoor in the ticket booth floor. The booth is intact. The floor holds. It felt more dramatic on the way down.');
@@ -2129,7 +2129,7 @@ function buildGeoStrata(bg) {
                 onInteract(v, e) {
                     if (v === 'Climb' || v === 'Walk to' || v === 'Use') {
                         e.say("I head back up the stone stairs to the shack entrance on the hill.");
-                        setTimeout(() => e.changeRoom('magnetic_hill', 455, 470), 1600);
+                        setTimeout(() => e.changeRoom('magnetic_hill', 455, 440), 1600);
                     } else e.say("Dark stone stairs leading up to the surface. To the shack. To the reality above.");
                 }
             },
@@ -2284,7 +2284,7 @@ function buildMagneticHill(bg) {
         id: 'magnetic_hill', name: 'Magnetic Hill',
         background: bg,
         walkbox: [
-            { x: 30, y: 510 }, { x: 930, y: 510 },
+            { x: 30, y: 450 }, { x: 930, y: 450 },
             { x: 820, y: 380 }, { x: 130, y: 380 },
         ],
         hotspots: [
@@ -2459,6 +2459,9 @@ async function main() {
     engine.changeRoom('title_screen', 480, 450);
     engine.start();
 
+    // Add cell phone immediately so it's in INV from the very first frame
+    engine.addItem('cell_phone', 'Cell Phone');
+
     // INTERMEDIATE: Setup Dave and Bedroom in background so Title is interactive ASAP
     (async () => {
         // Quick-load essential Dave/Bedroom assets or use fallbacks
@@ -2482,6 +2485,9 @@ async function main() {
 
         bedroom = buildBedroom(essentialBedroomBg);
         engine.registerRoom(bedroom);
+        
+        // Ensure starting room state is initialized
+        if (!engine.gameState.roomStates['bedroom']) engine.gameState.roomStates['bedroom'] = {};
     })();
 
     // PHASE 2: Load everything else with fault-tolerance
@@ -2560,11 +2566,8 @@ async function main() {
         itemIcons[id] = itemIcons['red_herring'];
     });
 
-    // CRITICAL: Attach preloaded icons to engine UI so they appear in inventory
+    // Icons are already started loading in background, we just assign them to UI
     Object.assign(engine.ui.loadedItemImages, itemIcons);
-
-    // Start Dave with his phone now that icons are ready
-    engine.addItem('cell_phone', 'Cell Phone');
 
     // Map pizza specifically
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
