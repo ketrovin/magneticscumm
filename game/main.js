@@ -587,45 +587,19 @@ function buildStreet(bg) {
                     }
                 }
             },
-            // Moncton Bakery — Baker NPC (prime suspect)
+            // Moncton Bakery
             {
                 id: 'bakery', name: 'Moncton Bakery', x: 340, y: 385, w: 200, h: 215, walkToX: 440, walkToY: 520,
                 onInteract(v, e) {
-                    const s = e.getRoomState('street');
-                    if (v === 'Talk to') {
-                        s.bakerTalks = (s.bakerTalks || 0) + 1;
-                        const lines = [
-                            "Baker: 'I know nothing about any mansion! NOTHING! You want bread? BUY BREAD!'",
-                            "Baker: 'Van Horne? He complained about MY baguette being too hard. TOO HARD! It's PERFECT!'",
-                            "Baker: 'I was HERE. All night. Baking. Do not look at me like that.'",
-                            "Baker: 'My baguette is not a weapon. It is ARTISANAL. The fact that it COULD be a weapon is a matter of QUALITY!'",
-                            "Baker: '...Are you still here? Non. Non non non. Au revoir, Dave.'",
-                        ];
-                        e.say(lines[(s.bakerTalks - 1) % lines.length]);
-                    } else if (v === 'Pick up' || v === 'Use' || v === 'Walk to' || v === 'Open') {
-                        if (e.hasItem('battle_bread')) {
-                            e.say("The baker eyes me. I already have his baguette-sword. He seems to want it back. I'm not giving it back.");
-                        } else {
-                            s.breadGiven = true;
-                            e.addItem('battle_bread', 'Battle Bread');
-                            e.say("Baker: 'You DARE enter?! TASTE MY ARTISANAL WRATH!' He hurls a baguette at supersonic speed. I catch it. This could be useful.");
-                        }
-                    } else {
-                        e.say('Moncton Bakery. Incredible bread. Baker looks absolutely furious. Standard.');
-                    }
+                    if (v === 'Talk to' || v === 'Look at') e.say("Moncton Bakery. The windows are fogged with artisanal ambition. The Baker is usually out front making sure the baguettes are properly hardened.");
+                    else e.say("It's locked. The Baker prefers doing business directly on the sidewalk.");
                 }
             },
             // Sub Shoppe
             {
                 id: 'sub_shoppe', name: 'The Sub Shoppe', x: 575, y: 375, w: 150, h: 210, walkToX: 650, walkToY: 520,
                 onInteract(v, e) {
-                    if (v === 'Talk to') {
-                        e.say("Sub Guy: 'Ey! You want a sub? I got meatball, I got cold cut, I got... uh, mystery loaf.'");
-                    } else if (v === 'Use' || v === 'Walk to' || v === 'Open') {
-                        e.say("Sub Guy: 'The door's stuck. Health inspector glued it shut. I'm operating out of this window now. Lean business, Dave. Lean business.'");
-                    } else {
-                        e.say("The Sub Shoppe. The sign is made of literal wood. The 'Sub Guy' is inside, looking semi-employed.");
-                    }
+                    e.say("The Sub Shoppe. Famous for its window-service and the guy wearing a sandwich. I suspect the health inspector wasn't a fan of the indoor plumbing.");
                 }
             },
             // CB Phone Co.
@@ -2523,6 +2497,52 @@ async function main() {
             room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460, 
             sheet: npcSubGuy, color: '#00ff55', scale: 0.9, cols: 9, rows: 4 
         });
+
+        if (baker) {
+            baker.onInteract = (v, e) => {
+                const s = e.getRoomState('street');
+                if (v === 'Talk to') {
+                    s.bakerTalks = (s.bakerTalks || 0) + 1;
+                    const lines = [
+                        "Baker: 'Stop staring! I know why you are here. You want the secrets of the baguette? BUY ONE!'",
+                        "Baker: 'Van Horne? A man of poor taste. He expected my bread to be... soft. SOFT! In this economy?'",
+                        "Baker: 'I bake. I do not murder. Murder is messy. Sourdough is also messy, but in a delicious way.'",
+                        "Baker: 'My baguette is forged in the fires of Moncton. It is a tool of destiny! Or just lunch. Depending on your teeth.'",
+                    ];
+                    e.say(lines[(s.bakerTalks - 1) % lines.length]);
+                } else if (v === 'Pick up' || v === 'Use' || v === 'Open') {
+                    if (e.hasItem('battle_bread')) {
+                        e.say("Baker: 'You already have your weapon of mass consumption. Go! Shoo!'");
+                    } else {
+                        e.addItem('battle_bread', 'Battle Bread');
+                        e.say("Baker: 'You look like you need a defensive carbohydrate. TASTE MY ARTISANAL WRATH!' He hurls a baguette. I catch it.");
+                    }
+                } else {
+                    e.triggerQuip(v, 'Baker');
+                }
+            };
+        }
+
+        if (poutine) {
+            poutine.onInteract = (v, e) => {
+                if (v === 'Talk to') {
+                    e.saySequence([
+                        "Poutine Guy: 'Ey! Fresh curds, hot gravy, and enough potatoes to sink a small freighter!'",
+                        "Poutine Guy: 'Business is booming. Everyone's so stressed out, they're eating their feelings. I'm the local therapist, only with more starch.'",
+                        "Poutine Guy: 'The Baker? He's a bit crusty. Get it? Crusty? Ah, I should stick to gravy.'"
+                    ]);
+                } else if (v === 'Pick up' || v === 'Use' || v === 'Open') {
+                    if (e.hasItem('poutine')) {
+                        e.say("Poutine Guy: 'You still have that one! Eat it before it achieves sentience!'");
+                    } else if (e.getRoomState('street').poutineAvailable !== false) {
+                        e.addItem('poutine', 'Steaming Poutine');
+                        e.say("Poutine Guy: 'On the house, Dave. You look like you're about to solve a mystery on an empty stomach. That's a rookie mistake.'");
+                    }
+                } else {
+                    e.triggerQuip(v, 'Poutine Guy');
+                }
+            };
+        }
         if (subGuy) {
             subGuy.onInteract = (v, e) => {
                 if (v === 'Talk to') {
