@@ -65,6 +65,7 @@ class Engine {
             return;
         }
         this.room = this.rooms[roomId];
+        this.gameState._interactTriggered = true;
         this.actors = [];
         if (this.player) {
             this.player.x = entryX;
