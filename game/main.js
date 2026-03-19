@@ -2408,43 +2408,48 @@ async function main() {
     engine.changeRoom('title_screen', 480, 450);
     engine.start();
 
-    // PHASE 2: Load everything else
+    // PHASE 2: Load everything else with fault-tolerance
+    const safeLoad = (src) => loadImage(src).catch(err => {
+        console.warn(`[Loader] Skipping missing file: ${src}`);
+        return null;
+    });
+
     const assetsProgress = Promise.all([
-        loadImage('assets/bedroom_bg.png'),
-        loadImage('assets/kitchen_bg.jpg'),
-        loadImage('assets/street_bg.png'),
-        loadImage('assets/alley_bg.jpg'),
-        loadImage('assets/secret_bg.jpg'),
-        loadImage('assets/gate_bg.jpg'),
-        loadImage('assets/pawn_bg.jpg'),
-        loadImage('assets/courtyard_bg.jpg'),
-        loadImage('assets/foyer_bg.jpg'),
-        loadImage('assets/library_bg.jpg'),
-        loadImage('assets/backyard_bg.jpg'),
-        loadImage('assets/police_ext_bg.jpg'),
-        loadImage('assets/police_int_bg.jpg'),
-        loadImage('assets/mag_entrance_bg.jpg'),
-        loadImage('assets/geo_strata_bg.jpg'),
-        loadImage('assets/magnetic_hill_bg.jpg'),
-        loadImage('assets/herring_club_bg.png'),
-        loadImage('assets/weather_station_bg.png'),
-        loadImage('assets/library_balcony_bg.png'),
-        loadImage('assets/Dave3.png'),
+        safeLoad('assets/bedroom_bg.png'),
+        safeLoad('assets/kitchen_bg.jpg'),
+        safeLoad('assets/street_bg.png'),
+        safeLoad('assets/alley_bg.jpg'),
+        safeLoad('assets/secret_bg.jpg'),
+        safeLoad('assets/gate_bg.jpg'),
+        safeLoad('assets/pawn_bg.jpg'),
+        safeLoad('assets/courtyard_bg.jpg'),
+        safeLoad('assets/foyer_bg.jpg'),
+        safeLoad('assets/library_bg.jpg'),
+        safeLoad('assets/backyard_bg.jpg'),
+        safeLoad('assets/police_ext_bg.jpg'),
+        safeLoad('assets/police_int_bg.jpg'),
+        safeLoad('assets/mag_entrance_bg.jpg'),
+        safeLoad('assets/geo_strata_bg.jpg'),
+        safeLoad('assets/magnetic_hill_bg.jpg'),
+        safeLoad('assets/herring_club_bg.png'),
+        safeLoad('assets/weather_station_bg.png'),
+        safeLoad('assets/library_balcony_bg.png'),
+        safeLoad('assets/Dave3.png'),
         // NPC sprite sheets
-        loadImage('assets/npc_baker.png'),
-        loadImage('assets/poutine_guy.png'),
-        loadImage('assets/npc_bouncer.png'),
-        loadImage('assets/npc_pawnbroker.png'),
-        loadImage('assets/npc_officer.png'),
-        loadImage('assets/cat.png'),
-        loadImage('assets/npc_woman_scientist.png'),
-        loadImage('assets/npc_weather_scientist.png'),
-        loadImage('assets/npc_raccoon.png'),
-        loadImage('assets/trapdoor_patch.png'),
-        loadImage('assets/rug_rolled_up.png'),
-        loadImage('assets/item_pizza_slice.png'),
-        loadImage('assets/sub_guy.png'),
-        loadImage('assets/npc_murder_suspect.png')
+        safeLoad('assets/npc_baker.png'),
+        safeLoad('assets/poutine_guy.png'),
+        safeLoad('assets/npc_bouncer.png'),
+        safeLoad('assets/npc_pawnbroker.png'),
+        safeLoad('assets/npc_officer.png'),
+        safeLoad('assets/cat.png'),
+        safeLoad('assets/npc_woman_scientist.png'),
+        safeLoad('assets/npc_weather_scientist.png'),
+        safeLoad('assets/npc_raccoon.png'),
+        safeLoad('assets/trapdoor_patch.png'),
+        safeLoad('assets/rug_rolled_up.png'),
+        safeLoad('assets/item_pizza_slice.png'),
+        safeLoad('assets/sub_guy.png'),
+        safeLoad('assets/npc_murder_suspect.png')
     ]);
 
     // We can continue initializing while items load, but Promise.all needs to finish for room builds

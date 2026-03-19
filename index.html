@@ -64,17 +64,9 @@
           window._engine.playMusic('opener');
           phase = 'playing';
           
-          const waitReady = () => {
-             if (window._engine.rooms['bedroom']) {
-               clickPrompt.innerText = 'CLICK TO START';
-               clickPrompt.classList.add('pulse');
-             } else {
-               clickPrompt.innerText = 'PREPARING GAME…';
-               clickPrompt.classList.remove('pulse');
-               setTimeout(waitReady, 200);
-             }
-          };
-          waitReady();
+          // Show start immediately
+          clickPrompt.innerText = 'CLICK TO START';
+          clickPrompt.classList.add('pulse');
 
         } else if (phase === 'playing') {
           // Phase 2: Trigger the engine's start logic and hide the overlay
