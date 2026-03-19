@@ -49,7 +49,7 @@
           phase = 'ready';
           loadingText.style.display = 'none';
           clickPrompt.style.display = 'block';
-          clickPrompt.innerText = 'CLICK ANYWHERE TO START';
+          clickPrompt.innerText = 'CLICK FOR SOUND';
         } else {
           setTimeout(checkReady, 100);
         }
@@ -60,10 +60,13 @@
         if (!window._engine) return;
 
         if (phase === 'ready') {
-          // Phase 1: Start music and reveal title screen
+          // Phase 1: Unblock sound and switch prompt
           window._engine.playMusic('opener');
           phase = 'playing';
-          
+          clickPrompt.innerText = 'PRESS ANYWHERE TO START';
+          clickPrompt.classList.add('pulse');
+        } else if (phase === 'playing') {
+          // Phase 2: Reveal the title screen underneath
           overlay.style.opacity = '0';
           setTimeout(() => {
             overlay.style.display = 'none';
