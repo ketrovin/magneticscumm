@@ -27,6 +27,7 @@ class Engine {
                 backgroundTrack: null,  // Selected on cell phone
                 volume: 0.5,
                 isLooping: true,
+                userDisabled: false,   // Manual toggle via cell phone
                 tracks: [] // { id, name, url }
             }
         };
@@ -94,7 +95,7 @@ class Engine {
         // Prioritize Room Music!
         const targetTrackId = this.room.music || this.gameState.music.backgroundTrack;
         
-        if (targetTrackId) {
+        if (targetTrackId && !this.gameState.music.userDisabled) {
             if (this.gameState.music.currentTrack !== targetTrackId) {
                 this.playMusic(targetTrackId);
             }
@@ -241,6 +242,26 @@ class Engine {
             this.currentAudio = null;
             this.gameState.music.currentTrack = null;
         }
+    }
+
+    toggleMusic() {
+        this.gameState.music.userDisabled = !this.gameState.music.userDisabled;
+        if (this.gameState.music.userDisabled) {
+            this.stopMusic();
+            this.say("Music: OFF");
+        } else {
+            this._updateMusic();
+            this.say("Music: ON");
+        }
+    }
+
+    /** Handle direct interaction with inventory items (self-use) */
+    handleInventoryClick(item) {
+        if (this.ui.selectedVerb === 'Use' && item.id === 'cell_phone') {
+            this.toggleMusic();
+            return true;
+        }
+        return false;
     }
 
     // ── Interactable helpers ───────────────────────────────────────────────

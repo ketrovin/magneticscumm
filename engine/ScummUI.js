@@ -127,7 +127,14 @@ class ScummUI {
             const ix = this.invX + col * (this.invW / 2);
             const iy = iy_start + row * 25;
             if (mx >= ix && mx < ix + this.invW/2 && my >= iy && my < iy + 25) {
-                this.selectedInventoryItem = this.inventory[i];
+                const item = this.inventory[i];
+                this.selectedInventoryItem = item;
+                
+                // Allow engine to handle special self-interactions (like cell phone toggle)
+                if (engine && engine.handleInventoryClick(item)) {
+                    return true; 
+                }
+
                 if (this.selectedVerb !== 'Give' && this.selectedVerb !== 'Use' && this.selectedVerb !== 'Look at') {
                     this.selectedVerb = 'Use';
                 }
