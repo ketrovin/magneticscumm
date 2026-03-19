@@ -412,8 +412,8 @@ function buildKitchen(bg) {
         id: 'kitchen', name: "Dave's Kitchen",
         background: bg,
         walkbox: [
-            { x: 60, y: 510 }, { x: 920, y: 510 },
-            { x: 820, y: 295 }, { x: 140, y: 295 },
+            { x: 0, y: 550 }, { x: 960, y: 550 },
+            { x: 960, y: 280 }, { x: 0, y: 280 },
         ],
         hotspots: [
             // Bedroom door (left, shown open in art)
@@ -426,7 +426,7 @@ function buildKitchen(bg) {
             },
             // Street / front door (right)
             {
-                id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 875, walkToY: 450,
+                id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 900, walkToY: 450,
                 onInteract(v, e) {
                     if (v === 'Open' || v === 'Walk to' || v === 'Use') {
                         if (e.hasItem('house_key') || true) { // door is always unlockable for now
@@ -2527,6 +2527,9 @@ async function main() {
 
     // CRITICAL: Attach preloaded icons to engine UI so they appear in inventory
     Object.assign(engine.ui.loadedItemImages, itemIcons);
+    
+    // Start Dave with his phone now that icons are ready
+    engine.addItem('cell_phone', 'Cell Phone');
 
     // Map pizza specifically
     itemIcons['pizza'] = pizzaImg || itemIcons['pizza_slice'];
