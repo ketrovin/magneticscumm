@@ -15,6 +15,7 @@ class Engine {
 
         // Global state shared across rooms
         this.gameState = {
+            isGameOver: false,
             inventory: [],          // item ids collected
             roomStates: {},         // per-room state: { roomId: { key: value } }
             dialogLine: null,       // current one-liner text
@@ -22,6 +23,7 @@ class Engine {
             dialogTimer: 0,
             activeDialogChoices: null, // [string] or null
             onChoiceCallback: null,
+            commandBuffer: "",      // For typed commands
             music: {
                 currentTrack: null,     // The track actually playing right now
                 backgroundTrack: null,  // Selected on cell phone
@@ -85,6 +87,38 @@ class Engine {
     // ── Room registry ──────────────────────────────────────────────────────
     registerRoom(room) {
         this.rooms[room.id] = room;
+        // If the player is currently in this room, refresh the reference 
+        // to pick up new NPCs and props added during late initialization.
+        if (this.room && this.room.id === room.id) {
+            this.room = room;
+            // Also refresh the actors list to include new room NPCs
+            const player = this.actors.find(a => a.id === 'dave');
+            this.actors = [];
+            if (player) this.actors.push(player);
+            if (this.room.npcs) this.actors.push(...this.room.npcs);
+        }
+    }
+
+    /** Handle combining two items in inventory */
+    handleItemCombine(itemA, itemB) {
+        const idA = itemA.id;
+        const idB = itemB.id;
+
+        // Remote Control + Enormous Battery = Overpowered Remote
+        if ((idA === 'remote_control' && idB === 'battery') || (idA === 'battery' && idB === 'remote_control')) {
+            this.removeItem('remote_control');
+            this.removeItem('battery');
+            this.addItem('overpowered_remote', 'Overpowered Remote');
+            this.say("Dave: 'I've jammed the hydrant-sized battery into the TV remote. It's glowing a faint, dangerous violet. This is definitely OSHA-compliant.'");
+            return true;
+        }
+
+        return false;
+    }
+
+    removeItem(id) {
+        const idx = this.gameState.inventory.findIndex(i => i.id === id);
+        if (idx !== -1) this.gameState.inventory.splice(idx, 1);
     }
 
     /** Switch to a different room, placing player at (entryX, entryY) */
@@ -116,6 +150,34 @@ class Engine {
         this.registerRoom(room);
         this.room = room;
         this._updateMusic();
+    }
+
+    /** Handle natural language commands (e.g., from console or Dave dialogue) */
+    processCommand(text) {
+        const input = text.toLowerCase().trim();
+        console.log(`[Engine] Command: "${input}"`);
+
+        // Handle "Leave" intent
+        if (input.includes('leave') || input.includes('exit') || input.includes('get out')) {
+            if (!this.room) return;
+            
+            // Find a hotspot that looks like an exit
+            const exitKeywords = ['door', 'exit', 'stairs', 'street', 'gate', 'alley', 'bedroom', 'kitchen', 'to_'];
+            const exit = this.room.hotspots.find(h => {
+                const name = (h.name || h.id).toLowerCase();
+                return exitKeywords.some(k => name.includes(k.toLowerCase()));
+            });
+
+            if (exit) {
+                this.say(`Dave: 'Right. Time to head out.'`);
+                setTimeout(() => this._onHotspotInteract(exit), 1500);
+            } else {
+                this.say("Dave: 'There doesn't seem to be an obvious way out of here.'");
+            }
+            return;
+        }
+
+        this.say(`Dave: 'I'm not sure how to "${text}".'`);
     }
 
     /** Choose and play the correct music (Room override vs Phone background) */
@@ -331,6 +393,26 @@ class Engine {
             }
         });
 
+        this.input.onKey((e) => {
+            if (this.gameState.dialogLine) return; // Ignore keys during dialog
+
+            if (e.key === 'Enter') {
+                if (this.gameState.commandBuffer.trim()) {
+                    this.processCommand(this.gameState.commandBuffer);
+                    this.gameState.commandBuffer = "";
+                }
+            } else if (e.key === 'Backspace') {
+                if (this.gameState.commandBuffer.length > 0) {
+                    this.gameState.commandBuffer = this.gameState.commandBuffer.slice(0, -1);
+                    e.preventDefault();
+                }
+            } else if (e.key === 'Escape') {
+                this.gameState.commandBuffer = "";
+            } else if (e.key.length === 1) {
+                this.gameState.commandBuffer += e.key;
+            }
+        });
+
         this.input.onClick((mx, my) => {
             // Unblock audio on first click
             if (this.currentAudio && this.currentAudio.paused) {
@@ -400,6 +482,10 @@ class Engine {
                 this.triggerQuip(verb, hotspot.name);
             }
         }
+
+        // Standard SCUMM behavior: reset to 'Walk to' after interaction
+        this.ui.selectedVerb = 'Walk to';
+        this.ui.selectedInventoryItem = null;
     }
 
     // ── Main loop ──────────────────────────────────────────────────────────
@@ -462,6 +548,27 @@ class Engine {
 
         // 4. UI panel
         this.ui.draw(ctx);
+
+        // 5. Game Over Overlay
+        if (this.gameState.isGameOver) {
+            this._drawGameOver(ctx);
+        }
+    }
+
+    _drawGameOver(ctx) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        ctx.fillStyle = '#ff00ff';
+        ctx.font = 'bold 48px "Share Tech Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('THE END', this.canvas.width / 2, this.canvas.height / 2);
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '24px "Share Tech Mono", monospace';
+        ctx.fillText('You have successfully broken the physics of Moncton.', this.canvas.width / 2, this.canvas.height / 2 + 60);
+        ctx.restore();
     }
 
     _drawDialog(ctx, text, speaker) {

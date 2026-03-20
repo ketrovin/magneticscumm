@@ -9,6 +9,7 @@ class InputManager {
         this.mouseY = 0;
         this._clickCallbacks = [];
         this._moveCallbacks = [];
+        this._keyCallbacks = [];
 
         const onMove = (e) => {
             const r = canvas.getBoundingClientRect();
@@ -27,14 +28,21 @@ class InputManager {
             this._clickCallbacks.forEach(cb => cb(mx, my));
         };
 
+        const onKey = (e) => {
+            this._keyCallbacks.forEach(cb => cb(e));
+        };
+
         canvas.addEventListener('mousemove', onMove);
         canvas.addEventListener('click', onClick);
+        canvas.addEventListener('keydown', onKey);
         this._listeners.push({ type: 'mousemove', fn: onMove });
         this._listeners.push({ type: 'click', fn: onClick });
+        this._listeners.push({ type: 'keydown', fn: onKey });
     }
 
     onMouseMove(cb) { this._moveCallbacks.push(cb); }
     onClick(cb) { this._clickCallbacks.push(cb); }
+    onKey(cb) { this._keyCallbacks.push(cb); }
 
     destroy() {
         this._listeners.forEach(({ type, fn }) =>

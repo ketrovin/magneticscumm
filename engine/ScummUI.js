@@ -127,11 +127,21 @@ class ScummUI {
             const ix = this.invX + col * (this.invW / 2);
             const iy = iy_start + row * 25;
             if (mx >= ix && mx < ix + this.invW/2 && my >= iy && my < iy + 25) {
-                const item = this.inventory[i];
-                this.selectedInventoryItem = item;
+                const clickedItem = this.inventory[i];
+                
+                // --- ITEM COMBINATION LOGIC ---
+                if (this.selectedVerb === 'Use' && this.selectedInventoryItem && this.selectedInventoryItem !== clickedItem) {
+                    if (engine && engine.handleItemCombine(this.selectedInventoryItem, clickedItem)) {
+                        this.selectedInventoryItem = null;
+                        this.selectedVerb = 'Walk to';
+                        return true;
+                    }
+                }
+
+                this.selectedInventoryItem = clickedItem;
                 
                 // Allow engine to handle special self-interactions (like cell phone toggle)
-                if (engine && engine.handleInventoryClick(item)) {
+                if (engine && engine.handleInventoryClick(clickedItem)) {
                     return true; 
                 }
 
@@ -219,13 +229,21 @@ class ScummUI {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ff00ff'; // Zak active pink
 
-        let text = this.selectedVerb;
+        // Case 1: Typed command buffer takes priority
+        if (this.engine.gameState.commandBuffer) {
+            ctx.fillText("> " + this.engine.gameState.commandBuffer, this.cw / 2, this.panelY + 15);
+            return;
+        }
+
+        // Case 2: Interactive SCUMM sentence
+        const verb = (this.selectedVerb === 'Walk to' && this.hoveredVerb) ? this.hoveredVerb : this.selectedVerb;
+        let text = verb;
         let item = this.selectedInventoryItem;
 
         if (item) {
             const itemName = (typeof item === 'string') ? item : item.name;
-            if (this.selectedVerb === 'Give') text += ` ${itemName} to`;
-            else if (this.selectedVerb === 'Use') text += ` ${itemName} with`;
+            if (verb === 'Give') text += ` ${itemName} to`;
+            else if (verb === 'Use') text += ` ${itemName} with`;
             else text += ` ${itemName}`;
         }
 

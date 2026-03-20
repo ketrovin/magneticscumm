@@ -641,12 +641,12 @@ function buildStreet(bg) {
                     e.say("I'm not going in there! My phone bill is... outstanding. As in, the amount is outstanding. As in astronomical.");
                 }
             },
-            // Alley entrance
+            // Alley entrance (right side gap)
             {
-                id: 'to_alley', name: 'Alley', x: 870, y: 120, w: 90, h: 200, walkToX: 920, walkToY: 440,
+                id: 'to_alley', name: 'Alley', x: 860, y: 120, w: 100, h: 420, walkToX: 920, walkToY: 440,
                 onInteract(v, e) {
                     if (v === 'Walk to' || v === 'Use') e.changeRoom('alley', 480, 460);
-                    else e.say("A classic dark alley. Every adventure has one.");
+                    else e.say("A dark alleyway. Probably full of mystery. Or just trash.");
                 }
             },
             // Left world edge
@@ -1077,7 +1077,19 @@ function tryBuyItem(v, item, e) {
             return;
         }
         e.addItem(item.id, item.name);
-        e.say(`I slide my cash card across the counter. The pawnbroker swipes it without looking up. I now own a ${item.name}. $${item.price}. This is a legitimate transaction.`);
+        
+        // Check if there's a pawnbroker in the room
+        const broker = e.room.npcs.find(n => n.id === 'pawnbroker_npc');
+        if (broker) {
+            e.say(`I slide my cash card across the counter. The pawnbroker swipes it without looking up. I now own a ${item.name}. $${item.price}. This is a legitimate transaction.`);
+        } else {
+            e.saySequence([
+                `I look around for someone to pay, but the shop is deserted. I notice a dusty security camera pointing at the counter.`,
+                `Dave: 'Uh, hello? Anyone? No? Okay then.'`,
+                `I tentativeley swipe my cash card across a small scanner near the register. It beeps with a cheerful, yet lonely sound.`,
+                `Dave: 'I guess I own a ${item.name} now. $${item.price} deducted digitally. Welcome to the automated future, Dave.'`
+            ]);
+        }
     } else {
         e.say(`I'm not sure what to do with the ${item.name} right now. Buying it seems like the best option.`);
     }
@@ -1107,14 +1119,18 @@ function buildPawnShop(bg) {
                     e.say('"STORE ROOM" — the door is locked. The pawnbroker watches me with one eyebrow raised. I back away.');
                 }
             },
-            // Counter / pawnbroker NPC
             {
-                id: 'counter', name: 'Pawnbroker', x: 185, y: 300, w: 265, h: 220, walkToX: 310, walkToY: 440,
+                id: 'counter', name: 'Counter', x: 185, y: 300, w: 265, h: 220, walkToX: 310, walkToY: 440,
                 onInteract(v, e) {
-                    const s = e.getRoomState('pawn_shop');
-                    s.pawnTalk = (s.pawnTalk || 0) + 1;
-                    const line = PAWNBROKER_LINES[(s.pawnTalk - 1) % PAWNBROKER_LINES.length];
-                    e.say(line);
+                    const broker = e.room.npcs.find(n => n.id === 'pawnbroker_npc');
+                    if (broker) {
+                        const s = e.getRoomState('pawn_shop');
+                        s.pawnTalk = (s.pawnTalk || 0) + 1;
+                        const line = PAWNBROKER_LINES[(s.pawnTalk - 1) % PAWNBROKER_LINES.length];
+                        e.say(broker.name + ": " + line);
+                    } else {
+                        e.say("A long glass counter. It's empty. No one is here. It's like the Mary Celeste of used electronics and stolen power tools.");
+                    }
                 }
             },
             // Display case — spoon, plus the mansion key (the big ticket item)
@@ -1161,7 +1177,7 @@ function buildPawnShop(bg) {
             },
             // Remote control ← the game-changing item
             {
-                id: 'remote_control', name: 'Remote Control', x: 385, y: 235, w: 50, h: 40, walkToX: 415, walkToY: 440,
+                id: 'remote_control', name: 'Remote Control', x: 390, y: 155, w: 50, h: 40, walkToX: 415, walkToY: 440,
                 onInteract(v, e) { tryBuyItem(v, PAWN_ITEMS[6], e); }
             },
             // Mannequin head
@@ -2333,40 +2349,24 @@ function buildMagneticHill(bg) {
             // Remote receiver on magnet — use remote_control here for game over
             {
                 id: 'magnet_receiver', name: 'Remote Receiver', x: 290, y: 310, w: 90, h: 60, walkToX: 400, walkToY: 450,
-                onInteract(v, e) {
-                    if (v === 'Use') {
-                        if (!e.hasItem('remote_control') && !e.hasItem('battery')) {
-                            e.say('A small IR receiver on the side of the magnet housing. It wants a remote signal. I have neither a remote nor any idea what powers it.');
-                        } else if (!e.hasItem('remote_control')) {
-                            e.say('I can sense this receiver wants a remote signal. I do not have the remote. I have the enormous battery though, which was extremely heavy to carry all the way here.');
-                        } else if (!e.hasItem('battery')) {
-                            e.say('I point the remote at the receiver. Nothing. I shake it. The battery compartment rattles. It is empty. This remote needs a battery. A very specific battery. An enormous one.');
-
-                        } else {
-                            e.say('I point the remote at the receiver. The red MAGNET button blinks. I press it. There is a long pause. A deep THUNK. The humming stops. My keys fall. In the distance, a thousand tourism brochures become inaccurate.');
-                            setTimeout(() => {
-                                const cv = document.getElementById('game');
-                                const ctx = cv.getContext('2d');
-                                ctx.fillStyle = 'rgba(0,0,0,0.9)';
-                                ctx.fillRect(0, 0, cv.width, cv.height);
-                                ctx.fillStyle = '#ff3333';
-                                ctx.font = 'bold 60px monospace';
-                                ctx.textAlign = 'center';
-                                ctx.fillText('GAME OVER', cv.width / 2, cv.height / 2 - 55);
-                                ctx.fillStyle = '#ffcc00';
-                                ctx.font = '30px monospace';
-                                ctx.fillText('TOURISM FAILURE', cv.width / 2, cv.height / 2 + 5);
-                                ctx.fillStyle = '#ffffff';
-                                ctx.font = '17px monospace';
-                                ctx.fillText('You turned off Magnetic Hill.', cv.width / 2, cv.height / 2 + 48);
-                                ctx.fillText('With a TV remote. From a pawn shop.', cv.width / 2, cv.height / 2 + 72);
-                                ctx.fillText('Moncton will not recover from this.', cv.width / 2, cv.height / 2 + 96);
-                                ctx.fillStyle = '#888888';
-                                ctx.font = '13px monospace';
-                                ctx.fillText('F5 to try again. (Just… leave it on next time.)', cv.width / 2, cv.height / 2 + 135);
-                            }, 2800);
-                        }
-                    } else e.say('A small receiver unit on the magnet housing. It wants a remote signal. Specifically.');
+                onInteract(v, e, item) {
+                    if (item && item.id === 'overpowered_remote') {
+                        e.saySequence([
+                            "Dave: 'I point the violet-crested remote at the magnet.'",
+                            "Dave: 'Wait... the humming is getting LOUDER. The keys aren't just falling, they're starting to orbit my head...'",
+                            "Dave: 'Oh, no... i have broken the tourist trap!'"
+                        ], () => {
+                            e.gameState.isGameOver = true;
+                        });
+                    } else if (item && item.id === 'remote_control') {
+                        e.say('I point the remote at the receiver. Nothing. The light on the remote is dead. This needs more juice. Like, industrial-strength, science-experiment-gone-wrong levels of juice.');
+                    } else if (v === 'Use' && !item) {
+                        e.say('A small IR receiver on the side of the magnet housing. It wants a remote signal. I have neither a remote nor any idea what powers it.');
+                    } else if (v === 'Look at') {
+                        e.say('A small receiver unit on the magnet housing. It wants a remote signal. Specifically.');
+                    } else {
+                        e.triggerQuip('Item', 'Remote Receiver', item ? item.name : '');
+                    }
                 }
             },
             // Shack entrance in hillside
@@ -2444,7 +2444,7 @@ async function main() {
         'cash_card', 'house_key', 'battery', 'cheese', 'rotten_egg', 'poutine',
         'battle_bread', 'mansion_key', 'remote_control', 'red_herring',
         'canadian_shield', 'geo_hammer', 'oos_sign', 'main_route_closed', 'pizza_slice',
-        'club_key', 'red_herring_key', 'fishy_token'
+        'club_key', 'red_herring_key', 'fishy_token', 'overpowered_remote'
     ];
     engine.assetStatus = { loaded: 0, total: assetsToLoad.length + itemsToLoad.length };
 
@@ -2474,16 +2474,43 @@ async function main() {
     // Add cell phone immediately so it's in INV from the very first frame
     engine.addItem('cell_phone', 'Cell Phone');
 
-    // PHASE 2: Load everything else. We use loadAssets to handle the countdown automatically.
-    // Combine everything into one big batch for the progress bar.
+    // PHASE 2: Load everything else.
     const allOtherUrls = [
         ...assetsToLoad,
         ...itemsToLoad.map(id => `assets/item_${id}.png`)
     ];
 
+    // --- EARLY REGISTRATION: Register all rooms immediately so they are "connected" ---
+    // Backgrounds and NPC sheets will be null initially and updated after load.
+    
+    bedroom = buildBedroom(null);
+    engine.registerRoom(bedroom);
+    
+    const kitchen = buildKitchen(null);
+    engine.registerRoom(kitchen);
+
+    // Register all other rooms so changeRoom works immediately
+    engine.registerRoom(buildStreet(null));
+    engine.registerRoom(buildAlley(null));
+    engine.registerRoom(buildHerringClub(null));
+    engine.registerRoom(buildWeatherStation(null));
+    engine.registerRoom(buildSecretRoom(null));
+    engine.registerRoom(buildGateArea(null));
+    engine.registerRoom(buildPawnShop(null));
+    engine.registerRoom(buildMansionCourtyard(null));
+    engine.registerRoom(buildMansionFoyer(null));
+    engine.registerRoom(buildMansionLibrary(null));
+    engine.registerRoom(buildMansionLibraryBalcony(null));
+    engine.registerRoom(buildMansionBackyard(null));
+    engine.registerRoom(buildPoliceExt(null));
+    engine.registerRoom(buildPoliceInt(null));
+    engine.registerRoom(buildMagEntrance(null));
+    engine.registerRoom(buildGeoStrata(null));
+    engine.registerRoom(buildMagneticHill(null));
+
     const results = await engine.loadAssets(allOtherUrls);
     
-    // Separate room/npc assets from item icons
+    // Extract assets from results
     const assets = results.slice(0, assetsToLoad.length);
     const itemIconsList = results.slice(assetsToLoad.length);
 
@@ -2499,7 +2526,26 @@ async function main() {
         npcBaker, npcDoorman, npcPawnbroker, npcSavoie,
         npcCat, npcPellerin, npcWeatherSheet, npcRaccoon, trapdoorImg, rugRolledImg, pizzaImg, npcSubGuy, subGuyHillSheet, npcSuspect] = assets;
 
-    // Now that everything is loaded, setup Dave and Bedroom
+    // Now that everything is loaded, update all room backgrounds and assets 
+    if (engine.rooms['bedroom']) engine.rooms['bedroom'].background = bedroomBg;
+    if (engine.rooms['kitchen']) engine.rooms['kitchen'].background = kitchenBg;
+    if (engine.rooms['street']) engine.rooms['street'].background = streetBg;
+    if (engine.rooms['alley']) engine.rooms['alley'].background = alleyBg;
+    if (engine.rooms['herring_club']) engine.rooms['herring_club'].background = herringClubBg;
+    if (engine.rooms['weather_station']) engine.rooms['weather_station'].background = weatherStationBg;
+    if (engine.rooms['secret']) engine.rooms['secret'].background = secretBg;
+    if (engine.rooms['gate']) engine.rooms['gate'].background = gateBg;
+    if (engine.rooms['pawn_shop']) engine.rooms['pawn_shop'].background = pawnBg;
+    if (engine.rooms['mansion_courtyard']) engine.rooms['mansion_courtyard'].background = courtyardBg;
+    if (engine.rooms['mansion_foyer']) engine.rooms['mansion_foyer'].background = foyerBg;
+    if (engine.rooms['mansion_library']) engine.rooms['mansion_library'].background = libraryBg;
+    if (engine.rooms['mansion_backyard']) engine.rooms['mansion_backyard'].background = backyardBg;
+    if (engine.rooms['police_station_ext']) engine.rooms['police_station_ext'].background = policeExtBg;
+    if (engine.rooms['police_station_int']) engine.rooms['police_station_int'].background = policeIntBg;
+    if (engine.rooms['mag_entrance']) engine.rooms['mag_entrance'].background = magEntranceBg;
+    if (engine.rooms['geo_strata']) engine.rooms['geo_strata'].background = geoStrataBg;
+    if (engine.rooms['magnetic_hill']) engine.rooms['magnetic_hill'].background = magHillBg;
+    if (engine.rooms['mansion_library_balcony']) engine.rooms['mansion_library_balcony'].background = libraryBalconyBg;
 
     // INTERMEDIATE: Dave should be ready as soon as the sheet loads
     const sheetImg = daveSheet ?? buildProceduralDave();
@@ -2535,6 +2581,19 @@ async function main() {
             const itemId = (item && (typeof item === 'string' ? item : item.id));
             if (v === 'Use' && itemId === 'cell_phone') {
                 window._openPhoneMenu(e);
+            } else if (v === 'Talk to') {
+                const roomName = e.room ? e.room.name : 'here';
+                e.enterDialog([
+                    `Leave ${roomName}`,
+                    "Tell me about myself.",
+                    "Cancel"
+                ], (idx) => {
+                    if (idx === 0) {
+                        e.processCommand(`leave ${roomName}`);
+                    } else if (idx === 1) {
+                        e.say("Dave: 'Reluctant hero, professional poutine critic, and I still can't believe I'm talking to myself.'");
+                    }
+                });
             } else if (v === 'Look at') {
                 e.say("That's me. Dave. Adventurer, reluctant poutine enthusiast, and owner of a very confused phone.");
             }
@@ -2556,12 +2615,14 @@ async function main() {
 
     // ── Register all 16 rooms + attach NPC actors ────────────────────────────
 
-    bedroom = buildBedroom(bedroomBg);
+    // Now that everything is loaded, re-initialize rooms with actual assets 
+    // This populates NPCs and props that require loaded images.
+
+    bedroom.background = bedroomBg;
     bedroom.props.push({ id: 'trapdoor_prop', image: trapdoorImg, x: 310, y: 340, w: 210, h: 100, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
     bedroom.props.push({ id: 'rug_rolled_prop', image: rugRolledImg, x: 550, y: 320, w: 100, h: 120, isVisible(e) { return !!e.getRoomState('bedroom').carpetMoved; } });
-    engine.registerRoom(bedroom);
 
-    const kitchen = buildKitchen(kitchenBg);
+    kitchen.background = kitchenBg;
     kitchen.props.push({
         id: 'battery_prop', image: itemIcons['battery'], x: 595, y: 150, w: 40, h: 60,
         isVisible(e) { return !!e.getRoomState('kitchen').fridgeOpen && !e.hasItem('battery'); }
@@ -2582,23 +2643,34 @@ async function main() {
         id: 'pizza_prop', image: itemIcons['pizza'], x: 380, y: 340, w: 40, h: 30,
         isVisible(e) { return !e.hasItem('pizza'); }
     });
-    engine.registerRoom(kitchen);
+
+    // Re-register all rooms with full assets (this updates the ones in engine.rooms)
+    // We already registered shallow versions, now we overwrite with full ones which include NPCs.
 
     { // Street — baker + poutine guy + sub guy
         const r = buildStreet(streetBg);
-        const baker = buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 460, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
+        const baker = buildNPCActor({ room: r, id: 'baker_npc', name: 'Baker', x: 388, y: 400, sheet: npcBaker, color: '#ff5555', cols: 9, rows: 4 });
+        const subGuy = buildNPCActor({
+            room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 670, y: 400,
+            sheet: npcSubGuy, color: '#00ff55', scale: 1.1, cols: 9, rows: 4
+        });
+
         if (baker) {
             baker.onInteract = (v, e) => {
+                const s = e.getRoomState('street');
                 if (v === 'Talk to') {
                     if (e.hasItem('battle_bread')) {
                         e.say("Baker: 'You still have that loaf? Careful, it's registered as a lethal weapon in three provinces.'");
                     } else {
-                        e.saySequence([
+                        s.bakerTalks = (s.bakerTalks || 0) + 1;
+                        const lines = [
                             "Dave: 'Excuse me, do you have any... fresh... bread?'",
                             "Baker: 'Fresh? No. But I have the MONCTON SPECIAL. We call it Battle Bread.'",
-                            "Baker: 'We leave it in the sun for three days and then use it to shore up the foundation of the bakery. Here, take a baguette. It's on the house.'",
-                            "Dave: 'This is... surprisingly heavy. And cold. And I think it just made a metallic CLANG when I moved it.'"
-                        ], () => {
+                            "Baker: 'We leave it in the sun for three days and then use it to shore up the foundation of the bakery. Here, take a baguette.'",
+                            "Dave: 'This is... surprisingly heavy. And cold. Is it made of... reinforced concrete?'",
+                            "Baker: 'It is ARTISANAL. Go! Shoo!'"
+                        ];
+                        e.saySequence(lines, () => {
                             e.addItem('battle_bread', 'Battle Bread');
                         });
                     }
@@ -2610,56 +2682,7 @@ async function main() {
             };
         }
 
-        const subGuy = buildNPCActor({
-            room: r, id: 'sub_guy_npc', name: 'Sub Guy', x: 650, y: 460,
-            sheet: npcSubGuy, color: '#00ff55', scale: 1.1, cols: 9, rows: 4
-        });
-
-        if (baker) {
-            baker.onInteract = (v, e) => {
-                const s = e.getRoomState('street');
-                if (v === 'Talk to') {
-                    s.bakerTalks = (s.bakerTalks || 0) + 1;
-                    const lines = [
-                        "Baker: 'Stop staring! I know why you are here. You want the secrets of the baguette? BUY ONE!'",
-                        "Baker: 'Van Horne? A man of poor taste. He expected my bread to be... soft. SOFT! In this economy?'",
-                        "Baker: 'I bake. I do not murder. Murder is messy. Sourdough is also messy, but in a delicious way.'",
-                        "Baker: 'My baguette is forged in the fires of Moncton. It is a tool of destiny! Or just lunch. Depending on your teeth.'",
-                    ];
-                    e.say(lines[(s.bakerTalks - 1) % lines.length]);
-                } else if (v === 'Pick up' || v === 'Use' || v === 'Open') {
-                    if (e.hasItem('battle_bread')) {
-                        e.say("Baker: 'You already have your weapon of mass consumption. Go! Shoo!'");
-                    } else {
-                        e.addItem('battle_bread', 'Battle Bread');
-                        e.say("Baker: 'You look like you need a defensive carbohydrate. TASTE MY ARTISANAL WRATH!' He hurls a baguette. I catch it.");
-                    }
-                } else {
-                    e.triggerQuip(v, 'Baker');
-                }
-            };
-        }
-
-        if (poutine) {
-            poutine.onInteract = (v, e) => {
-                if (v === 'Talk to') {
-                    e.saySequence([
-                        "Poutine Guy: 'Ey! Fresh curds, hot gravy, and enough potatoes to sink a small freighter!'",
-                        "Poutine Guy: 'Business is booming. Everyone's so stressed out, they're eating their feelings. I'm the local therapist, only with more starch.'",
-                        "Poutine Guy: 'The Baker? He's a bit crusty. Get it? Crusty? Ah, I should stick to gravy.'"
-                    ]);
-                } else if (v === 'Pick up' || v === 'Use' || v === 'Open') {
-                    if (e.hasItem('poutine')) {
-                        e.say("Poutine Guy: 'You still have that one! Eat it before it achieves sentience!'");
-                    } else if (e.getRoomState('street').poutineAvailable !== false) {
-                        e.addItem('poutine', 'Steaming Poutine');
-                        e.say("Poutine Guy: 'On the house, Dave. You look like you're about to solve a mystery on an empty stomach. That's a rookie mistake.'");
-                    }
-                } else {
-                    e.triggerQuip(v, 'Poutine Guy');
-                }
-            };
-        }
+        // Note: Poutine guy is currently disabled/missing assets
         if (subGuy) {
             subGuy.onInteract = (v, e) => {
                 if (v === 'Talk to') {
@@ -2705,6 +2728,22 @@ async function main() {
                     bouncer.isVisible = false;
                     e.addItem('club_key', 'Herring Club Key');
                     e.say("He dropped a brass key with a fish-shaped handle. Poetic justice, if a bit yeasty.");
+                    return;
+                }
+
+                if (v === 'Give' && itemId === 'rotten_egg') {
+                    e.saySequence([
+                        "Dave: 'Here, have this. It's... a local delicacy.'",
+                        "Inside: *Sniff sniff* 'Ugh! What is that smell?! It's like a skunk died inside a sewer pipe!'",
+                        "Inside: 'I'm out of here! I didn't sign up for chemical warfare!'",
+                        "The 'unseen' bouncer can be heard running away at high speed."
+                    ], () => {
+                        s.bouncerKnockedOut = true;
+                        if (bouncer) bouncer.isVisible = false;
+                        e.removeItem('rotten_egg');
+                        e.addItem('club_key', 'Herring Club Key');
+                        e.say("He left the key in the lock in his haste to escape the olfactory onslaught.");
+                    });
                     return;
                 }
 
@@ -3058,20 +3097,19 @@ async function main() {
 
     { // Pawn shop — pawnbroker
         const r = buildPawnShop(pawnBg);
-        const pawnbroker = buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff', cols: 9, rows: 4 });
-
-        if (pawnbroker) {
-            // Optional: add pawnbroker-specific logic here if needed beyond buildPawnShop
-        }
+        
+        // Note: Pawnbroker is currently absent for "self-serve" logic
+        // const pawnbroker = buildNPCActor({ room: r, id: 'pawnbroker_npc', name: 'Pawnbroker', x: 720, y: 420, sheet: npcPawnbroker, color: '#00ffff', cols: 9, rows: 4 });
 
         // Add item props to shelves
+        r.props = r.props || [];
         r.props.push({ id: 'p_camera', image: itemIcons['camera'], x: 230, y: 200, w: 50, h: 50, isVisible(e) { return !e.hasItem('camera'); } });
         r.props.push({ id: 'p_radio', image: itemIcons['radio'], x: 340, y: 200, w: 60, h: 50, isVisible(e) { return !e.hasItem('radio'); } });
         r.props.push({ id: 'p_binoculars', image: itemIcons['binoculars'], x: 465, y: 195, w: 60, h: 50, isVisible(e) { return !e.hasItem('binoculars'); } });
         r.props.push({ id: 'p_knife', image: itemIcons['bent_knife'], x: 435, y: 185, w: 60, h: 50, isVisible(e) { return !e.hasItem('bent_knife'); } });
         r.props.push({ id: 'p_spoon', image: itemIcons['spoon'], x: 645, y: 375, w: 50, h: 50, isVisible(e) { return !e.hasItem('spoon'); } });
         r.props.push({ id: 'p_mansion_key', image: itemIcons['mansion_key'], x: 705, y: 360, w: 50, h: 50, isVisible(e) { return !e.hasItem('mansion_key'); } });
-        r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 385, y: 235, w: 50, h: 40, isVisible(e) { return !e.hasItem('remote_control'); } });
+        r.props.push({ id: 'p_remote', image: itemIcons['remote_control'], x: 390, y: 155, w: 50, h: 40, isVisible(e) { return !e.hasItem('remote_control'); } });
         r.props.push({ id: 'p_bread', image: itemIcons['battle_bread'], x: 185, y: 230, w: 70, h: 50, isVisible(e) { return !e.hasItem('battle_bread'); } });
 
         engine.registerRoom(r);
@@ -3089,9 +3127,18 @@ async function main() {
         const cat1 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 760, y: 455, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
         engine.registerRoom(r);
     }
-    { // Mansion library — cat reappears upstairs (same sheet)
+    { // Mansion library — cat reappears upstairs (same sheet) + OUT OF ORDER sign
         const r = buildMansionLibrary(libraryBg);
         const cat2 = buildNPCActor({ room: r, id: 'cat_npc', name: 'Cat', x: 820, y: 440, sheet: npcCat, color: '#ffffff', scale: 0.15, cols: 9, rows: 4 });
+        
+        r.props = r.props || [];
+        r.props.push({ 
+            id: 'p_oos_sign', 
+            image: itemIcons['oos_sign'], 
+            x: 180, y: 290, w: 100, h: 60, 
+            isVisible(e) { return !e.getRoomState('mansion_library').signRemoved; } 
+        });
+
         engine.registerRoom(r);
     }
     { // Mansion library balcony — Atmospheric science plaques + Murder Suspect
@@ -3148,7 +3195,7 @@ async function main() {
     }
     { // Mag entrance — signage props
         const r = buildMagEntrance(magEntranceBg);
-        r.props.push({ id: 'p_oos_sign', image: itemIcons['oos_sign'], x: 200, y: 220, w: 60, h: 40, isVisible(e) { return !e.hasItem('oos_sign'); } });
+        r.props = r.props || [];
         r.props.push({ id: 'p_closed_sign', image: itemIcons['main_route_closed'], x: 500, y: 400, w: 80, h: 60, isVisible(e) { return !e.hasItem('main_route_closed'); } });
         engine.registerRoom(r);
     }
