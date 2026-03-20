@@ -26,6 +26,7 @@ class ScummUI {
         this.inventory = [];
         this.hoveredInventoryItem = null;
         this.selectedInventoryItem = null;
+        this.hoveredScroll = null;
 
         // EGA Style: 4 columns, 3 rows for 12 verbs
         this.verbAreaW = Math.floor(canvasWidth * 0.70);
@@ -41,6 +42,23 @@ class ScummUI {
 
         this.invX = this.verbAreaW;
         this.invW = canvasWidth - this.verbAreaW;
+        this.inventoryOffset = 0; // Each offset unit = 2 items (one row)
+
+        // Scroll buttons (arrows) on the right of the inventory
+        const arrowW = 20;
+        const arrowH = 20;
+        this.scrollUpRect = {
+            x: this.cw - arrowW - 5,
+            y: this.panelY + 30,
+            w: arrowW,
+            h: arrowH
+        };
+        this.scrollDownRect = {
+            x: this.cw - arrowW - 5,
+            y: this.panelY + this.panelH - 30,
+            w: arrowW,
+            h: arrowH
+        };
 
         // Dialog choice area (same as verb area)
         this.dialogChoiceRects = [];
@@ -83,16 +101,32 @@ class ScummUI {
         
         // Inventory hit detection
         const iy_start = this.panelY + 30;
-        for (let i = 0; i < Math.min(this.inventory.length, 8); i++) {
+        const startIdx = this.inventoryOffset * 2;
+        for (let i = 0; i < Math.min(this.inventory.length - startIdx, 8); i++) {
+            const actualIdx = startIdx + i;
             const row = Math.floor(i / 2);
             const col = i % 2;
             const ix = this.invX + col * (this.invW / 2);
             const iy = iy_start + row * 25;
             if (mx >= ix && mx < ix + this.invW/2 && my >= iy && my < iy + 25) {
-                this.hoveredInventoryItem = this.inventory[i];
+                this.hoveredInventoryItem = this.inventory[actualIdx];
                 return this.hoveredInventoryItem;
             }
         }
+
+        // Scroll button hits
+        if (mx >= this.scrollUpRect.x && mx < this.scrollUpRect.x + this.scrollUpRect.w &&
+            my >= this.scrollUpRect.y && my < this.scrollUpRect.y + this.scrollUpRect.h) {
+            this.hoveredScroll = 'up';
+            return 'up';
+        }
+        if (mx >= this.scrollDownRect.x && mx < this.scrollDownRect.x + this.scrollDownRect.w &&
+            my >= this.scrollDownRect.y && my < this.scrollDownRect.y + this.scrollDownRect.h) {
+            this.hoveredScroll = 'down';
+            return 'down';
+        }
+        this.hoveredScroll = null;
+
         return null;
     }
 
@@ -120,14 +154,26 @@ class ScummUI {
             }
         }
         
+        // Scroll button hits
+        if (this.hoveredScroll === 'up' && this.inventoryOffset > 0) {
+            this.inventoryOffset--;
+            return true;
+        }
+        if (this.hoveredScroll === 'down' && (this.inventoryOffset + 4) * 2 < this.inventory.length) {
+            this.inventoryOffset++;
+            return true;
+        }
+
         const iy_start = this.panelY + 30;
-        for (let i = 0; i < Math.min(this.inventory.length, 8); i++) {
+        const startIdx = this.inventoryOffset * 2;
+        for (let i = 0; i < Math.min(this.inventory.length - startIdx, 8); i++) {
             const row = Math.floor(i / 2);
             const col = i % 2;
             const ix = this.invX + col * (this.invW / 2);
             const iy = iy_start + row * 25;
             if (mx >= ix && mx < ix + this.invW/2 && my >= iy && my < iy + 25) {
-                const clickedItem = this.inventory[i];
+                const actualIdx = startIdx + i;
+                const clickedItem = this.inventory[actualIdx];
                 
                 // --- ITEM COMBINATION LOGIC ---
                 if (this.selectedVerb === 'Use' && this.selectedInventoryItem && this.selectedInventoryItem !== clickedItem) {
@@ -205,8 +251,10 @@ class ScummUI {
         // 4. Inventory
         ctx.font = '18px "Share Tech Mono", monospace';
         const iy_start = this.panelY + 30;
-        for (let i = 0; i < Math.min(this.inventory.length, 8); i++) {
-            const item = this.inventory[i];
+        const startIdx = this.inventoryOffset * 2;
+        for (let i = 0; i < Math.min(this.inventory.length - startIdx, 8); i++) {
+            const actualIdx = startIdx + i;
+            const item = this.inventory[actualIdx];
             const row = Math.floor(i / 2);
             const col = i % 2;
             const ix = this.invX + col * (this.invW / 2);
@@ -217,6 +265,16 @@ class ScummUI {
 
             ctx.fillStyle = isSelected ? COLOR_SELECTED : (isHovered ? '#ffffff' : '#00aaaa'); // Cyan for items
             ctx.fillText(item.name, ix + 5, iy + 5);
+        }
+
+        // 4b. Draw Scroll Arrows
+        if (this.inventoryOffset > 0) {
+            ctx.fillStyle = this.hoveredScroll === 'up' ? '#ffffff' : '#00aaaa';
+            ctx.fillText('^', this.scrollUpRect.x + 5, this.scrollUpRect.y + 15);
+        }
+        if ((this.inventoryOffset + 4) * 2 < this.inventory.length) {
+            ctx.fillStyle = this.hoveredScroll === 'down' ? '#ffffff' : '#00aaaa';
+            ctx.fillText('v', this.scrollDownRect.x + 5, this.scrollDownRect.y + 15);
         }
 
         // 5. Active Command / Status Line
