@@ -130,6 +130,25 @@ class ScummUI {
         return null;
     }
 
+    onWheel(deltaY, mx, my) {
+        if (!this.isInPanel(mx, my)) return;
+        
+        // Only scroll if hovering over the inventory area
+        if (mx < this.invX) return;
+
+        if (deltaY > 0) {
+            // Scroll down
+            if ((this.inventoryOffset + 4) * 2 < this.inventory.length) {
+                this.inventoryOffset++;
+            }
+        } else if (deltaY < 0) {
+            // Scroll up
+            if (this.inventoryOffset > 0) {
+                this.inventoryOffset--;
+            }
+        }
+    }
+
     onClick(mx, my) {
         if (my < this.panelY) return false;
 
@@ -267,14 +286,15 @@ class ScummUI {
             ctx.fillText(item.name, ix + 5, iy + 5);
         }
 
-        // 4b. Draw Scroll Arrows
+        // 4b. Draw Scroll Arrows (More Prominent)
+        ctx.font = 'bold 24px "Share Tech Mono", monospace';
         if (this.inventoryOffset > 0) {
-            ctx.fillStyle = this.hoveredScroll === 'up' ? '#ffffff' : '#00aaaa';
-            ctx.fillText('^', this.scrollUpRect.x + 5, this.scrollUpRect.y + 15);
+            ctx.fillStyle = this.hoveredScroll === 'up' ? '#ffffff' : '#00ffee'; // Brighter neon
+            ctx.fillText('▲', this.scrollUpRect.x, this.scrollUpRect.y + 18);
         }
         if ((this.inventoryOffset + 4) * 2 < this.inventory.length) {
-            ctx.fillStyle = this.hoveredScroll === 'down' ? '#ffffff' : '#00aaaa';
-            ctx.fillText('v', this.scrollDownRect.x + 5, this.scrollDownRect.y + 15);
+            ctx.fillStyle = this.hoveredScroll === 'down' ? '#ffffff' : '#00ffee';
+            ctx.fillText('▼', this.scrollDownRect.x, this.scrollDownRect.y + 18);
         }
 
         // 5. Active Command / Status Line

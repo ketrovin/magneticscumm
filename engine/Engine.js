@@ -446,6 +446,10 @@ class Engine {
                 }
             }
         });
+
+        this.input.onWheel((delta) => {
+            this.ui.onWheel(delta, this.input.mouseX, this.input.mouseY);
+        });
     }
 
     triggerQuip(type, targetName = '', itemName = '') {
