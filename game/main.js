@@ -427,12 +427,24 @@ function buildKitchen(bg) {
             // Street / front door (right)
             {
                 id: 'to_street', name: 'Front Door', x: 870, y: 130, w: 90, h: 330, walkToX: 900, walkToY: 450,
-                onInteract(v, e) {
-                    if (v === 'Open' || v === 'Walk to' || v === 'Use') {
-                        if (e.hasItem('house_key')) {
+                onInteract(v, e, item) {
+                    const hasKey = e.hasItem('house_key');
+                    const hasCard = e.hasItem('cash_card');
+                    const itemId = (item && (typeof item === 'string' ? item : item.id));
+
+                    if (v === 'Open' || v === 'Walk to' || (v === 'Use' && itemId === 'house_key')) {
+                        if (hasKey && hasCard) {
+                            if (v === 'Use') e.say("I unlock the door and step out into the Moncton night. Adventure awaits. Or at least a very long walk.");
+                            else e.say("I open the door and step out into the Moncton night. Adventure awaits.");
                             e.changeRoom('street', 110, 440);
-                        } else { e.say("The door is locked. I need my house key..."); }
-                    } else { e.say("The front door. Beyond it: the street, the night, and my choices."); }
+                        } else if (!hasKey) {
+                            e.say("The door is locked, and I'm not leaving without my house key. I'm not spending the night on my own doorstep.");
+                        } else if (!hasCard) {
+                            e.say("I have my keys, but I'm not going anywhere without my cash card. Moncton doesn't run on good vibes alone.");
+                        }
+                    } else {
+                        e.say("The front door. Beyond it: the street, the night, and my choices. Most of which involve poutine.");
+                    }
                 }
             },
             // Window (center-back)
